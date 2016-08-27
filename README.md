@@ -22,7 +22,7 @@ Each dataset will have its own directory tree, with the following folders
 /test (optional) - Folder for tests
 
 /tools (optional) - additional tools for handling data sets, downloaders, etc
-         /data folder will be created when using downloaders, 
+        /data folder will be created when using downloaders, 
         retieving data from uCluster
 
 /util (optional) - other file readers (such us .csv, .txt, etc) as helpers, 
