@@ -24,7 +24,7 @@ else
 endif
 
 # Targets.
-MICROS := src/yfcc
+MICROS := src/yfcc test/concurrent
 
 # Extra stuff to clean whose names cannot be derived from dependences.
 CLEANFILES :=
@@ -80,6 +80,7 @@ src/%.o: src/%.cc
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 src/yfcc.o: src/Chrono.o src/ChronoCpu.o
+test/concurrent.o: src/Chrono.o src/ChronoCpu.o
 
 # Rule for building an object file from a C++ file.
 $(O_ROOT)%.o: %.cc $(MAKEFILE_LIST) 
