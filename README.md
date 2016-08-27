@@ -19,7 +19,7 @@ Basic info about organization:
 /test - Folder for tests
 
 /tools - additional tools for handling data sets, downloaders, etc
-         /data folder will be created when using downloaders.
+         /data folder will be created when using downloaders, retieving data from uCluster
 
 /utils - file readers (such us .csv, .txt, etc) as helpers, as well as any other useful helpers.
 
