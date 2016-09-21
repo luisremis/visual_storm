@@ -75,7 +75,8 @@ int insertNewMedia(std::string file, Jarvis::Graph& db)
         counter++;
         if (counter % 500 == 0)
         {
-            std::cout << "\r Elements loaded: " << counter << " - Avg Trans Time: " << chrono.getElapsedStats().averageTime_ms << " ms";
+            std::cout << "\r Elements loaded: " << counter << " - Avg Trans Time: " 
+                      << chrono.getElapsedStats().averageTime_ms << " ms";
             std::cout << std::flush;
         }
         tokens.clear();
