@@ -1,17 +1,16 @@
-env = Environment(CPPPATH= ['include', 'src', 
-						   	'../../jarvis/include', 
-						   	'../../jarvis/util',], 
-							CXXFLAGS="-std=c++11")
+env = Environment(CPPPATH= ['include', 'src',
+				'/opt/intel/jarvis/include',
+				'/opt/intel/jarvis/util',],
+				CXXFLAGS="-std=c++11")
 
 
-source_files = ['src/Chrono.cc', 
-				'src/misc_loaders.cc', 
-				'src/yfcc_csv_reader.cc', 
-				'src/yfcc.cc', 
+source_files = ['src/misc_loaders.cc',
+				'src/yfcc_csv_reader.cc',
+				'src/yfcc.cc',
 				]
 
 
-env.Program('yfcc', source_files, 
-			LIBS = ['jarvis', 'jarvis-util', 'jsoncpp'], 
-			LIBPATH = ['../../jarvis/lib/']
+env.Program('yfcc', source_files,
+			LIBS = ['jarvis', 'jarvis-util', 'jsoncpp'],
+			LIBPATH = ['/opt/intel/jarvis/lib/']
 			)

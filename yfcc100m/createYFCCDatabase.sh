@@ -1,10 +1,10 @@
 #!/bin/sh
 
-JARVIS_DATABASE=yfcc100m_jarvis
+JARVIS_DB=yfcc100m_jarvis
 
-rm -r $JARVIS_DATABASE
+rm -r $JARVIS_DB
 
-src/yfcc --locationTree data/geolite2/cities.csv $JARVIS_DATABASE
-src/yfcc --cities data/geolite2/latlongcities.csv $JARVIS_DATABASE
-src/yfcc --synonyms data/dictionary-seed/db/wordnet_generics.tsv $JARVIS_DATABASE
-src/yfcc --media data/yfcc100m/yfcc100m_dataset_short $JARVIS_DATABASE
+./yfcc --locationTree data/extras/geolite2/cities.csv $JARVIS_DB
+./yfcc --cities data/extras/geolite2/latlongcities.csv $JARVIS_DB
+./yfcc --synonyms data/extras/dictionary-seed/db/wordnet_generics.tsv $JARVIS_DB
+./yfcc --media data/yfcc100m/yfcc100m_dataset_short $JARVIS_DB

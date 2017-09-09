@@ -13,7 +13,6 @@
 
 #include "yfcc_csv_reader.h"
 #include "misc_loaders.h"
-#include "Chrono.h"
 
 int query(Jarvis::Graph& db, std::string key)
 {
@@ -32,15 +31,14 @@ int query(Jarvis::Graph& db, std::string key)
         {
             fileurls << ed->get_source().get_property("link").string_value() << std::endl;
             edgecounter++;
-        }           
+        }
     }
     tx1.commit();
 
     std::cout << "Number of Results: " << edgecounter << std::endl;
 
-
     Jarvis::Transaction tx2(db, Jarvis::Transaction::ReadWrite);
-    for (Jarvis::NodeIterator i = db.get_nodes("label", pps1); i; i.next()) 
+    for (Jarvis::NodeIterator i = db.get_nodes("label", pps1); i; i.next())
     {
 
         for (Jarvis::EdgeIterator ed = i->get_edges("synonym"); ed; ed.next())
@@ -63,7 +61,7 @@ int query(Jarvis::Graph& db, std::string key)
             }
             synCounter++;
         }
-            
+
     }
     tx2.commit();
 
@@ -85,19 +83,19 @@ int queryLocation(Jarvis::Graph& db, std::string key)
     Jarvis::PropertyPredicate pps1("name", Jarvis::PropertyPredicate::Eq, key.c_str() );
     for (Jarvis::NodeIterator i = db.get_nodes("place", pps1); i; i.next())
     {
-        std::cout << key << " is at " << i->get_property("latitude").float_value() << " , " 
+        std::cout << key << " is at " << i->get_property("latitude").float_value() << " , "
                   << i->get_property("longitude").float_value() << std::endl;
         for (Jarvis::EdgeIterator ed = i->get_edges("was taken"); ed; ed.next())
         {
             fileurls << ed->get_source().get_property("link").string_value() << std::endl;
             edgecounter++;
-        }            
+        }
     }
     tx2.commit();
 
     std::cout << "Number of Results: " << edgecounter << std::endl;
 
-    return 0;    
+    return 0;
 }
 
 int main(int argc, char **argv)
