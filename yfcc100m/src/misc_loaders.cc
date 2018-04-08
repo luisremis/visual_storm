@@ -9,7 +9,7 @@
 
 #include "misc_loaders.h"
 
-int insertSynonyms(std::string file, Jarvis::Graph& db, std::string tag, std::string prop)
+int insertSynonyms(std::string file, PMGD::Graph& db, std::string tag, std::string prop)
 {
     std::string line;
     std::string token;
@@ -18,13 +18,13 @@ int insertSynonyms(std::string file, Jarvis::Graph& db, std::string tag, std::st
     std::vector<std::string> tokens;
     int labelCounter = 0;
 
-    Jarvis::Transaction txi(db, Jarvis::Transaction::ReadWrite);
-    db.create_index(Jarvis::Graph::NodeIndex, tag.c_str(), prop.c_str(), Jarvis::PropertyType::String);
+    PMGD::Transaction txi(db, PMGD::Transaction::ReadWrite);
+    db.create_index(PMGD::Graph::NodeIndex, tag.c_str(), prop.c_str(), PMGD::PropertyType::String);
     txi.commit();
 
-    while(std::getline(filein, line)) 
+    while(std::getline(filein, line))
     {     // '\n' is the default delimiter
-        Jarvis::Transaction tx(db, Jarvis::Transaction::ReadWrite);
+        PMGD::Transaction tx(db, PMGD::Transaction::ReadWrite);
 
         std::istringstream iss(line);
         tokens.clear();
@@ -32,7 +32,7 @@ int insertSynonyms(std::string file, Jarvis::Graph& db, std::string tag, std::st
         while(std::getline(iss, token, '\t'))
         {
             tokens.push_back(token);
-        } 
+        }
 
         if (tokens.size() != 2)
         {
@@ -43,34 +43,34 @@ int insertSynonyms(std::string file, Jarvis::Graph& db, std::string tag, std::st
 
         for (size_t i = 0; i < tokens.size(); ++i)
         {
-            Jarvis::PropertyPredicate pps1(prop.c_str(), Jarvis::PropertyPredicate::Eq, tokens[i].c_str() );
-            Jarvis::NodeIterator nodeit = db.get_nodes(tag.c_str(), pps1);
+            PMGD::PropertyPredicate pps1(prop.c_str(), PMGD::PropertyPredicate::Eq, tokens[i].c_str() );
+            PMGD::NodeIterator nodeit = db.get_nodes(tag.c_str(), pps1);
 
             if (!nodeit)
             {
-                Jarvis::Node &nlabel = db.add_node(tag.c_str());
+                PMGD::Node &nlabel = db.add_node(tag.c_str());
                 nlabel.set_property(prop.c_str(), tokens[i].c_str());
             }
         }
 
-        Jarvis::PropertyPredicate pps1(prop.c_str(), Jarvis::PropertyPredicate::Eq, tokens[0].c_str() );
-        Jarvis::NodeIterator i_first = db.get_nodes(tag.c_str(), pps1);
+        PMGD::PropertyPredicate pps1(prop.c_str(), PMGD::PropertyPredicate::Eq, tokens[0].c_str() );
+        PMGD::NodeIterator i_first = db.get_nodes(tag.c_str(), pps1);
 
-        Jarvis::PropertyPredicate pps2(prop.c_str(), Jarvis::PropertyPredicate::Eq, tokens[1].c_str() );
-        Jarvis::NodeIterator i_second = db.get_nodes(tag.c_str(), pps2);
+        PMGD::PropertyPredicate pps2(prop.c_str(), PMGD::PropertyPredicate::Eq, tokens[1].c_str() );
+        PMGD::NodeIterator i_second = db.get_nodes(tag.c_str(), pps2);
 
         if (!i_first || !i_second)
         {
             std::cout << "Label not found, what?" << std::endl;
         }
 
-        Jarvis::Edge &e = db.add_edge(*i_first, *i_second, "synonym");
+        PMGD::Edge &e = db.add_edge(*i_first, *i_second, "synonym");
 
         tx.commit();
     }
 
-    Jarvis::Transaction tx(db, Jarvis::Transaction::ReadWrite);
-    for (Jarvis::NodeIterator i = db.get_nodes(tag.c_str()); i; i.next())
+    PMGD::Transaction tx(db, PMGD::Transaction::ReadWrite);
+    for (PMGD::NodeIterator i = db.get_nodes(tag.c_str()); i; i.next())
     {
         labelCounter++;
     }
@@ -80,7 +80,7 @@ int insertSynonyms(std::string file, Jarvis::Graph& db, std::string tag, std::st
     return 0;
 }
 
-int insertCountriesTree(std::string file, Jarvis::Graph& db, std::string tag)
+int insertCountriesTree(std::string file, PMGD::Graph& db, std::string tag)
 {
     std::string line;
     std::string token;
@@ -89,26 +89,26 @@ int insertCountriesTree(std::string file, Jarvis::Graph& db, std::string tag)
     std::vector<std::string> tokens;
     int placesCounter = 0;
 
-    Jarvis::Transaction txrem(db, Jarvis::Transaction::ReadWrite);
-    for (Jarvis::NodeIterator i = db.get_nodes(tag.c_str()); i; i.next()) // remove all places
+    PMGD::Transaction txrem(db, PMGD::Transaction::ReadWrite);
+    for (PMGD::NodeIterator i = db.get_nodes(tag.c_str()); i; i.next()) // remove all places
     {
         db.remove(*i);
     }
     txrem.commit();
 
-    Jarvis::Transaction txi(db, Jarvis::Transaction::ReadWrite);
-    db.create_index(Jarvis::Graph::NodeIndex, tag.c_str(), "name",      Jarvis::PropertyType::String);
-    db.create_index(Jarvis::Graph::NodeIndex, tag.c_str(), "type",      Jarvis::PropertyType::String);
-    db.create_index(Jarvis::Graph::NodeIndex, tag.c_str(), "code",      Jarvis::PropertyType::String);
-    db.create_index(Jarvis::Graph::NodeIndex, tag.c_str(), "latitude" , Jarvis::PropertyType::Float);
-    db.create_index(Jarvis::Graph::NodeIndex, tag.c_str(), "longitude", Jarvis::PropertyType::Float);
+    PMGD::Transaction txi(db, PMGD::Transaction::ReadWrite);
+    db.create_index(PMGD::Graph::NodeIndex, tag.c_str(), "name",      PMGD::PropertyType::String);
+    db.create_index(PMGD::Graph::NodeIndex, tag.c_str(), "type",      PMGD::PropertyType::String);
+    db.create_index(PMGD::Graph::NodeIndex, tag.c_str(), "code",      PMGD::PropertyType::String);
+    db.create_index(PMGD::Graph::NodeIndex, tag.c_str(), "latitude" , PMGD::PropertyType::Float);
+    db.create_index(PMGD::Graph::NodeIndex, tag.c_str(), "longitude", PMGD::PropertyType::Float);
     txi.commit();
 
-    std::unordered_map<std::string, std::unordered_map<std::string,int > > continents; //List of countries by continent. 
-    std::unordered_map<std::string, std::string> continents_code; // Continent Code map 
-    std::unordered_map<std::string, std::string> countries_code;  // Country Code map 
+    std::unordered_map<std::string, std::unordered_map<std::string,int > > continents; //List of countries by continent.
+    std::unordered_map<std::string, std::string> continents_code; // Continent Code map
+    std::unordered_map<std::string, std::string> countries_code;  // Country Code map
 
-    while(std::getline(filein, line)) 
+    while(std::getline(filein, line))
     {     // '\n' is the default delimiter
 
         std::istringstream iss(line);
@@ -116,7 +116,7 @@ int insertCountriesTree(std::string file, Jarvis::Graph& db, std::string tag)
         while(std::getline(iss, token, ','))
         {
             tokens.push_back(token);
-        } 
+        }
 
         continents[tokens[3]][tokens[5]] = 1;
         continents_code[tokens[3]] = tokens[2];
@@ -127,20 +127,20 @@ int insertCountriesTree(std::string file, Jarvis::Graph& db, std::string tag)
     for ( auto it = continents.begin(); it != continents.end(); ++it )
     {
 
-        Jarvis::Transaction tx(db, Jarvis::Transaction::ReadWrite);
+        PMGD::Transaction tx(db, PMGD::Transaction::ReadWrite);
 
-        Jarvis::Node &continent = db.add_node(tag.c_str());
+        PMGD::Node &continent = db.add_node(tag.c_str());
         continent.set_property("type", "continent");
         continent.set_property("name", it->first.c_str());
         continent.set_property("code", continents_code[it->first].c_str());
 
         for ( auto it_c = it->second.begin(); it_c != it->second.end(); ++it_c )
         {
-            Jarvis::Node &country = db.add_node(tag.c_str());
+            PMGD::Node &country = db.add_node(tag.c_str());
             country.set_property("type", "country");
             country.set_property("name", it_c->first.c_str());
             country.set_property("code", countries_code[it_c->first].c_str());
-            
+
             db.add_edge(country, continent, "belongs to");
         }
 
@@ -148,12 +148,12 @@ int insertCountriesTree(std::string file, Jarvis::Graph& db, std::string tag)
 
     }
 
-    Jarvis::Transaction tx(db, Jarvis::Transaction::ReadWrite);
-    for (Jarvis::NodeIterator i = db.get_nodes(tag.c_str()); i; i.next()) // should be only 0 or 1 though
+    PMGD::Transaction tx(db, PMGD::Transaction::ReadWrite);
+    for (PMGD::NodeIterator i = db.get_nodes(tag.c_str()); i; i.next()) // should be only 0 or 1 though
     {
         placesCounter++;
-        std::cout << i->get_property("type").string_value() << " " 
-                  << i->get_property("code").string_value() << " " 
+        std::cout << i->get_property("type").string_value() << " "
+                  << i->get_property("code").string_value() << " "
                   << i->get_property("name").string_value() << std::endl;
     }
     tx.commit();
@@ -162,7 +162,7 @@ int insertCountriesTree(std::string file, Jarvis::Graph& db, std::string tag)
     return 0;
 }
 
-int insertCities(std::string file, Jarvis::Graph& db, std::string tag)
+int insertCities(std::string file, PMGD::Graph& db, std::string tag)
 {
     std::string line;
     std::string token;
@@ -171,10 +171,10 @@ int insertCities(std::string file, Jarvis::Graph& db, std::string tag)
     std::vector<std::string> tokens;
     int placesCounter = 0;
 
-    while(std::getline(filein, line)) 
+    while(std::getline(filein, line))
     {     // '\n' is the default delimiter
 
-        Jarvis::Transaction tx(db, Jarvis::Transaction::ReadWrite);
+        PMGD::Transaction tx(db, PMGD::Transaction::ReadWrite);
 
         std::istringstream iss(line);
         tokens.clear();
@@ -182,10 +182,10 @@ int insertCities(std::string file, Jarvis::Graph& db, std::string tag)
         while(std::getline(iss, token, ','))
         {
             tokens.push_back(token);
-        } 
+        }
 
-        Jarvis::PropertyPredicate pps1("code", Jarvis::PropertyPredicate::Eq, tokens[1].c_str() );
-        Jarvis::NodeIterator i = db.get_nodes(tag.c_str(), pps1);
+        PMGD::PropertyPredicate pps1("code", PMGD::PropertyPredicate::Eq, tokens[1].c_str() );
+        PMGD::NodeIterator i = db.get_nodes(tag.c_str(), pps1);
 
         if (i)
         {
@@ -196,21 +196,21 @@ int insertCities(std::string file, Jarvis::Graph& db, std::string tag)
             }
             else // New city in that country
             {
-                Jarvis::PropertyPredicate pps2("name", Jarvis::PropertyPredicate::Eq, tokens[3].c_str() );
-                Jarvis::NodeIterator i_city = db.get_nodes(tag.c_str(), pps2);
+                PMGD::PropertyPredicate pps2("name", PMGD::PropertyPredicate::Eq, tokens[3].c_str() );
+                PMGD::NodeIterator i_city = db.get_nodes(tag.c_str(), pps2);
 
                 if (!i_city) // City does not exist already
                 {
-                    Jarvis::Node &city = db.add_node(tag.c_str());
+                    PMGD::Node &city = db.add_node(tag.c_str());
                     city.set_property("type", "city");
                     city.set_property("name", (tokens[3].c_str()));
                     city.set_property("code", "nocitycode");
                     city.set_property("latitude",  atof(tokens[5].c_str()));
                     city.set_property("longitude", atof(tokens[6].c_str()));
-                    
+
                     db.add_edge(city, *i, "belongs to");
                 }
-                
+
             }
         }
         else
@@ -221,8 +221,8 @@ int insertCities(std::string file, Jarvis::Graph& db, std::string tag)
         tx.commit();
     }
 
-    Jarvis::Transaction tx(db, Jarvis::Transaction::ReadWrite);
-    for (Jarvis::NodeIterator i = db.get_nodes(tag.c_str()); i; i.next()) // should be only 0 or 1 though
+    PMGD::Transaction tx(db, PMGD::Transaction::ReadWrite);
+    for (PMGD::NodeIterator i = db.get_nodes(tag.c_str()); i; i.next()) // should be only 0 or 1 though
     {
         placesCounter++;
     }

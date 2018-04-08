@@ -7,14 +7,14 @@
 #include <vector>
 #include <stdlib.h>     /* system, NULL, EXIT_FAILURE */
 
-#include "jarvis.h"
+#include "pmgd.h"
 #include "util.h"
 #include "neighbor.h"
 
 #include "yfcc_csv_reader.h"
 #include "misc_loaders.h"
 
-int query(Jarvis::Graph& db, std::string key)
+int query(PMGD::Graph& db, std::string key)
 {
     int edgecounter = 0;
     int extendedCounter = 0;
@@ -23,11 +23,11 @@ int query(Jarvis::Graph& db, std::string key)
     std::ofstream fileurls("urls.txt");
     std::ofstream fileurls_ext("urls_extended.txt");
 
-    Jarvis::Transaction tx1(db, Jarvis::Transaction::ReadWrite);
-    Jarvis::PropertyPredicate pps1("name", Jarvis::PropertyPredicate::Eq, key.c_str() );
-    for (Jarvis::NodeIterator i = db.get_nodes("label", pps1); i; i.next())
+    PMGD::Transaction tx1(db, PMGD::Transaction::ReadWrite);
+    PMGD::PropertyPredicate pps1("name", PMGD::PropertyPredicate::Eq, key.c_str() );
+    for (PMGD::NodeIterator i = db.get_nodes("label", pps1); i; i.next())
     {
-        for (Jarvis::EdgeIterator ed = i->get_edges("has object"); ed; ed.next())
+        for (PMGD::EdgeIterator ed = i->get_edges("has object"); ed; ed.next())
         {
             fileurls << ed->get_source().get_property("link").string_value() << std::endl;
             edgecounter++;
@@ -37,14 +37,14 @@ int query(Jarvis::Graph& db, std::string key)
 
     std::cout << "Number of Results: " << edgecounter << std::endl;
 
-    Jarvis::Transaction tx2(db, Jarvis::Transaction::ReadWrite);
-    for (Jarvis::NodeIterator i = db.get_nodes("label", pps1); i; i.next())
+    PMGD::Transaction tx2(db, PMGD::Transaction::ReadWrite);
+    for (PMGD::NodeIterator i = db.get_nodes("label", pps1); i; i.next())
     {
 
-        for (Jarvis::EdgeIterator ed = i->get_edges("synonym"); ed; ed.next())
+        for (PMGD::EdgeIterator ed = i->get_edges("synonym"); ed; ed.next())
         {
 
-            Jarvis::Node* it;
+            PMGD::Node* it;
             if ( ed->get_source().get_property("name").string_value() == i->get_property("name").string_value() )
             {
                 it = &ed->get_destination();
@@ -54,7 +54,7 @@ int query(Jarvis::Graph& db, std::string key)
                 it = &ed->get_source();
             }
 
-            for (Jarvis::EdgeIterator ed = it->get_edges("has object"); ed; ed.next())
+            for (PMGD::EdgeIterator ed = it->get_edges("has object"); ed; ed.next())
             {
                 fileurls_ext << ed->get_source().get_property("link").string_value() << std::endl;
                 extendedCounter++;
@@ -72,20 +72,20 @@ int query(Jarvis::Graph& db, std::string key)
     return 0;
 }
 
-int queryLocation(Jarvis::Graph& db, std::string key)
+int queryLocation(PMGD::Graph& db, std::string key)
 {
 
     int edgecounter = 0;
 
     std::ofstream fileurls("urls.txt");
 
-    Jarvis::Transaction tx2(db, Jarvis::Transaction::ReadWrite);
-    Jarvis::PropertyPredicate pps1("name", Jarvis::PropertyPredicate::Eq, key.c_str() );
-    for (Jarvis::NodeIterator i = db.get_nodes("place", pps1); i; i.next())
+    PMGD::Transaction tx2(db, PMGD::Transaction::ReadWrite);
+    PMGD::PropertyPredicate pps1("name", PMGD::PropertyPredicate::Eq, key.c_str() );
+    for (PMGD::NodeIterator i = db.get_nodes("place", pps1); i; i.next())
     {
         std::cout << key << " is at " << i->get_property("latitude").float_value() << " , "
                   << i->get_property("longitude").float_value() << std::endl;
-        for (Jarvis::EdgeIterator ed = i->get_edges("was taken"); ed; ed.next())
+        for (PMGD::EdgeIterator ed = i->get_edges("was taken"); ed; ed.next())
         {
             fileurls << ed->get_source().get_property("link").string_value() << std::endl;
             edgecounter++;
@@ -108,21 +108,21 @@ int main(int argc, char **argv)
         jarvisDB = argv[3];
     }
 
-    Jarvis::Graph* db;
-    Jarvis::Graph::Config config;
+    PMGD::Graph* db;
+    PMGD::Graph::Config config;
     config.default_region_size = 0x4000000000; // Set to 256 GB
 
     try{
-        db = new Jarvis::Graph(jarvisDB.c_str(), Jarvis::Graph::ReadWrite, &config);
+        db = new PMGD::Graph(jarvisDB.c_str(), PMGD::Graph::ReadWrite, &config);
     }
-    catch(Jarvis::Exception e) {
+    catch(PMGD::Exception e) {
         print_exception(e);
         printf("Not existent Database, creating a new one\n");
 
         try{
-            db = new Jarvis::Graph(jarvisDB.c_str(), Jarvis::Graph::Create, &config);
+            db = new PMGD::Graph(jarvisDB.c_str(), PMGD::Graph::Create, &config);
         }
-        catch(Jarvis::Exception e) {
+        catch(PMGD::Exception e) {
             print_exception(e);
             return 1;
         }
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
         }
 
     }
-    catch (Jarvis::Exception e) {
+    catch (PMGD::Exception e) {
         print_exception(e);
         return 1;
     }

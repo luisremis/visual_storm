@@ -1,6 +1,6 @@
 env = Environment(CPPPATH= ['include', 'src',
-				'/opt/intel/jarvis/include',
-				'/opt/intel/jarvis/util',],
+				'/opt/intel/pmgd/include',
+				'/opt/intel/pmgd/util',],
 				CXXFLAGS="-std=c++11")
 
 
@@ -11,6 +11,6 @@ source_files = ['src/misc_loaders.cc',
 
 
 env.Program('yfcc', source_files,
-			LIBS = ['jarvis', 'jarvis-util', 'jsoncpp'],
-			LIBPATH = ['/opt/intel/jarvis/lib/']
+			LIBS = ['pmgd', 'pmgd-util', 'jsoncpp'],
+			LIBPATH = ['/opt/intel/pmgd/lib/']
 			)

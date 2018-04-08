@@ -2,8 +2,8 @@
 #include <inttypes.h>
 #include <string>
 
-#include "jarvis.h"
+#include "pmgd.h"
 #include "util.h"
 
-int insertNewMedia(std::string file, Jarvis::Graph& db);
+int insertNewMedia(std::string file, PMGD::Graph& db);
 

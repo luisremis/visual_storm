@@ -1,6 +1,6 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
-#include "jarvis.h"
+#include "pmgd.h"
 #include "util.h"
 #include <sstream>
 #include <iostream>
@@ -11,11 +11,15 @@
 #include <math.h>
 
 #include "yfcc_csv_reader.h"
-// #include "Chrono.h"
 
 #define IMAGE_TAG "AT:IMAGE"
+#define IMAGE_PROP_ID "id"
+
+#define LABEL_TAG "Label"
+#define LABEL_PROP_NAME "name"
+#define LABEL_IMG_EDGE "has_label"
+
 #define PLACE_TAG "PLACE"
-#define LABEL_TAG "LABEL"
 
 float rad_distance_miles = 30;
 float lng_equivalent = rad_distance_miles/55.8f;
@@ -27,15 +31,15 @@ inline float radians(float a)
     return a * PI / 180.0f;
 }
 
-void map2Location(Jarvis::Node &nmedia , Jarvis::Graph& db)
+void map2Location(PMGD::Node &nmedia , PMGD::Graph& db)
 {
     float media_lat = nmedia.get_property("latitude").float_value();
     float media_lng = nmedia.get_property("longitude").float_value();
 
-    Jarvis::PropertyPredicate pp2("longitude", Jarvis::PropertyPredicate::GeLe,
+    PMGD::PropertyPredicate pp2("longitude", PMGD::PropertyPredicate::GeLe,
                                     media_lng-lng_equivalent, media_lng+lng_equivalent);
 
-    for (Jarvis::NodeIterator i = db.get_nodes(PLACE_TAG, pp2); i; i.next()) {
+    for (PMGD::NodeIterator i = db.get_nodes(PLACE_TAG, pp2); i; i.next()) {
         float city_lat  = i->get_property("latitude").float_value();
         float city_lng  = i->get_property("longitude").float_value();
 
@@ -44,14 +48,14 @@ void map2Location(Jarvis::Node &nmedia , Jarvis::Graph& db)
                 sin( radians(city_lat) ) * sin( radians( media_lat ) ) );
 
         if ( distance_miles < rad_distance_miles) {
-            Jarvis::Edge &e = db.add_edge(nmedia, *i, "was taken");
+            PMGD::Edge &e = db.add_edge(nmedia, *i, "was taken");
             e.set_property("testprop", "empy test prop");
             return;
         }
     }
 }
 
-int insertNewMedia(std::string file, Jarvis::Graph& db)
+int insertNewMedia(std::string file, PMGD::Graph& db)
 {
     std::string line;
     std::string token;
@@ -62,9 +66,9 @@ int insertNewMedia(std::string file, Jarvis::Graph& db)
     size_t counterRep = 0;
     int mediaCounter = 0;
 
-    Jarvis::Transaction txi(db, Jarvis::Transaction::ReadWrite);
-    db.create_index(Jarvis::Graph::NodeIndex, LABEL_TAG, "name", Jarvis::PropertyType::String);
-    db.create_index(Jarvis::Graph::NodeIndex, IMAGE_TAG, "id", Jarvis::PropertyType::Integer  );
+    PMGD::Transaction txi(db, PMGD::Transaction::ReadWrite);
+    db.create_index(PMGD::Graph::NodeIndex, LABEL_TAG, LABEL_PROP_NAME, PMGD::PropertyType::String);
+    db.create_index(PMGD::Graph::NodeIndex, IMAGE_TAG, IMAGE_PROP_ID, PMGD::PropertyType::Integer  );
     txi.commit();
 
     // ChronoCpu chrono("chrono_tx");
@@ -86,16 +90,16 @@ int insertNewMedia(std::string file, Jarvis::Graph& db)
         }
 
         // chrono.tic();
-        Jarvis::Transaction tx(db, Jarvis::Transaction::ReadWrite);
+        PMGD::Transaction tx(db, PMGD::Transaction::ReadWrite);
 
-        Jarvis::PropertyPredicate pps1("id", Jarvis::PropertyPredicate::Eq, atoi(tokens[0].c_str()) );
-        Jarvis::NodeIterator i = db.get_nodes(IMAGE_TAG, pps1);
+        PMGD::PropertyPredicate pps1(IMAGE_PROP_ID, PMGD::PropertyPredicate::Eq, atoi(tokens[0].c_str()) );
+        PMGD::NodeIterator i = db.get_nodes(IMAGE_TAG, pps1);
 
         if (!i) {
-            Jarvis::Node &nmedia = db.add_node(IMAGE_TAG);
+            PMGD::Node &nmedia = db.add_node(IMAGE_TAG);
 
-            // nmedia.set_property("lineNumber", atoi(tokens[0].c_str()));
-            nmedia.set_property("id",  atoi(tokens[1].c_str()));
+            nmedia.set_property("lineNumber", atoi(tokens[0].c_str()));
+            nmedia.set_property(IMAGE_PROP_ID,  atoll(tokens[1].c_str()));
             nmedia.set_property("mediaHash", tokens[2].c_str());
             nmedia.set_property("userId" , tokens[3].c_str());
             nmedia.set_property("userNick" , tokens[4].c_str());
@@ -122,7 +126,7 @@ int insertNewMedia(std::string file, Jarvis::Graph& db)
 
 
             if (!tokens[10].empty()) {
-                map2Location(nmedia, db);
+                // map2Location(nmedia, db);
             }
 
             std::stringstream labels(tokens[10]);
@@ -132,19 +136,23 @@ int insertNewMedia(std::string file, Jarvis::Graph& db)
                 std::istringstream iss(line);
 
                 while(std::getline(iss, token, ',')) {
-                    Jarvis::PropertyPredicate pps1("name", Jarvis::PropertyPredicate::Eq, token.c_str() );
-                    Jarvis::NodeIterator i = db.get_nodes(LABEL_TAG, pps1);
+                    PMGD::PropertyPredicate pps1(
+                                LABEL_PROP_NAME,
+                                PMGD::PropertyPredicate::Eq,
+                                token.c_str() );
+
+                    PMGD::NodeIterator i = db.get_nodes(LABEL_TAG, pps1);
 
                     if (!i){
-                        Jarvis::Node &nlabel = db.add_node(LABEL_TAG);
-                        nlabel.set_property("name", token);
+                        PMGD::Node &nlabel = db.add_node(LABEL_TAG);
+                        nlabel.set_property(LABEL_PROP_NAME, token);
 
-                        Jarvis::Edge &e = db.add_edge(nmedia, nlabel, "has object");
-                        e.set_property("testprop", "empy test prop");
+                        PMGD::Edge &e = db.add_edge(nmedia, nlabel,
+                                                      LABEL_IMG_EDGE);
                     }
                     else {
-                        Jarvis::Edge &e = db.add_edge(nmedia, *i, "has object");
-                        e.set_property("testprop", "empy test prop");
+                        PMGD::Edge &e = db.add_edge(nmedia, *i,
+                                                      LABEL_IMG_EDGE);
                     }
                 }
             }
@@ -161,9 +169,9 @@ int insertNewMedia(std::string file, Jarvis::Graph& db)
     std::cout << "Elements added: " << counter - counterRep << std::endl;
     std::cout << "Elements Repeted: " << counterRep << std::endl;
 
-    Jarvis::Transaction tx(db, Jarvis::Transaction::ReadWrite);
+    PMGD::Transaction tx(db, PMGD::Transaction::ReadWrite);
     // should be only 0 or 1 though
-    for (Jarvis::NodeIterator i = db.get_nodes(IMAGE_TAG); i; i.next()) {
+    for (PMGD::NodeIterator i = db.get_nodes(IMAGE_TAG); i; i.next()) {
         mediaCounter++;
     }
     tx.commit();
