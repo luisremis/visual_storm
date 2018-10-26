@@ -69,6 +69,7 @@ int insertNewMedia(std::string file, PMGD::Graph& db)
     PMGD::Transaction txi(db, PMGD::Transaction::ReadWrite);
     db.create_index(PMGD::Graph::NodeIndex, LABEL_TAG, LABEL_PROP_NAME, PMGD::PropertyType::String);
     db.create_index(PMGD::Graph::NodeIndex, IMAGE_TAG, IMAGE_PROP_ID, PMGD::PropertyType::Integer  );
+    db.create_index(PMGD::Graph::NodeIndex, IMAGE_TAG, "lineNumber", PMGD::PropertyType::Integer  );
     txi.commit();
 
     // ChronoCpu chrono("chrono_tx");
