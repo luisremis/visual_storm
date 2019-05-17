@@ -24,10 +24,12 @@ Each dataset will have its own directory tree, with the following folders
 
 	/tools (optional) - additional tools for handling data sets, downloaders, etc
         
-	/data folder will be created when using downloaders, retieving data from uCluster
+	/data folder will be created when using downloaders, retrieving data from uCluster
 
 	/util (optional) - other file readers (such us .csv, .txt, etc) as helpers, 
         as well as any other useful helpers.
+
+	/python (optional) - Folder for python scripts
 
 
 Let's calm down.
