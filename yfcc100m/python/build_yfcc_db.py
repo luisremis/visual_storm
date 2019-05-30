@@ -9,12 +9,15 @@ import util
 import vdms
 
 
+connection_batch_limit = 100  #10               
+
+
 def get_args():
     parserobj = argparse.ArgumentParser()
-    parserobj.add_argument('-num_threads', type=int, default=64,
-                           help='Number of threads to use [default: 64]')
-    parserobj.add_argument('-batch_size', type=int, default=1,
-                           help='Number of entries per thread [default: 1]')
+    parserobj.add_argument('-num_threads', type=int, default=100,
+                           help='Number of threads to use [default: 100]')
+    parserobj.add_argument('-batch_size', type=int, default=100,
+                           help='Number of entries per thread for autotags and images [default: 100; connections: max {}]'.format(connection_batch_limit))
     parserobj.add_argument('-data_file', type=str,
                            default='/data/yfcc100m/set_0/data_0/metadata/yfcc100m_short/yfcc100m_dataset_short',
                            help='YFCC metadata [default: ' +
@@ -31,15 +34,10 @@ def get_args():
 
 
 def get_data(params):
-    yfcc_tags = []
-    with open(params.tag_list, 'r') as f:
-        for tix, this_tag in enumerate(f):
-            yfcc_tags.append(this_tag.strip())
-
-    yfcc_data = pd.read_csv(params.data_file, sep='\t', names=util.property_names)
+    all_data = pd.read_csv(params.data_file, sep='\t', names=util.property_names)
     tags = pd.read_csv(params.tag_file, sep='\t', names=['ID', 'autotags'])
-    yfcc_data = pd.merge(yfcc_data, tags, on='ID')
-    return yfcc_data, yfcc_tags
+    all_data = pd.merge(all_data, tags, on='ID')
+    return all_data, [line.strip() for line in open(params.tag_list, 'r')]
 
 
 def get_db_list(num):
@@ -73,55 +71,31 @@ def make_logger(name, log_file, level=logging.INFO):
     return logger
     
     
-def process_tag_entities(params, dbs, tags):
-    batch = params.batch_size
-    num_lines = len(tags)
-    blocks = int(np.ceil(num_lines / (params.num_threads * batch)))
-    results = [None] * num_lines
+def get_parameters(params, all_data, num_entries_per_thread=None):
+    if num_entries_per_thread is None:
+        num_entries_per_thread = params.batch_size
+    num_entries = len(all_data)
+    blocks = int(np.ceil(num_entries / (params.num_threads * num_entries_per_thread)))
+    return num_entries_per_thread, num_entries, blocks, [None] * num_entries
+ 
+ 
+def process_tag_entities(params, dbs, all_data):
+    batch, num_lines, blocks, results = get_parameters(params, all_data)
 
     for block in range(0, blocks):
         thread_arr = []
         
         for i in range(0, params.num_threads):
-            idx = params.num_threads * block + i * batch
+            idx = (params.num_threads * batch) * block + i * batch
             
             if idx < num_lines:
-                thread_add = Thread(target=util.add_autotags_entity_batch, args=(idx, dbs[i], tags[idx:min([idx+batch, num_lines])], results))
+                thread_add = Thread(target=util.add_autotags_entity_batch, args=(idx, dbs[i], all_data[idx:min([idx+batch, num_lines])], results))
                 thread_add.start()
                 thread_arr.append(thread_add)
             else:
                 break
         
-        idx = params.num_threads * block
-        error_counter = 0
-        for th in thread_arr:
-            th.join()
-            error_counter += results[idx:min([idx+batch, num_lines])].count(-1)
-            idx += batch
-    # return results, error_counter
-    return error_counter
-
-
-def process_image_entities(params, dbs, yfcc_data):
-    batch = params.batch_size
-    num_lines = len(yfcc_data)
-    blocks = int(np.ceil(num_lines / (params.num_threads * batch)))
-    results = [None] * num_lines
-
-    for block in range(0, blocks):
-        thread_arr = []
-        
-        for i in range(0, params.num_threads):
-            idx = params.num_threads * block + i * batch
-            
-            if idx < num_lines:
-                thread_add = Thread(target=util.add_image_entity_batch, args=(idx, min([idx+batch, num_lines]), dbs[i], yfcc_data.iloc[idx:min([idx+batch, num_lines]), :], results))
-                thread_add.start()
-                thread_arr.append(thread_add)
-            else:
-                break
-        
-        idx = params.num_threads * block
+        idx = (params.num_threads * batch) * block
         error_counter = 0
         for th in thread_arr:
             th.join()
@@ -130,28 +104,51 @@ def process_image_entities(params, dbs, yfcc_data):
     return error_counter
 
 
-def process_connections(params, dbs, yfcc_data):
-    batch = 10
-    # batch = params.batch_size
-    num_lines = len(yfcc_data)
-    blocks = int(np.ceil(num_lines / (params.num_threads * batch)))
-    results = [None] * num_lines
+def process_image_entities(params, dbs, all_data):
+    batch, num_lines, blocks, results = get_parameters(params, all_data)
+                              
+    for block in range(0, blocks):
+        thread_arr = []
+        
+        for i in range(0, params.num_threads):
+            idx = (params.num_threads * batch) * block + i * batch
+            
+            if idx < num_lines:
+                # print('block: {}\tthread: {}\tstart index: {}\tend index:{}'.format(block, i, idx, min([idx+batch, num_lines])))
+                thread_add = Thread(target=util.add_image_entity_batch, args=(idx, min([idx+batch, num_lines]), dbs[i], all_data.iloc[idx:min([idx+batch, num_lines]), :], results))
+                thread_add.start()
+                thread_arr.append(thread_add)
+            else:
+                break
+        
+        idx = (params.num_threads * batch) * block
+        error_counter = 0
+        for th in thread_arr:
+            th.join()
+            error_counter += results[idx:min([idx+batch, num_lines])].count(-1)
+            idx += batch
+    return error_counter
+
+
+def process_connections(params, dbs, all_data):
+    batch, num_lines, blocks, results = get_parameters(params, all_data,
+        num_entries_per_thread=min([connection_batch_limit, params.batch_size]))
 
     for block in range(0, blocks):
         thread_arr = []
         
         for i in range(0, params.num_threads):
-            idx = params.num_threads * block + i * batch
+            idx = (params.num_threads * batch) * block + i * batch
             
             if idx < num_lines:
                 thread_add = Thread(target=util.add_autotag_connection_batch,
-                                    args=(idx, dbs[i], yfcc_data.iloc[idx:min([idx+batch, num_lines]), :], results))
+                                    args=(idx, dbs[i], all_data.iloc[idx:min([idx+batch, num_lines]), :], results))
                 thread_add.start()
                 thread_arr.append(thread_add)
             else:
                 break
                 
-        idx = params.num_threads * block
+        idx = (params.num_threads * batch) * block
         error_counter = 0
         for th in thread_arr:
             th.join()
@@ -170,24 +167,16 @@ def main(in_args):
     main_logger.info('\t[!] [get_data] Total elapsed time: {:0.4f} secs ({:0.4f} mins)'.format(e_time, e_time / 60.))
 
     db_list = get_db_list(in_args.num_threads)
-
-    # Add Entities for Tags
-    start_t = time.time()
-    tag_num_errors = process_tag_entities(in_args, db_list, all_tags)
-    e_time = time.time() - start_t
-    main_logger.info('\t[!] [process_tag_entities] Total Errors: {}\tTotal elapsed time: {:0.4f} secs ({:0.4f} mins)'.format(tag_num_errors, e_time, e_time / 60.))
-
-    # Add Entities for Metadata
-    start_t = time.time()
-    image_num_errors = process_image_entities(in_args, db_list, data)
-    e_time = time.time() - start_t
-    main_logger.info('\t[!] [process_image_entities] Total Errors: {}\tTotal elapsed time: {:0.4f} secs ({:0.4f} mins)'.format(image_num_errors, e_time, e_time / 60.))
-
-    # Add Connections between Tags and Metadata
-    start_t = time.time()
-    connection_num_errors = process_connections(in_args, db_list, data)
-    e_time = time.time() - start_t
-    main_logger.info('\t[!] [process_connections] Total Errors: {}\tTotal elapsed time: {:0.4f} secs ({:0.4f} mins)'.format(connection_num_errors, e_time, e_time / 60.))
+    
+    func_list = ['process_tag_entities', 'process_image_entities', 'process_connections']
+    func_data = [all_tags, data, data]
+    # func_list = ['process_image_entities']
+    # func_data = [ data]
+    for fn, fd in zip(func_list, func_data):
+        start_t = time.time()
+        tag_num_errors = eval('{}(in_args, db_list, fd)'.format(fn))
+        e_time = time.time() - start_t
+        main_logger.info('\t[!] [{}] Total Errors: {}\tTotal elapsed time: {:0.4f} secs ({:0.4f} mins)'.format(fn, tag_num_errors, e_time, e_time / 60.))
 
     disconnect_db_list(db_list)
     e_time = time.time() - start
@@ -195,7 +184,7 @@ def main(in_args):
 
 
 if __name__ == "__main__":
-    main_logger = make_logger('main_logger', "build_yfcc_db_batching.log")
+    main_logger = make_logger('main_logger', "build_yfcc_db.log")
 
     args = get_args()
     main(args)

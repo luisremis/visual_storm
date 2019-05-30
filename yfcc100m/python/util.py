@@ -2,6 +2,8 @@ import os.path
 import logging
 import numpy as np
 
+
+""" General functions """
 property_names = ['Line number', 'ID', 'Hash', 'User NSID',
                   'User nickname', 'Date taken', 'Date uploaded', 'Capture device',
                   'Title', 'Description', 'User tags', 'Machine tags',
@@ -11,17 +13,40 @@ property_names = ['Line number', 'ID', 'Hash', 'User NSID',
                   'Extension', 'Marker']
 
 
+def display_images(imgs):
+    from IPython.display import Image, display
+    for im in imgs:
+        display(Image(im))
+
+
+""" Using multiple entries per thread """
+
 def add_autotags_entity_batch(index, database, tag, results):
+    
+    def check_status(response):
+        redo = False
+        for ix, _ in enumerate(tag):
+            try:
+                results[index + ix] = response[0][ix]['AddEntity']["status"]
+            except:
+                results[index + ix] = -1
+                redo = True
+                break
+        return redo
+        
     all_queries = []
     for ix, row in enumerate(tag):
         query = {}
         add_entity = {"class": 'autotags', "properties": {"name": row}}
         query["AddEntity"] = add_entity
         all_queries.append(query)
-    res = database.query(all_queries)
-    # print('res[0][0]', res[0][0])
-    for b in range(0, len(tag)):
-        results[index + b] = res[0][b]['AddEntity']["status"]
+    
+    redo_flag = True
+    cnt = 0
+    while redo_flag is True and cnt < 5:
+        res = database.query(all_queries)
+        redo_flag = check_status(res)
+        cnt += 1
 
 
 def add_image_entity_batch(index, index2, database, row_data, results):
@@ -54,28 +79,12 @@ def add_image_entity_batch(index, index2, database, row_data, results):
         query["AddEntity"] = add_entity
         all_queries.append(query)
     
-    redo_flag = False
+    redo_flag = True
     cnt = 0
     while redo_flag is True and cnt < 5:
         res = database.query(all_queries)
         redo_flag = check_status(res)
         cnt += 1
-    # res = database.query(all_queries)
-    # redo = False
-    # for ix, b in enumerate(range(index, index2)):
-        # try:
-            # results[b] = res[0][ix]['AddEntity']["status"]
-        # except:
-            # results[b] = -1
-            # res = database.query(all_queries)
-            # redo = True
-            # break
-    # if redo:
-        # for ix, b in enumerate(range(index, index2)):
-            # try:
-                # results[b] = res[0][ix]['AddEntity']["status"]
-            # except:
-                # results[b] = -1
 
 
 def add_autotag_connection_batch(index, database, row_data, results):
@@ -109,9 +118,7 @@ def add_autotag_connection_batch(index, database, row_data, results):
             find_image = {'constraints': {'ID': ["==", int(row['ID'])]}, "_ref": parentref}
             query["FindImage"] = find_image
             all_queries.append(query)
-            ind[0] = num_queries
-            # run_index[rix,0] = num_queries
-            
+            ind[0] = num_queries            
             num_queries +=1
             
             current_tags = row['autotags'].split(',')
@@ -124,7 +131,6 @@ def add_autotag_connection_batch(index, database, row_data, results):
                 find_entity = {"class": 'autotags', "_ref": this_ref, "constraints": {'name': ["==", val[0]]}}
                 query["FindEntity"] = find_entity
                 all_queries.append(query)
-                # run_index[rix,1] = num_queries
                 num_queries +=1
 
                 # Add Connection
@@ -135,39 +141,18 @@ def add_autotag_connection_batch(index, database, row_data, results):
                 query["AddConnection"] = add_connection
                 all_queries.append(query)
                 ind[1] = num_queries
-                # run_index[rix,1] = num_queries
                 num_queries +=1
             run_index.append(ind)
     
-    redo_flag = False
+    redo_flag = True
     cnt = 0
     while redo_flag is True and cnt < 5:
         res = database.query(all_queries)
         redo_flag = check_status(res, run_index)
         cnt += 1
-    # redo = False
-    # for rix, n in enumerate(run_index):
-        # tmp = res[n[0] : n[1]]
-        # try:
-            # for i in range(len(tmp)):
-                # cmd = list(tmp[i][0].items())[0][0]
-                # assert tmp[i][0][cmd]["status"] == 0
-            # results[index + rix] = 0        
-        # except:
-            # results[index + rix] = -1
-            # res = database.query(all_queries)
-            # redo = True
-            # break
-    # if redo:
-        # for rix, n in enumerate(run_index):
-            # tmp = res[n[0] : n[1]]
-            # try:
-                # for i in range(len(tmp)):
-                    # cmd = list(tmp[i][0].items())[0][0]
-                    # assert tmp[i][0][cmd]["status"] == 0
-                # results[index + rix] = 0        
-            # except:
-                # results[index + rix] = -1
+
+
+""" Using single entry per thread """
 
 def add_autotags_entity(index, database, tag, results):
     query = {}
@@ -242,8 +227,3 @@ def add_autotag_connection(index, database, row_data, results):
     except:
         results[index] = -1
 
-
-def display_images(imgs):
-    from IPython.display import Image, display
-    for im in imgs:
-        display(Image(im))
