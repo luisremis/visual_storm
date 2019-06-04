@@ -137,7 +137,7 @@ def process_connections(params, dbs, all_data):
         num_entries_per_thread=min([connection_batch_limit, params.batch_size]))
     
     for block in range(0, blocks):
-        thread_arr = []
+        # thread_arr = []
         
         for i in range(0, params.num_threads):
             idx = (params.num_threads * batch) * block + i * batch

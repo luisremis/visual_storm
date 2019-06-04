@@ -164,7 +164,7 @@ def add_autotag_connection_batch(index, database, row_data, results):
         res = database.query(all_queries)
         redo_flag = check_status(res, run_index)
         cnt += 1
-    return result
+    return results
 
 
 """ Using single entry per thread """
