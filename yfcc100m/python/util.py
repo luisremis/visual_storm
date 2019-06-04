@@ -95,9 +95,12 @@ def add_autotag_connection_batch(index, database, row_data, results):
         for rix, n in enumerate(indices):
             tmp = response[n[0] : n[1]]
             try:
+                status = 0
                 for i in range(len(tmp)):
-                    cmd = list(tmp[i][0].items())[0][0]
-                    assert tmp[i][0][cmd]["status"] == 0
+                    cmd = list(tmp[0][i].items())[0][0]
+                    if tmp[0][i][cmd]["status"] != 0:
+                        results[index + rix] = -1
+                        break
                 results[index + rix] = 0        
             except:
                 results[index + rix] = -1
@@ -106,17 +109,21 @@ def add_autotag_connection_batch(index, database, row_data, results):
         return redo
     
     run_index = []
+    all_queries = []
     num_queries = 0
     for rix, row in row_data.iterrows():
         # Find Tag
         if not pd.isna(row['autotags']):
             ind = [None, None]
-            all_queries = []
             # Find Image
-            parentref = 1000 * rix
+            parentref = (100 * rix) % 19000
+            parentref +=1  #Max ref 20000
             query = {}
-            find_image = {'constraints': {'ID': ["==", int(row['ID'])]}, "_ref": parentref}
-            query["FindImage"] = find_image
+            findImage = {}
+            findImage["_ref"] = parentref
+            findImage['constraints'] = {'ID': ["==", int(row['ID'])]}
+            findImage['results'] = {"blob": False}
+            query["FindImage"] = findImage
             all_queries.append(query)
             ind[0] = num_queries            
             num_queries +=1
@@ -128,16 +135,23 @@ def add_autotag_connection_batch(index, database, row_data, results):
 
                 # Find Tag 
                 query = {}
-                find_entity = {"class": 'autotags', "_ref": this_ref, "constraints": {'name': ["==", val[0]]}}
+                find_entity = {}
+                find_entity["_ref"] = this_ref
+                find_entity["class"] = 'autotags'
+                find_entity["constraints"] = {'name': ["==", val[0]]}
                 query["FindEntity"] = find_entity
                 all_queries.append(query)
                 num_queries +=1
 
                 # Add Connection
                 query = {}
-                add_connection = {"class": 'tag', "ref1": parentref, "ref2": this_ref,
-                                  "properties": {"tag_name": val[0], 'tag_prob': float(val[1]),
-                                                 "MetaDataID": int(row['ID'])}}
+                add_connection = {}
+                add_connection["class"] = 'tag'
+                add_connection["ref1"] = parentref
+                add_connection["ref2"] = this_ref
+                add_connection["properties"] = {"tag_name": val[0],
+                                                "tag_prob": float(val[1]),
+                                                "MetaDataID": int(row['ID'])}
                 query["AddConnection"] = add_connection
                 all_queries.append(query)
                 ind[1] = num_queries
@@ -146,10 +160,11 @@ def add_autotag_connection_batch(index, database, row_data, results):
     
     redo_flag = True
     cnt = 0
-    while redo_flag is True and cnt < 5:
+    while redo_flag is True and cnt < 10:
         res = database.query(all_queries)
         redo_flag = check_status(res, run_index)
         cnt += 1
+    return result
 
 
 """ Using single entry per thread """

@@ -7,8 +7,10 @@ from threading import Thread
 
 import util
 import vdms
+import sys
 
 
+log_name = sys.argv[0].split('/')[-1].replace('.py','.log')
 connection_batch_limit = 100  #10               
 
 
@@ -128,12 +130,12 @@ def process_image_entities(params, dbs, all_data):
             error_counter += results[idx:min([idx+batch, num_lines])].count(-1)
             idx += batch
     return error_counter
-
-
+      
+        
 def process_connections(params, dbs, all_data):
     batch, num_lines, blocks, results = get_parameters(params, all_data,
         num_entries_per_thread=min([connection_batch_limit, params.batch_size]))
-
+    
     for block in range(0, blocks):
         thread_arr = []
         
@@ -141,19 +143,18 @@ def process_connections(params, dbs, all_data):
             idx = (params.num_threads * batch) * block + i * batch
             
             if idx < num_lines:
-                thread_add = Thread(target=util.add_autotag_connection_batch,
-                                    args=(idx, dbs[i], all_data.iloc[idx:min([idx+batch, num_lines]), :], results))
-                thread_add.start()
-                thread_arr.append(thread_add)
+                results = util.add_autotag_connection_batch(idx, dbs[i], all_data.iloc[idx:min([idx+batch, num_lines]), :], results)
+                # thread_add = Thread(target=util.add_autotag_connection_batch,
+                                    # args=(idx, dbs[i], all_data.iloc[idx:min([idx+batch, num_lines]), :], results)), :], results)
+                # thread_add.start()
+                # thread_arr.append(thread_add)
             else:
                 break
+            # print(idx, min([idx+batch, num_lines]))
                 
-        idx = (params.num_threads * batch) * block
-        error_counter = 0
-        for th in thread_arr:
-            th.join()
-            error_counter += results[idx:min([idx+batch, num_lines])].count(-1)
-            idx += batch
+        # for th in thread_arr:
+            # th.join()
+    error_counter = results.count(-1)
     return error_counter
 
 
@@ -170,7 +171,9 @@ def main(in_args):
     
     func_list = ['process_tag_entities', 'process_image_entities', 'process_connections']
     func_data = [all_tags, data, data]
-    # func_list = ['process_image_entities']
+    # func_list = ['process_tag_entities', 'process_image_entities']
+    # func_data = [all_tags, data]
+    # func_list = ['process_connections']
     # func_data = [ data]
     for fn, fd in zip(func_list, func_data):
         start_t = time.time()
@@ -184,7 +187,7 @@ def main(in_args):
 
 
 if __name__ == "__main__":
-    main_logger = make_logger('main_logger', "build_yfcc_db.log")
+    main_logger = make_logger('main_logger', log_name)
 
     args = get_args()
     main(args)
