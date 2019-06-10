@@ -50,7 +50,6 @@ def add_autotags_entity_batch(index, database, tag, results):
         redo_flag = check_status(res)
         cnt += 1
 
-
 def add_image_all_batch(index, batch_size, db,
                         start, end, row_data, results):
 
@@ -64,18 +63,19 @@ def add_image_all_batch(index, batch_size, db,
         add_image_entity_batch(start_r, end_r, db,
                                row_data.iloc[start_r:end_r], results)
 
-def add_image_entity_batch(index, index2, database, row_data, results):
+def add_image_entity_batch(start, end, database, row_data, results):
     from pandas import isna
     from urllib.parse import urlparse
 
     def check_status(response):
         redo = False
-        for ix, b in enumerate(range(index, index2)):
+        for ix, b in enumerate(range(start, end)):
             try:
                 results[b] = response[0][ix]['AddEntity']["status"]
             except:
                 results[b] = -1
                 redo = True
+                # print(response)
                 break
         return redo
 
@@ -95,11 +95,23 @@ def add_image_entity_batch(index, index2, database, row_data, results):
         all_queries.append(query)
 
     redo_flag = True
+    flag_report = False
     cnt = 0
     while redo_flag is True and cnt < 20:
         res = database.query(all_queries)
         redo_flag = check_status(res)
+        if redo_flag is True:
+            # print("retrying: ", start, end)
+            flag_report = True
+
+        #     print("redoing: ", query)
         cnt += 1
+
+    if flag_report is True:
+        print("went through after n retries: ", cnt, start, end)
+
+    if cnt == 20:
+        print("--------------!!!!!!!!!!!!!!! batch not completed: ", start, end)
 
 
 def add_autotag_connection_all_batch(index, batch_size, db,

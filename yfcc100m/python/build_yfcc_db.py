@@ -15,8 +15,6 @@ import sys
 log_name = sys.argv[0].split('/')[-1].replace('.py','.log')
 connection_batch_limit = 100  #10
 
-process_first_n = 10000
-
 def get_args():
     parserobj = argparse.ArgumentParser()
     parserobj.add_argument('-num_threads', type=int, default=100,
@@ -165,7 +163,7 @@ def process_connections(params, dbs, all_data):
 
             start = idx
             end = min([idx+per_thread, num_lines])
-            thread_add = multiprocessing.Process(target=util.add_autotag_connection_all_batch,
+            thread_add = Thread(target=util.add_autotag_connection_all_batch,
                                 args=(idx, batch, dbs[i], start, end,
                                       all_data, results) )
             thread_add.start()
