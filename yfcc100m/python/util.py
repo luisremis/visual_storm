@@ -227,7 +227,6 @@ def add_autotag_connection_batch(index, database, row_data, start, end, results)
 
     run_query = time.time() - t0
 
-
     total_time = pre + make_query + run_query
 
     # print("pre:", pre / total_time, "make:", make_query/total_time, "run:", run_query/total_time)

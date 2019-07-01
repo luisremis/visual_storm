@@ -2,7 +2,7 @@ rm -rf db
 mkdir -p db/images
 # ln -s /data/yfcc100m/set_0/data_0/images db/images/jpg
 
-/home/luisremi/vcs/pmgd/tools/mkgraph db/graph \
+/home/luisremi/vcs/pmgd/tools/mkgraph db/graph -c 32 \
 	node VD:IMG imgPath string \
 	node VD:IMG ID integer \
 	node autotags name string

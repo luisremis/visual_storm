@@ -5,3 +5,5 @@ echo "Number of autotags:"
 cat dump.graph | grep "#autotags" | wc -l
 echo "Number of connections:"
 cat dump.graph | grep "#tag:" | wc -l
+echo "Number of elements:"
+cat dump.graph | grep "#" | wc -l

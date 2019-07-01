@@ -41,7 +41,6 @@ class descriptors_reader(object):
 
         return ids, descriptors
 
-
     def read_next_file(self):
 
         filename = self.prefix + str(self.file_counter) + ".bin"
@@ -50,5 +49,3 @@ class descriptors_reader(object):
 
         self.file = open(filename, 'rb')
         self.file_counter += 1
-
-
