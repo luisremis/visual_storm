@@ -24,19 +24,21 @@ def get_args():
     parserobj.add_argument('-batch_size', type=int, default=100,
                            help='Number of entries per thread for autotags and images [default: 100; connections: max {}]'.format(connection_batch_limit))
     parserobj.add_argument('-data_file', type=str,
-                           default='yfcc100m_dataset_short',
+                           default='yfcc100m_dataset_1M',
                            help='YFCC metadata [default: ' +
-                                '/data/yfcc100m/set_0/data_0/metadata/yfcc100m_short/yfcc100m_dataset_short')
-    parserobj.add_argument('-tag_list', type=str, default='../yfcc_parse_labels/autotag_list.txt',
+                                './yfcc100m_dataset_1M')
+    parserobj.add_argument('-tag_list', type=str,
+                           default='../yfcc_parse_labels/autotag_list.txt',
                            help='List of expected tags [default: ../yfcc_parse_labels/autotag_list.txt]')
+    parserobj.add_argument('-add_tags', type=bool, default=False,
+                           help='Whether or not insert tags')
     parserobj.add_argument('-tag_file', type=str,
-                           default='yfcc100m_autotags_short',
+                           default='yfcc100m_autotags_1M',
                            help='YFCC file of autotags [default: ' +
-                                '/data/yfcc100m/set_0/data_0/metadata/yfcc100m_short/yfcc100m_autotags_short]')
+                                './yfcc100m_autotags_1M]')
 
     params = parserobj.parse_args()
     return params
-
 
 def get_data(params):
     all_data = pd.read_csv(params.data_file, sep='\t', names=util.property_names)  # , nrows=params.process_first_n)
@@ -79,11 +81,11 @@ def make_logger(name, log_file, level=logging.INFO):
 def get_parameters(params, all_data, num_entries_per_thread=None):
     if num_entries_per_thread is None:
         num_entries_per_thread = params.batch_size
-    
-    num_entries = len(all_data)    
+
+    num_entries = len(all_data)
     # if params.process_first_n is not None and params.process_first_n < num_entries:
         # num_entries = params.process_first_n
-        
+
     blocks = int(np.ceil(num_entries / (params.num_threads * num_entries_per_thread)))
     return num_entries_per_thread, num_entries, blocks, [None] * num_entries
 
@@ -110,6 +112,7 @@ def process_tag_entities(params, dbs, all_data):
             th.join()
             error_counter += results[idx:min([idx+batch, num_lines])].count(-1)
             idx += batch
+
     return error_counter
 
 
@@ -184,7 +187,6 @@ def process_connections(params, dbs, all_data):
     error_counter = results.count(-1)
     return error_counter
 
-
 def main(in_args):
     main_logger.info('[!] Building database')
     start = time.time()
@@ -196,8 +198,17 @@ def main(in_args):
 
     db_list = get_db_list(in_args.num_threads)
 
-    func_list = ['process_tag_entities', 'process_image_entities', 'process_connections']
-    func_data = [all_tags, data, data]
+    func_list = []
+    func_data = []
+    if (in_args.add_tags):
+        func_list.append('process_tag_entities')
+        fund_data.append[all_tags]
+
+    func_list.append('process_image_entities')
+    func_list.append('process_connections')
+
+    func_data.append(data)
+    func_data.append(data)
     # func_list = ['process_tag_entities', 'process_image_entities']
     # func_data = [all_tags, data]
     # func_list = ['process_connections']
