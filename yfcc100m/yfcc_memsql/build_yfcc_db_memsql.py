@@ -1,8 +1,5 @@
 """
-SOURCE: https://github.com/memsql/memsql-python/blob/master/examples/multi_threaded_inserts.py
-
-MODIFIED BY: Chaunte W. Lacewell
-
+Create Databases in MemSQL
 """
 
 from pathlib import Path
@@ -43,26 +40,26 @@ def make_logger(name, log_file, level=logging.INFO):
 
 def get_args():
     parserobj = argparse.ArgumentParser()
-    # parserobj.add_argument('-process_first_n', type=int, default=None,
-                           # help='Process only the first N lines of image/connection data [default: None-> all data]')
-    parserobj.add_argument('-num_threads', type=int, default=100,
-                           help='Number of threads to use [default: 100]')
-    parserobj.add_argument('-batch_size', type=int, default=100,
-                           help='Number of entries per thread for autotags and images [default: 100; connections: max {}]'.format(connection_batch_limit))
+    # parserobj.add_argument('-num_threads', type=int, default=100,
+                           # help='Number of threads to use [default: 100]')
+    # parserobj.add_argument('-batch_size', type=int, default=100,
+                           # help='Number of entries per thread for autotags and images [default: 100; connections: max {}]'.format(connection_batch_limit))
     parserobj.add_argument('-data_file', type=lambda s: Path(s),
-                           default='yfcc100m_dataset_short',
+                           default='/mnt/data/metadata/original/yfcc100m_photo_dataset',
                            help='YFCC metadata [default: ' +
-                                '/mnt/data/metadata/yfcc100m_short/yfcc100m_dataset_short')
+                           '/mnt/data/metadata/original/yfcc100m_photo_dataset')
     parserobj.add_argument('-tag_list', type=lambda s: Path(s), default='../yfcc_parse_labels/autotag_list.txt',
                            help='List of expected tags [default: ../yfcc_parse_labels/autotag_list.txt]')
     parserobj.add_argument('-tag_file', type=lambda s: Path(s),
-                           default='/mnt/data/metadata/yfcc100m_short/yfcc100m_autotags_short',
+                           default='/mnt/data/metadata/original/yfcc100m_photo_autotags',
                            help='YFCC file of autotags [default: ' +
-                                '/mnt/data/metadata/yfcc100m_short/yfcc100m_autotags_short]')
+                                '/mnt/data/metadata/original/yfcc100m_photo_autotags]')
+    
+    # Database Info
     parserobj.add_argument('-db_name', type=str, default='test',
                            help='Name of database [default: test]')
-    parserobj.add_argument('-db_host', type=str, default='sky3.jf.intel.com',
-                           help='Name of memsql host [default: sky3.jf.intel.com]')
+    parserobj.add_argument('-db_host', type=str, required=True,
+                           help='Name of memsql host')
     parserobj.add_argument('-db_port', type=int, default=3306,
                            help='Port of memsql [default: 3306]')
     parserobj.add_argument('-db_user', type=str, default='root',
@@ -79,8 +76,6 @@ def get_parameters(params, all_data, num_entries_per_thread=None):
         num_entries_per_thread = params.batch_size
     
     num_entries = len(all_data)    
-    # if params.process_first_n is not None and params.process_first_n < num_entries:
-        # num_entries = params.process_first_n
         
     blocks = int(np.ceil(num_entries / (params.num_threads * num_entries_per_thread)))
     return num_entries_per_thread, num_entries, blocks, [None] * num_entries
@@ -149,10 +144,7 @@ def setup_test_db(params):
             secret varchar(255) DEFAULT NULL, 
             secret_original varchar(255) DEFAULT NULL,
             extension varchar(255) DEFAULT NULL,
-            marker varchar(255) DEFAULT NULL,
-            imgPath varchar(255) DEFAULT NULL,
-            imgBlob blob DEFAULT NULL,
-            format varchar(255) DEFAULT 'jpg')""")
+            marker varchar(255) DEFAULT NULL)""")
 
 def cleanup():
     """ Cleanup the database this benchmark is using. """
@@ -168,47 +160,7 @@ def process_tag_entities(params):
         count = conn.get("SELECT COUNT(*) AS count FROM test_taglist").count
     return count, num_lines - count
     
-def process_autotags_entities(params):
-    # JSON
-    # # tags = pd.read_csv(str(params.tag_file), sep='\t', names=['id', 'autotags'])
-    # # for ix, row in tags.iterrows():
-        # # if not pd.isna(row['autotags']):
-            # # json_str = '['
-            # # curr_tags = row['autotags'].split(',')
-            # # arr = []
-            # # for tag in curr_tags:
-                # # name, prob = tag.split(':')
-                # # arr.append("{'name':'" + name + "','probability':" + prob + "}" )
-            
-            # # json_str += ','.join(arr) + ']'        
-        # # else:
-            # # json_str = "[{'name':'','probability':0.0}]"
-        # # # tags.set_value(ix, 'autotags', json_str)
-        # # tags.at[ix, 'autotags'] = json_str
-    # # num_lines = len(tags)
-    # # tmp_file = str(Path().cwd() / 'tmp_tags')    
-    # # tags.to_csv(tmp_file, index=False)
-    # # query = "LOAD DATA INFILE '{}' INTO TABLE test_autotags (id,autotags)".format(tmp_file)
-    
-    # 2 cols -> 3 cols (id, name, prob)
-    # tags = pd.DataFrame(columns=['id','autotags', 'probability'])
-    # tmp_file = str(Path().cwd() / 'tmp_tags') 
-    # # with open(tmp_file, 'w') as file:
-        # # writer = csv.writer(file)
-    # for line in open(str(params.tag_file), 'r'):
-        # line = line.strip().split('\t')
-        # if len(line) > 1:
-            # name, taglist = line
-            # taglist = taglist.split(',')
-            # for t in taglist:
-                # tag, val = t.split(':')
-                # tags = tags.append({'id': name, 'autotags':tag, 'probability':val}, ignore_index=True) 
-                # # writer.writerows('{}\t{}\t{}'.format(name,tag,val))
-                # # new_data.append('{}\t{}\t{}'.format(name,tag,val))
-    # tags.to_csv(tmp_file, index=False)
-    # query = "LOAD DATA INFILE '{}' INTO TABLE test_autotags (id,autotags,probability)".format(tmp_file)
-    # os.remove(tmp_file)
-    
+def process_autotags_entities(params):    
     num_lines = len([line.strip() for line in open(str(params.tag_file), 'r')])
     query = "LOAD DATA INFILE '{}' INTO TABLE test_autotags (id,autotags)".format(str(params.tag_file.absolute()))
     with util.get_connection(params) as conn:
@@ -247,33 +199,6 @@ def process_metadata_entities(params):
     # # return results.count(-1)
     
     return count, num_lines - count
-    
-# def str_to_json(val):
-    # tags = []
-    # if not pd.isna(val):
-        # current_tags = val.split(',')
-        # for x in current_tags:
-            # data = x.split(':')
-            # # tags[data[0]] = float(data[1])
-            # tags.append({"tagname" : data[0], "probability" : float(data[1])})
-    # else:
-        # tags.append({"tagname" : "null", "probability" : float(0)})
-    # return tags
-        
-        
-# def process_autotags_entities(params):
-    # tags = pd.read_csv(params.tag_file, sep='\t', names=['id', 'autotags'])
-    # tags['autotags'] = tags['autotags'].apply(str_to_json)
-    # tmp_file = Path().cwd() / 'tmp_autotags.csv'
-    # tags.to_csv(str(tmp_file), index=False)
-    # query = "LOAD DATA INFILE '{}' INTO TABLE test_autotags (id,autotags)".format(str(tmp_file))
-    # num_lines = len([line.strip() for line in open(str(params.tag_file), 'r')])
-    # # query = "LOAD DATA INFILE '{}' INTO TABLE test_autotags (id,autotags)".format(str(params.tag_file.absolute()))
-    # with util.get_connection(params) as conn:
-        # conn.execute(query)
-        # count = conn.get("SELECT COUNT(*) AS count FROM test_autotags").count
-    # os.remove(str(tmp_file))
-    # return count, num_lines - count
     
 
 def main(in_args):

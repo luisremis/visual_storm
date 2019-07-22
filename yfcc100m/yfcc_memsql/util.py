@@ -8,6 +8,7 @@ import cv2
 import requests
 from pandas import isna
 from urllib.parse import urlparse
+import IPython
 
 
 """ General functions """
@@ -26,6 +27,10 @@ property_names_sql = ['line_number','id', 'hash', 'user_nsid', 'user_nickname',
             'farm_id', 'secret', 'secret_original', 'extension', 'marker',
             'imgPath', 'imgBlob', 'format']
 tag_property_names=['ID', 'autotags']
+
+num_imgs_per_data_dir = 8400000
+folder_choices = ['/mnt/data/set_0/data_0/images', '/mnt/data/set_0/data_1/images', '/mnt/data/set_0/data_2/images', '/mnt/data/set_0/data_3/images',
+                  '/mnt/data/set_1/data_0/images', '/mnt/data/set_1/data_1/images', '/mnt/data/set_1/data_2/images', '/mnt/data/set_1/data_3/images']
 
 
 def get_connection(params, db=None):
@@ -71,6 +76,50 @@ def display_images(imgs):
     for im in imgs:
         display(Image(im))
 
+def display_image_from_path(imgPath, w=None, h=None):
+    img = IPython.core.display.Image(imgPath, width=w, height=h)
+    if img.data:
+        IPython.core.display.display(img)
+
+def query_autotags(interests, host=None, port=3306, user="root",
+                          pswd="", db=None):
+    start_t = time.time()
+    with database.connect(host=host, port=port, user=user,
+                          password=pswd, database=db) as conn:
+        match_regex = ' AND '.join(['''{}":"$'''.format(key) for key in interests.keys()])
+        val_regex = ' AND '.join(['''CONVERT(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(a.autotags,'{}":"',-1),',',1),':',-1),DECIMAL)>=CONVERT({},DECIMAL)'''.format(key, value) for key, value in interests.items()])
+        query = '''select b.line_number, b.id, a.autotags, b.download_url from test_autotags a JOIN test_metadata b ON a.id = b.id WHERE match (a.autotags) against ('{}') AND {}'''.format(match_regex, val_regex)
+        sql_response = conn.query(query)
+        response = []
+        for res in sql_response:
+#             tags_str = [t for t in res['autotags'].split(',') if any(key in t for key, val in interests.items())]
+            
+            if all(key in res['autotags'] for key in interests.keys()):
+                tags_str = []
+                for t in res['autotags'].split(','):
+#                     print(t.split(":"))
+                    val = t.split(":")                    
+                    try:
+                        if len(val) == 2: 
+                            val[1] = float(val[1]) if val[1] != '' else 0
+                            if val[0] in interests and val[1] >= float(interests[val[0]]):
+                                tags_str.append(val[0] + ":" + str(val[1]))   
+                    except:
+                        print(val[0], val[1])
+                if tags_str:
+                    print('\tID: {}'.format(res['id']))
+                    print('\tAutotags: {}'.format(','.join(tags_str)))
+                    print('\tdownload_url: {}\n'.format(res['download_url']))
+                    response.append(res)
+    return response, time.time() - start_t
+
+def get_query_images(sql_response, width=None, height=None):
+    start_t = time.time()
+    for res in sql_response:
+        quotient = int(res['line_number']) // num_imgs_per_data_dir
+        imgPath = folder_choices[quotient] + urlparse(res['download_url']).path
+        display_image_from_path(imgPath, w=width, h=height)
+    return time.time() - start_t
 
 """ Using multiple entries per thread """
 
