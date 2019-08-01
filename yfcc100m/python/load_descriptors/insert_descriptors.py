@@ -3,7 +3,7 @@
 
 import vdms
 
-import descriptors_reader as dr
+import descriptors_io as d_io
 
 descriptor_set_name = "hybridNet"
 
@@ -28,21 +28,22 @@ def insert_descriptor_set(db):
 # This method is paralelizable, can be called multiple times
 def insert_descriptors(batch_size, ids, descriptors, db):
 
-    # rounds = int(len(ids) / batch_size)
-    rounds = len(ids)
+    tx_batch = 10
 
-    print("rounds:", rounds)
+    rounds = int(len(ids) / tx_batch)
 
-    print("n_ids:", len(ids))
-    print("n_descriptors:", len(descriptors))
+    # print("rounds:", rounds)
+    # print("n_ids:", len(ids))
+    # print("n_descriptors:", len(descriptors))
+
+    error_counter_fi = 0
+    error_counter_ad = 0
+    total_errors = 0
 
     for round_n in range(rounds):
 
-        # start = round_n * batch_size
-        # end   = min(start + batch_size, len(ids))
-
-        start = round_n
-        end = round_n + 1
+        start = round_n * tx_batch
+        end   = min(start + tx_batch, len(ids))
 
         ref_counter = 1
 
@@ -51,7 +52,7 @@ def insert_descriptors(batch_size, ids, descriptors, db):
 
         for i in range(start,end):
 
-            print("inderting desc id:", ids[i])
+            # print("inderting desc id:", ids[i])
 
             fI = { "FindImage": {
                     "_ref": ref_counter,
@@ -82,34 +83,54 @@ def insert_descriptors(batch_size, ids, descriptors, db):
 
             ref_counter += 1
 
-        respones, blob = db.query(all_queries, [blobs])
+        responses, blob = db.query(all_queries, [blobs])
 
-        print(db.get_last_response_str())
+        if (len(responses) < tx_batch * 2):
+            # print("Responses sizee error")
+            total_errors += tx_batch
+            continue
+
+        for i in range(int(len(responses)/2)):
+            if (responses[2*i]["FindImage"]["status"] != 0):
+                error_counter_fi += 1
+            if (responses[2*i+1]["AddDescriptor"]["status"] != 0):
+                error_counter_ad += 1
+
+    if (error_counter_fi > 0 or error_counter_ad > 0):
+        print("fi_errors:", error_counter_fi)
+        print("ad_errors:", error_counter_ad)
+
+    return total_errors
 
 def main():
 
     db = vdms.vdms()
-    db.connect("localhost", 55559)
+    db.connect("localhost")
 
     insert_descriptor_set(db)
 
-    prefix = "/nvme4/YFCC100M_hybridCNN_gmean_fc6_"
-    d_reader = dr.descriptors_reader(prefix)
+    prefix = "/mnt/nvme1/features_1M/YFCC100M_hybridCNN_gmean_fc6_first_1M_"
+    d_reader = d_io.descriptors_reader(prefix)
 
-    total = 1000000
+    total = int(1e6)
     batch_size = 1000
 
     inserted = 0
+    total_errors = 0
 
     while inserted < total:
 
         ids, desc = d_reader.get_next_n(batch_size)
 
-        insert_descriptors(batch_size, ids, desc, db)
+        total_errors += insert_descriptors(batch_size, ids, desc, db)
 
         inserted += batch_size
 
-        print("Elements Inserted: ", inserted)
+        print("Elements Inserted: ", inserted, " - ",
+              100 * inserted / total, "%")
+
+        print("total_errors:", total_errors,
+              "Percentage:", 100 * total_errors/inserted, "%")
 
     # Read from file, this should read the files as needed, given a number
     # of elements, it should open the different files as needed.
@@ -120,5 +141,3 @@ def main():
 if __name__ == "__main__":
 
     main()
-
-
