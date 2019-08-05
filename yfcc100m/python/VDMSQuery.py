@@ -36,13 +36,11 @@ def binarySearch (arr, l, r, x):
 class VDMSQuery(object):
 
     def __init__(self, host="localhost", port=55555):
-
         self.db = vdms.vdms()
         self.db.connect(host, port)
 
     def __del__(self):
-
-        print("bye bye")
+        self.db.disconnect()
 
     def get_image_fv(self, image_id):
 
@@ -167,7 +165,7 @@ class VDMSQuery(object):
 
         return results
 
-    def get_image_by_tags(self, tags, probs):
+    def get_image_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0):
 
         all_cmds = []
 
@@ -198,6 +196,14 @@ class VDMSQuery(object):
                 }
             }
 
+            if (lat != -1):
+                fI["FindImage"]["constraints"] = {
+                    "Latitude": [">=", lat-range_dist*1.0,
+                                 "<=", lat + range_dist*1.0  ],
+                    "Longitude": [">=", long-range_dist*1.0,
+                                 "<=", long + range_dist*1.0  ]
+                }
+
             all_cmds.append(fE)
             all_cmds.append(fI)
 
@@ -206,7 +212,7 @@ class VDMSQuery(object):
         start = time.time()
         responses, blobs = self.db.query(all_cmds)
         print("Time (ms):", (time.time() - start) * 1000.0)
-        # print(self.db.get_last_response_str())
+        print(self.db.get_last_response_str())
 
         if (len(tags) > 1):
             results = self.intersect_by_key(responses, "ID")
@@ -215,7 +221,7 @@ class VDMSQuery(object):
 
         print("Total results:", len(results))
 
-        # print(results)
+        print(results)
 
         return responses
 

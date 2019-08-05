@@ -90,6 +90,8 @@ def add_image_entity_batch(start, end, database, row_data, results):
         for key in property_names:
             if not isna(row[key]):
                 props[key] = int(row[key]) if key == 'ID' else str(row[key])
+                props[key] = float(row[key]) if key == 'Latitude' else str(row[key])
+                props[key] = float(row[key]) if key == 'Longitude' else str(row[key])
         props["VD:imgPath"] = 'db/images/jpg' + urlparse(props['Download URL']).path
         props["format"] = "jpg"
 
