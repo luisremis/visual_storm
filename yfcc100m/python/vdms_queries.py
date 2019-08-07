@@ -13,7 +13,6 @@ def display_images(imgs):
         fd.close()
         display(Image(img_file))
 
-
 qh = VDMSQuery.VDMSQuery("sky3.jf.intel.com", 55500)
 
 qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2])
@@ -27,6 +26,8 @@ resize = {
 }
 
 qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize])
+
+qh.get_images_by_tags(["alligator"], [0.2], [resize])
 
 # print("Query Images:")
 # display_images(imgs)

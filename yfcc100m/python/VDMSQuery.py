@@ -211,7 +211,7 @@ class VDMSQuery(object):
 
         start = time.time()
         responses, blobs = self.db.query(all_cmds)
-        print("Time (ms):", (time.time() - start) * 1000.0)
+        print("Time for metadata (ms):", (time.time() - start) * 1000.0)
         # print(self.db.get_last_response_str())
 
         if (len(tags) > 1):
@@ -253,47 +253,10 @@ class VDMSQuery(object):
 
         start = time.time()
         responses, blobs = self.db.query(all_cmds)
-        print("Time (ms):", (time.time() - start) * 1000.0)
+        print("Time for images (ms):", (time.time() - start) * 1000.0)
         # print(self.db.get_last_response_str())
 
         print("Total results:", len(blobs))
         # print(results)
 
         return results
-
-
-    def get_image_by_tag(self, tag, prob):
-
-        fE = {
-            "FindEntity": {
-                "_ref": 2,
-                "class": "autotags",
-                "constraints": {
-                    "name": ["==", tag]
-                }
-            }
-        }
-
-        fI = {
-            "FindImage": {
-                "link": {
-                    "ref": 2,
-                    "constraints": {
-                        "tag_prob": [">=", prob]
-                    }
-                },
-                "results": {
-                    "list": ["ID"],
-                    "blob": True,
-                    "limit": 20
-                }
-            }
-        }
-
-        responses, blobs = self.db.query([fE, fI])
-
-    #     print(self.db.get_last_response_str())
-
-        print("Images with", tag, "with prob >=", prob, ":", responses[1]["FindImage"]["returned"])
-
-        return blobs
