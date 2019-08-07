@@ -12,6 +12,8 @@ import util
 import vdms
 import sys
 
+# process_first_n = 100000
+
 log_name = sys.argv[0].split('/')[-1].replace('.py','.log')
 connection_batch_limit = 100  #10
 
@@ -30,7 +32,7 @@ def get_args():
     parserobj.add_argument('-tag_list', type=str,
                            default='../yfcc_parse_labels/autotag_list.txt',
                            help='List of expected tags [default: ../yfcc_parse_labels/autotag_list.txt]')
-    parserobj.add_argument('-add_tags', type=bool, default=False,
+    parserobj.add_argument('-add_tags', type=bool, default=True,
                            help='Whether or not insert tags')
     parserobj.add_argument('-tag_file', type=str,
                            default='yfcc100m_autotags_1M',
@@ -161,10 +163,7 @@ def process_connections(params, dbs, all_data):
 
     per_thread = int(num_lines / params.num_threads)
 
-    print("n lines: ", num_lines)
-    print("batch: ", batch)
-
-    print("per_thread: ", per_thread)
+    # print("n lines: ", num_lines, "batch: ", batch, "per_thread: ", per_thread)
 
     for i in range(0, params.num_threads):
         idx = i * per_thread
@@ -202,7 +201,7 @@ def main(in_args):
     func_data = []
     if (in_args.add_tags):
         func_list.append('process_tag_entities')
-        fund_data.append[all_tags]
+        func_data.append(all_tags)
 
     func_list.append('process_image_entities')
     func_list.append('process_connections')

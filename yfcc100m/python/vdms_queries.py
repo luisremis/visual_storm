@@ -14,10 +14,11 @@ def display_images(imgs):
         display(Image(img_file))
 
 
-qh = VDMSQuery.VDMSQuery("sky3.jf.intel.com", 55501)
+qh = VDMSQuery.VDMSQuery("sky3.jf.intel.com", 55500)
 
-# qh.get_image_by_tags(["alligator", "lake"], [0.2, 0.2])
-qh.get_image_by_tags(["alligator", "lake"], [0.2, 0.2], -14.354356, -39.002567, 2)
+qh.get_image_by_tags(["alligator", "lake"], [0.2, 0.2])
+
+qh.get_image_by_tags(["alligator", "lake"], [0.2, 0.2], -14.354356, -39.002567, 20)
 # qh.get_image_by_tags(["alligator"], [0.9])
 
 # print("Query Images:")

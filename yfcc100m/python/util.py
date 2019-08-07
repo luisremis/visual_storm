@@ -96,7 +96,7 @@ def add_image_entity_batch(start, end, database, row_data, results):
                 elif key == 'Longitude':
                     props[key] = float(row[key])
                 else:
-                   props[key] = str(row[key])
+                    props[key] = str(row[key])
 
         props["VD:imgPath"] = 'db/images/jpg' + urlparse(props['Download URL']).path
         props["format"] = "jpg"

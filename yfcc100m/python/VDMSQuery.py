@@ -212,7 +212,7 @@ class VDMSQuery(object):
         start = time.time()
         responses, blobs = self.db.query(all_cmds)
         print("Time (ms):", (time.time() - start) * 1000.0)
-        print(self.db.get_last_response_str())
+        # print(self.db.get_last_response_str())
 
         if (len(tags) > 1):
             results = self.intersect_by_key(responses, "ID")
