@@ -221,9 +221,45 @@ class VDMSQuery(object):
 
         print("Total results:", len(results))
 
-        print(results)
+        # print(results)
 
-        return responses
+        return results
+
+
+    def get_images_by_tags(self, tags, probs, operations = [],
+                           lat=-1, long=-1, range_dist=0):
+
+        results = self.get_metadata_by_tags(tags, probs, lat, long, range_dist)
+
+        all_cmds = []
+
+        for ele in results:
+
+            fI = {
+                "FindImage": {
+                    "constraints": {
+                        "ID":  ["==", ele['ID']]
+                    },
+                    "results": {
+                        "list": ["ID", "Latitude", "Longitude", "License name"]
+                    }
+                }
+            }
+
+            if (len(operations) >= 0):
+                fI["FindImage"]["operations"] = operations
+
+            all_cmds.append(fI)
+
+        start = time.time()
+        responses, blobs = self.db.query(all_cmds)
+        print("Time (ms):", (time.time() - start) * 1000.0)
+        # print(self.db.get_last_response_str())
+
+        print("Total results:", len(blobs))
+        # print(results)
+
+        return results
 
 
     def get_image_by_tag(self, tag, prob):
