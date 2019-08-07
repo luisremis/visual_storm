@@ -165,7 +165,7 @@ class VDMSQuery(object):
 
         return results
 
-    def get_image_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0):
+    def get_metadata_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0):
 
         all_cmds = []
 
