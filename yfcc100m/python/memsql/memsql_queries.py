@@ -37,7 +37,7 @@ def drop_database(params):
                                   database=params.db_name) as conn:
                 conn.query('DROP DATABASE %s' % params.db_name)
                 
-args = {'db_name':'yfcc_10M',#'yfcc_100k',
+args = {'db_name':'yfcc_100k',
         'db_host':'sky3.jf.intel.com',
         'db_port': 3306,
         'db_user': 'root',

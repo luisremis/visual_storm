@@ -19,7 +19,7 @@ resize = {
     "height": 224
 }
 
-qh = VDMSQuery.VDMSQuery("sky3.jf.intel.com", 55501)
+qh = VDMSQuery.VDMSQuery("sky3.jf.intel.com", 55500)
 
 print('Query metadata with autotags: alligator>=0.2 AND lake>=0.2')
 qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2])

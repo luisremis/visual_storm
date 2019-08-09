@@ -50,7 +50,6 @@ def get_args():
 
 
 def get_thread_metadata(obj, params, index, results, query_arguments):
-    # obj = VDMSQuery.VDMSQuery(params.db_host, params.db_port)
     for ix in range(params.numtags):
         # print('\nTAG:{}\tLAT:{}\tLON:{}'.format(query_arguments['tags'], query_arguments['lat'] if 'lat' in query_arguments else '', query_arguments['long'] if 'long' in query_arguments else ''))
         tag = query_arguments['tags']
@@ -126,13 +125,13 @@ def main(params):
 
             # Metadata transactions per sec
             all_times = [res['response_time'] for res in results if res]
-            tx_per_sec = (params.numtags * params.numthreads) / np.sum(all_times)
+            tx_per_sec = (params.numtags * params.numthreads) / np.max(all_times)
             all_tx_per_sec += tx_per_sec
 
             # Images per sec
             num_images = np.sum([res['images_len'] for res in results if res])
             all_times = [res['images_time'] for res in results if res]
-            img_per_sec = num_images / np.sum(all_times)
+            img_per_sec = num_images / np.max(all_times)
             all_img_per_sec += img_per_sec
             
             print('# responses: {}'.format(len(all_times)))
