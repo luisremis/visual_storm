@@ -13,21 +13,34 @@ def display_images(imgs):
         fd.close()
         display(Image(img_file))
 
-qh = VDMSQuery.VDMSQuery("sky3.jf.intel.com", 55500)
-
-qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2])
-
-qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2], -14.354356, -39.002567, 20)
-
 resize = {
     "type": "resize",
     "width": 224,
     "height": 224
 }
 
+qh = VDMSQuery.VDMSQuery("sky3.jf.intel.com", 55501)
+
+print('Query metadata with autotags: alligator>=0.2 AND lake>=0.2')
+qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2])
+print('Query images with autotags: alligator>=0.2 AND lake>=0.2')
 qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize])
 
+print('Query metadata with autotags: alligator>=0.2 AND lake>=0.2 within 20 of lat -14.354356, long -39.002567')
+qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2], -14.354356, -39.002567, 20)
+print('Query images with autotags: alligator>=0.2 AND lake>=0.2 within 20 of lat -14.354356, long -39.002567')
+qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize], -14.354356, -39.002567, 20)
+
+print('Query metadata with autotags: alligator>=0.2')
+qh.get_metadata_by_tags(["alligator"], [0.2] )
+print('Query images with autotags: alligator>=0.2')
 qh.get_images_by_tags(["alligator"], [0.2], [resize])
+# display_images([img for img in blobs if img])
+
+print('Query metadata with autotags: pizza>=0.5 AND wine>=0.5')
+qh.get_metadata_by_tags(["pizza", "wine"], [0.5, 0.5] )
+print('Query images with autotags: pizza>=0.5 AND wine>=0.5')
+qh.get_images_by_tags(["pizza", "wine"], [0.5, 0.5], [resize])
 
 # print("Query Images:")
 # display_images(imgs)

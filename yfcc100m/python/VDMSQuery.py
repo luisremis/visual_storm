@@ -165,7 +165,7 @@ class VDMSQuery(object):
 
         return results
 
-    def get_metadata_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0):
+    def get_metadata_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0, return_response=True):
 
         all_cmds = []
 
@@ -211,30 +211,36 @@ class VDMSQuery(object):
 
         start = time.time()
         responses, blobs = self.db.query(all_cmds)
-        print("Time for metadata (ms):", (time.time() - start) * 1000.0)
+        endtime = time.time() - start
+        print("Time for metadata (ms):", endtime * 1000.0)
         # print(self.db.get_last_response_str())
-
-        if (len(tags) > 1):
-            results = self.intersect_by_key(responses, "ID")
-        else:
-            results = responses[1]["FindImage"]["entities"]
+        
+        try:
+            if (len(tags) > 1):
+                results = self.intersect_by_key(responses, "ID")
+            else:               
+                results = responses[1]["FindImage"]["entities"]
+        except:
+                results = []
 
         print("Total results:", len(results))
 
         # print(results)
-
-        return results
+        if return_response:
+            return results
+            
+        out_dict = {'response_len':len(results),'response_time':endtime}
+        return out_dict
 
 
     def get_images_by_tags(self, tags, probs, operations = [],
-                           lat=-1, long=-1, range_dist=0):
+                           lat=-1, long=-1, range_dist=0, return_images=True):
 
         results = self.get_metadata_by_tags(tags, probs, lat, long, range_dist)
 
         all_cmds = []
 
-        for ele in results:
-
+        for ele in results:            
             fI = {
                 "FindImage": {
                     "constraints": {
@@ -245,18 +251,24 @@ class VDMSQuery(object):
                     }
                 }
             }
-
-            if (len(operations) >= 0):
+            
+            if len(operations) >= 0:
                 fI["FindImage"]["operations"] = operations
 
             all_cmds.append(fI)
 
         start = time.time()
         responses, blobs = self.db.query(all_cmds)
-        print("Time for images (ms):", (time.time() - start) * 1000.0)
+        end_time = time.time() - start
+        print("Time for images (ms):", end_time * 1000.0)
         # print(self.db.get_last_response_str())
 
-        print("Total results:", len(blobs))
+        vblobs = [img for img in blobs if img]
+        print("Total valid images:", len(vblobs))
         # print(results)
-
-        return results
+        
+        if return_images:
+            return blobs
+        
+        out_dict = {'images_len':len(vblobs),'images_time':end_time}        
+        return out_dict

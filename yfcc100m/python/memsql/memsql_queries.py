@@ -1,6 +1,7 @@
 import MemSQLQuery
 from collections import namedtuple
 import os
+import time
 
 from memsql.common import database
 
@@ -18,43 +19,76 @@ def display_images(imgs):
         fd.close()
         display(Image(img_file))
         
-
-def run_tag_query(list_of_tags, list_of_probabilities, height=None, width=None):
-    sql_response = memsql_obj.get_metadata_by_tag(list_of_tags, list_of_probabilities)
-
-    imgs = memsql_obj.get_images_from_query(sql_response, height, width)
-    valid_images = [img for img in imgs if img]
-    return valid_images
-
-
-def run_location_query(latitude, longitude, miles, tag, probability, height=None, width=None):
-    sql_response = memsql_obj.get_metadata_by_location_and_tag(latitude, longitude, miles, tag, probability)
-
-    imgs = memsql_obj.get_images_from_query(sql_response, height, width)
-    valid_images = [img for img in imgs if img]
-    return valid_images
+def build_db(params):
+    """
+    Build database
+    """
+    import subprocess
+    db_size = PORT_MAPPING[params.db_name]
+    cmd = "python3 build_yfcc_db_memsql.py -data_file '/mnt/data/metadata/yfcc100m_short/yfcc100m_photo_" + \
+          "dataset_{}' -tag_file '/mnt/data/metadata/yfcc100m_short/yfcc100m_photo_autotags_{}_extended' ".format(db_size, db_size) + \
+          "-db_name '{}' -db_host '{}' -db_port {} -db_user '{}' -db_pswd '{}'".format(params.db_name, params.db_host, 
+              params.db_port, params.db_user, params.db_pswd)
+    subprocess.run(cmd, shell=True)
     
-args = {'db_name':'yfcc_1M',
+def drop_database(params):
+    with database.connect(host=params.db_host, port=params.db_port,
+                                  user=params.db_user, password=params.db_pswd,
+                                  database=params.db_name) as conn:
+                conn.query('DROP DATABASE %s' % params.db_name)
+                
+args = {'db_name':'yfcc_10M',#'yfcc_100k',
         'db_host':'sky3.jf.intel.com',
         'db_port': 3306,
         'db_user': 'root',
-        'db_pswd': ''} 
+        'db_pswd': '',
+        'build_db': False,
+        'cleanup': False} 
         
-height, width = 224, 224        
+resize = {
+    "type": "resize",
+    "width": 224,
+    "height": 224
+}      
+PORT_MAPPING = {'yfcc_100k': '100k', 'yfcc_1M': '1M', 'yfcc_10M': '10M'}
 params = namedtuple("Arguments", args.keys())(*args.values())
 
-memsql_obj = MemSQLQuery.MemSQL(params.db_name, params)
+# Build database
+if args['build_db']:
+    build_db(params)
+    print('\n') 
 
-print('Query autotags: alligator>=0.8')
-imgs = run_tag_query(["alligator"], [0.8], height=height, width=width)
+try:    
+    qh = MemSQLQuery.MemSQL(params)
+except:
+    build_db(params)
+    print('\n')
+    qh = MemSQLQuery.MemSQL(params) 
 
-print('Query autotags: alligator>=0.8 AND lake>=0.8')
-imgs = run_tag_query(["alligator", "lake"], [0.8, 0.8], height=height, width=width)
+print('Query metadata with autotags: alligator>=0.2 AND lake>=0.2')
+qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2])
+print('Query images with autotags: alligator>=0.2 AND lake>=0.2')
+qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize])
 
-print('Query autotags: pizza>=0.5 AND wine>=0.5')
-imgs = run_tag_query(["pizza", "wine"], [0.5, 0.5], height=height, width=width)
+print('Query metadata with autotags: alligator>=0.2 AND lake>=0.2 within 20 of lat -14.354356, long -39.002567')
+qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2], -14.354356, -39.002567, 20)
+print('Query images with autotags: alligator>=0.2 AND lake>=0.2 within 20 of lat -14.354356, long -39.002567')
+qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize], -14.354356, -39.002567, 20)
 
-print('Query location: alligator>=0.8 within 100 miles of 38.9072° N, 77.0369° W (Washington, DC)')
-imgs = run_location_query(38.9072, -77.0369, 100, "alligator", 0.8, height=height, width=width)
+print('Query metadata with autotags: alligator>=0.2')
+qh.get_metadata_by_tags(["alligator"], [0.2] )
+print('Query images with autotags: alligator>=0.2')
+qh.get_images_by_tags(["alligator"], [0.2], [resize])
+# display_images([img for img in blobs if img])
+
+print('Query metadata with autotags: pizza>=0.5 AND wine>=0.5')
+qh.get_metadata_by_tags(["pizza", "wine"], [0.5, 0.5] )
+print('Query images with autotags: pizza>=0.5 AND wine>=0.5')
+qh.get_images_by_tags(["pizza", "wine"], [0.5, 0.5], [resize])
+
+# DROP Database
+if args['cleanup']:
+    drop_database(params)
+    print('Removed database')
 
 # display_images(imgs)
