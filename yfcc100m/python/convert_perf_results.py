@@ -13,8 +13,7 @@ def get_args():
                      
     # Configs from performance run
     obj.add_argument('-cols', type=str, default='100k,1M,10M',
-                     choices=['100k','1M','10M'],
-                     help='Column names: 100k,1M,10M')
+                     help='Comma separated list of column names [default:100k,1M,10M]')
     obj.add_argument('-numtags', type=int, default=10,
                      help='Number of queries to process per thread [default: 10]')
     obj.add_argument('-numthreads', type=int, default=10,
@@ -27,14 +26,15 @@ def get_args():
 
 def main(params):
     data = pd.read_csv(params.results, index_col=0)
-    cols = list(set([c.split(' ')[0] for c in data.columns if c.split(' ')[0] in params.cols]))
+    # cols = list(set([c.split(' ')[0] for c in data.columns if c.split(' ')[0] in params.cols]))
     
     with open(params.out, 'w') as log:
         print('YFCC100M - Queries - nq: {} nt: {} ni: {}'.format(params.numtags, params.numthreads, params.numiters), file=log)
-        print('idx,{}'.format(','.join(cols)), file=log)
+        # print('idx,{}'.format(','.join(cols)), file=log)
+        print('idx,{}'.format(params.cols), file=log)
         for descriptor in data.index:
             line = descriptor
-            for c in cols:
+            for c in params.cols.split(','): #cols:
                 line += ',{},{}'.format(data.at[descriptor, c + ' Tx/sec'],data.at[descriptor, c + ' imgs/sec'])
             print(line, file=log)
 

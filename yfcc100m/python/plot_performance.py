@@ -17,11 +17,20 @@ def isfloat(value):
   except ValueError:
     return False
     
+def instr2bool(in_value):
+    if in_value.lower() in ['true', 't']:
+        return True
+    else:
+        return False
+    
 obj = argparse.ArgumentParser()
 obj.add_argument('-infile', type=lambda s: Path(s), default="perf_results/results.log",
                      help='File containing plot data')
 obj.add_argument('-outfile', type=lambda s: Path(s), default="perf_results/plots/results_plot.pdf",
                      help='PDF path for file containing plots')
+obj.add_argument('-log', type=instr2bool, default=False, const=True, nargs='?',
+                     help='Use log scale for Tx/sec')
+                     
 params = obj.parse_args()
 
 plotfilename = str(params.outfile)
@@ -103,7 +112,8 @@ xticks = list(range(len(xlabels)))
 plt.xticks(xticks)
 ax0.set_xticklabels(xlabels, fontsize=14)
 
-ax0.set_yscale('log')
+if params.log:
+    ax0.set_yscale('log')
 ax0.set_title(title)
 plt.xlabel('Size', fontsize=12)
 plt.ylabel('Tx/sec', fontsize=12)

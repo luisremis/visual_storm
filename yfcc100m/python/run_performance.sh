@@ -20,7 +20,7 @@ rm -rf tmp
 
 # Convert performance results to format for plotting
 cd ..
-python3 convert_perf_results.py -results=perf_results/$outfile -out=perf_results/perf_results.log
+python3 convert_perf_results.py -cols='100k,1M' -results=perf_results/$outfile -out=perf_results/perf_results.log
 
 # Plot results
 python3 plot_performance.py -infile=perf_results/perf_results.log -outfile=perf_results/plots/perf_results_plot.pdf
