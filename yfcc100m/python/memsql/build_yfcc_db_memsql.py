@@ -16,7 +16,6 @@ import sys, os
 import csv
 
 connection_batch_limit = 100
-log_name = sys.argv[0].split('/')[-1].replace('.py','.log')
 
 # Pre-generate the workload query
 # QUERY_TEXT = "INSERT INTO %s VALUES %s" % (
@@ -94,30 +93,29 @@ def setup_test_db(params):
         conn.query("""\
             CREATE TABLE test_taglist(
             idx INT AUTO_INCREMENT PRIMARY KEY,
-            tag varchar(255) NOT NULL DEFAULT '')""")
+            tag TEXT NOT NULL DEFAULT '')""")
         
         print('Creating table test_autotags')
         conn.query('DROP TABLE IF EXISTS test_autotags')
         conn.query("""\
-            CREATE TABLE test_autotags(
-            id BIGINT UNSIGNED NOT NULL, 
-            autotags varchar(255) NOT NULL DEFAULT '',
-            key (id) USING CLUSTERED COLUMNSTORE,
-            FULLTEXT (autotags))""")
-        
-        # print('Creating table test_autotags')  # JSON Test
-        # conn.query('DROP TABLE IF EXISTS test_autotags')
+            CREATE TABLE test_autotags( 
+            metadataid BIGINT,
+            tagid INT AUTO_INCREMENT,
+            tagname TEXT,
+            probability DECIMAL(5,4) NOT NULL DEFAULT 0.000,
+            KEY (metadataid,tagid))""")
         # conn.query("""\
-            # CREATE TABLE test_autotags(
-            # id BIGINT UNSIGNED NOT NULL, 
-            # autotags varchar(255) NOT NULL DEFAULT '',
-            # probability DOUBLE NOT NULL DEFAULT 0,
-            # key (id, autotags))""")
+            # CREATE TABLE test_autotags( 
+            # idx INT AUTO_INCREMENT PRIMARY KEY,
+            # metadataid BIGINT,
+            # tagid INT,
+            # tagname TEXT,
+            # probability DECIMAL(5,4) NOT NULL DEFAULT 0.000)""")
 
         print('Creating table test_metadata')
         conn.query('DROP TABLE IF EXISTS test_metadata')
         
-        t_query = ''
+        # t_query = ''
         conn.query("""\
             CREATE TABLE test_metadata(
             line_number varchar(255) DEFAULT NULL,
@@ -162,9 +160,19 @@ def process_tag_entities(params):
     
 def process_autotags_entities(params):    
     num_lines = len([line.strip() for line in open(str(params.tag_file), 'r')])
-    query = "LOAD DATA INFILE '{}' INTO TABLE test_autotags (id,autotags)".format(str(params.tag_file.absolute()))
+    query = \
+        '''LOAD DATA INFILE '{}' 
+            INTO TABLE test_autotags 
+            FIELDS TERMINATED BY '\t'(metadataid,tagname,probability)'''.format(str(params.tag_file.absolute()))
+    query2 = \
+        '''UPDATE test_autotags INNER JOIN test_taglist ON test_autotags.tagname=test_taglist.tag 
+        SET test_autotags.tagid = test_taglist.idx'''
+    query3 = \
+        '''ALTER TABLE test_autotags DROP column tagname;'''
     with util.get_connection(params) as conn:
         conn.execute(query)
+        conn.execute(query2)
+        conn.execute(query3)
         count = conn.get("SELECT COUNT(*) AS count FROM test_autotags").count
     return count, num_lines - count
     
@@ -175,28 +183,7 @@ def process_metadata_entities(params):
     
     with util.get_connection(params) as conn:
         conn.execute(query)
-        count = conn.get("SELECT COUNT(*) AS count FROM test_metadata").count    
-    
-    # thread_arr = []
-    # per_thread = int(num_lines / params.num_threads)
-    # for i in range(0, params.num_threads):
-        # idx = i * per_thread
-
-        # if idx < num_lines:
-            # start = idx
-            # end = min([idx+per_thread, num_lines])
-            # print('thread: {}\tstart index: {}\tend index:{}'.format(i, start, end))
-            # results = util.add_image_batch_to_db(params.db_name, batch, start, end, all_data, results)
-            # # results = util.add_image_all_batch(params.db_name, batch, start, end, all_data, results)
-            # # thread_add = threading.Thread(target=util.add_image_all_batch, args=(params.db_name, batch, start, end, all_data, results))
-            # # thread_add.start()
-            # # thread_arr.append(thread_add)
-        # else:
-            # break
-
-    # # for th in thread_arr:
-        # # th.join()
-    # # return results.count(-1)
+        count = conn.get("SELECT COUNT(*) AS count FROM test_metadata").count   
     
     return count, num_lines - count
     
@@ -220,8 +207,11 @@ def main(in_args):
     main_logger.info('[!] Total elapsed time: {:0.4f} secs ({:0.4f} mins)'.format(e_time, e_time / 60.))
 
 if __name__ == '__main__':
-    main_logger = make_logger('main_logger', log_name)
     args = get_args()
+    
+    log_name = sys.argv[0].split('/')[-1].replace('.py','{}.log'.format(args.db_name))
+    main_logger = make_logger('main_logger', log_name)
+    
     main(args)
    
    
