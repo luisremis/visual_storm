@@ -9,10 +9,10 @@ import argparse
 def get_args():
     parserobj = argparse.ArgumentParser()
     parserobj.add_argument('-tag_file', type=str, required=True,
-                           help='YFCC file of autotags [Ex: /mnt/data/metadata/original/yfcc100m_photo_autotags]')
+                           help='YFCC file of autotags [Ex: /mnt/yfcc100m/metadata/original/yfcc100m_photo_autotags]')
     params = parserobj.parse_args()
     return params
-    
+
 
 def main(params):
     photoautotags = params.tag_file
@@ -30,9 +30,9 @@ def main(params):
                         f_out.write(newline)
     print('\tTime(s): {:0.4f}'.format(time.time() - start))
     print('New extended file location: ', photoautotagsex)
-    
+
 
 if __name__ == '__main__':
     args = get_args()
     main(args)
-    
+

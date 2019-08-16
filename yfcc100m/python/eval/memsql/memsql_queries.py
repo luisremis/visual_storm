@@ -18,52 +18,52 @@ def display_images(imgs):
         fd.write(im)
         fd.close()
         display(Image(img_file))
-        
+
 def build_db(params):
     """
     Build database
     """
     import subprocess
     db_size = PORT_MAPPING[params.db_name]
-    cmd = "python3 build_yfcc_db_memsql.py -data_file '/mnt/data/metadata/yfcc100m_short/yfcc100m_photo_" + \
-          "dataset_{}' -tag_file '/mnt/data/metadata/yfcc100m_short/yfcc100m_photo_autotags_{}_extended' ".format(db_size, db_size) + \
-          "-db_name '{}' -db_host '{}' -db_port {} -db_user '{}' -db_pswd '{}'".format(params.db_name, params.db_host, 
+    cmd = "python3 build_yfcc_db_memsql.py -data_file '/mnt/yfcc100m/metadata/yfcc100m_short/yfcc100m_photo_" + \
+          "dataset_{}' -tag_file '/mnt/yfcc100m/metadata/yfcc100m_short/yfcc100m_photo_autotags_{}_extended' ".format(db_size, db_size) + \
+          "-db_name '{}' -db_host '{}' -db_port {} -db_user '{}' -db_pswd '{}'".format(params.db_name, params.db_host,
               params.db_port, params.db_user, params.db_pswd)
     subprocess.run(cmd, shell=True)
-    
+
 def drop_database(params):
     with database.connect(host=params.db_host, port=params.db_port,
                                   user=params.db_user, password=params.db_pswd,
                                   database=params.db_name) as conn:
                 conn.query('DROP DATABASE %s' % params.db_name)
-                
+
 args = {'db_name':'yfcc_100k',
         'db_host':'sky3.jf.intel.com',
         'db_port': 3306,
         'db_user': 'root',
         'db_pswd': '',
         'build_db': False,
-        'cleanup': False} 
-        
+        'cleanup': False}
+
 resize = {
     "type": "resize",
     "width": 224,
     "height": 224
-}      
+}
 PORT_MAPPING = {'yfcc_100k': '100k', 'yfcc_1M': '1M', 'yfcc_10M': '10M'}
 params = namedtuple("Arguments", args.keys())(*args.values())
 
 # Build database
 if args['build_db']:
     build_db(params)
-    print('\n') 
+    print('\n')
 
-try:    
+try:
     qh = MemSQLQuery.MemSQL(params)
 except:
     build_db(params)
     print('\n')
-    qh = MemSQLQuery.MemSQL(params) 
+    qh = MemSQLQuery.MemSQL(params)
 
 print('Query metadata with autotags: alligator>=0.2 AND lake>=0.2')
 qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2])

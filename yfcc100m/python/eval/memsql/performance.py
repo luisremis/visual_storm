@@ -120,8 +120,8 @@ def build_db(params):
     """
     import subprocess
     db_size = PORT_MAPPING[params.db_name]
-    cmd = "python3 build_yfcc_db_memsql.py -data_file '/mnt/data/metadata/yfcc100m_short/yfcc100m_photo_" + \
-          "dataset_{}' -tag_file '/mnt/data/metadata/yfcc100m_short/yfcc100m_photo_autotags_{}_extended' ".format(db_size, db_size) + \
+    cmd = "python3 build_yfcc_db_memsql.py -data_file '/mnt/yfcc100m/metadata/yfcc100m_short/yfcc100m_photo_" + \
+          "dataset_{}' -tag_file '/mnt/yfcc100m/metadata/yfcc100m_short/yfcc100m_photo_autotags_{}_extended' ".format(db_size, db_size) + \
           "-db_name '{}' -db_host '{}' -db_port {} -db_user '{}' -db_pswd '{}'".format(params.db_name, params.db_host,
               params.db_port, params.db_user, params.db_pswd)
     subprocess.run(cmd, shell=True)
