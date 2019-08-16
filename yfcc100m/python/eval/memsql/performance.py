@@ -22,8 +22,8 @@ def get_args():
     obj = argparse.ArgumentParser()
 
     # Database Info
-    obj.add_argument('-db_name', type=str, default='yfcc_100k',
-                     choices=PORT_MAPPING.keys(),
+    obj.add_argument('-db_name', type=str, default='100k',
+                     choices=["100k", "1M", "10M"],
                      help='Database names: yfcc_100k, yfcc_1M, yfcc_10M')
     obj.add_argument('-db_host', type=str, default='sky3.jf.intel.com',
                      help='Name of memsql host')
@@ -49,10 +49,15 @@ def get_args():
     obj.add_argument('-append_out', type=str, default=None,
                      help='CSV Filename to update measurements')
     params = obj.parse_args()
+    params.db_name = "yfcc_" + params.db_name
+    print(params.db_name)
 
     if params.out == params.append_out:
-        params.out = 'memsql_perf_nq{}_nthread{}_niter{}_db{}.csv'.format(params.numtags, params.numthreads,
-                                                                          params.numiters, params.db_name)
+        params.out = 'memsql_perf_nq{}_nthread{}_niter{}_db{}.csv'.format(
+                        params.numtags,
+                        params.numthreads,
+                        params.numiters,
+                        params.db_name)
 
     return params
 

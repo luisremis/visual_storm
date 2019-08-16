@@ -13,7 +13,7 @@ PORT_MAPPING = {'100k': 55500, '1M': 55501, '10M': 55510, 'None': 55555}
 RESIZE = {"type": "resize", "width": 224, "height": 224}
 QUERY_PARAMS = [{'key': 'vdms_1tag_resize', 'tags': ["alligator"], 'probs': [0.2], 'operations': [RESIZE]},
                 {'key': 'vdms_2tag_resize', 'tags': ["alligator", "lake"], 'probs': [0.2, 0.2], 'operations': [RESIZE]},
-                {'key': 'vdms_2tag_loc20_resize', 'tags': ["alligator", "lake"], 'probs': [0.2, 0.2], 
+                {'key': 'vdms_2tag_loc20_resize', 'tags': ["alligator", "lake"], 'probs': [0.2, 0.2],
                  'lat': -14.354356, 'long': -39.002567, 'range_dist': 20, 'operations': [RESIZE]}]
 
 
@@ -44,8 +44,11 @@ def get_args():
 
     params.db_port = PORT_MAPPING[params.db_name]
     if params.out == params.append_out:
-        params.out = 'vdms_perf_nq{}_nthread{}_niter{}_db{}.csv'.format(params.numtags, params.numthreads,
-                                                                        params.numiters, params.db_name)
+        params.out = 'vdms_perf_nq{}_nthread{}_niter{}_db{}.csv'.format(
+                            params.numtags,
+                            params.numthreads,
+                            params.numiters,
+                            params.db_name)
     return params
 
 
@@ -74,7 +77,7 @@ def get_metadata(params, query_arguments):
     list_of_objs = []
     for i in range(params.numthreads):
         list_of_objs.append(VDMSQuery.VDMSQuery(params.db_host, params.db_port))
-        
+
     for thread in range(params.numthreads):  # Number of threads processing at once
         print('== METADATA THREAD: {} =='.format(thread))
         idx = (thread * params.numtags)
@@ -110,7 +113,7 @@ def main(params):
         outfile = params.out
         performance = pd.DataFrame(columns=[params.db_name + ' Tx/sec', params.db_name + ' imgs/sec'])
 
-    for query_args in QUERY_PARAMS:    
+    for query_args in QUERY_PARAMS:
         print('Query:{}'.format(query_args))
         print('DATABASE: {}'.format(params.db_name))
         all_tx_per_sec = 0
@@ -133,7 +136,7 @@ def main(params):
             all_times = [res['images_time'] for res in results if res]
             img_per_sec = num_images / np.max(all_times)
             all_img_per_sec += img_per_sec
-            
+
             print('# responses: {}'.format(len(all_times)))
             print('# images: {}'.format(num_images))
             print('ITERATION TIME: {:0.4f}s ({:0.4f} mins)'.format(end_time_metadata, end_time_metadata / 60.))

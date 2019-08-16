@@ -10,7 +10,7 @@ def get_args():
                      help='Results CSV file')
     obj.add_argument('-out', type=str, default='perf_results/perf_results.log',
                      help='Filename to save results table [default: perf_results/perf_results.log]')
-                     
+
     # Configs from performance run
     obj.add_argument('-cols', type=str, default='100k,1M,10M',
                      help='Comma separated list of column names [default:100k,1M,10M]')
@@ -27,9 +27,9 @@ def get_args():
 def main(params):
     data = pd.read_csv(params.results, index_col=0)
     # cols = list(set([c.split(' ')[0] for c in data.columns if c.split(' ')[0] in params.cols]))
-    
+
     with open(params.out, 'w') as log:
-        print('YFCC100M - Queries - nq: {} nt: {} ni: {}'.format(params.numtags, params.numthreads, params.numiters), file=log)
+        print('YFCC100M - Queries - ntags: {} nthr: {} niter: {}'.format(params.numtags, params.numthreads, params.numiters), file=log)
         # print('idx,{}'.format(','.join(cols)), file=log)
         print('idx,{}'.format(params.cols), file=log)
         for descriptor in data.index:

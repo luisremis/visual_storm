@@ -1,28 +1,48 @@
 #!/bin/bash
 ntags=2
 nthreads=100
-niter=100
-outfile=perf_ntags${ntags}_nthread${nthreads}_niter${niter}.csv
+niter=10
 
-mkdir -p perf_results
+result_folder=perf_results
+outfile=${result_folder}/perf_ntags${ntags}_nthread${nthreads}_niter${niter}.csv
+result_log=${result_folder}/perf_results.log
+result_pdf=${result_folder}/plots/perf_results_plot.pdf
 
-# Run VDMS Queries
-echo "Running vdms_100k..."
-python3 vdms/performance.py -db_name=100k -numtags=$ntags -numthreads=$nthreads -numiters=$niter -out=perf_results/$outfile > perf_results/vdms_100k.log
-echo "Running vdms_1M..."
-python3 vdms/performance.py -db_name=1M -numtags=$ntags -numthreads=$nthreads -numiters=$niter -append_out=perf_results/$outfile > perf_results/vdms_1M.log
+rm -rf $result_folder
+mkdir -p $result_folder
+append=-out # The first need to be create and not append
 
-# Run MemSQL Queries
-echo "Running memsql_100k..."
-python3 memsql/performance.py -db_name=yfcc_100k -numtags=$ntags -numthreads=$nthreads -numiters=$niter -append_out=perf_results/$outfile > perf_results/memsql_100k.log
-echo "Running memsql_1M..."
-python3 memsql/performance.py -db_name=yfcc_1M -numtags=$ntags -numthreads=$nthreads -numiters=$niter -append_out=perf_results/$outfile > perf_results/memsql_1M.log
+for db in vdms memsql
+do
+    for size in 100k 1M
+    do
+        # Run VDMS Queries
+        echo "Running $db ${size}..."
+        python3 $db/performance.py \
+                -db_name=$size \
+                -numtags=$ntags \
+                -numthreads=$nthreads \
+                -numiters=$niter \
+                ${append}=$outfile > $result_folder/${db}_${size}.log
+
+        append=-append_out
+    done
+done
 
 # Force remove temporary storage for images
 rm -rf tmp
 
 # Convert performance results to format for plotting
-python3 convert_perf_results.py -cols='100k,1M' -results=perf_results/$outfile -out=perf_results/perf_results.log
+python3 convert_perf_results.py \
+        -cols="100k,1M" \
+        -numtags=$ntags \
+        -numthreads=$nthreads \
+        -numiters=$niter \
+        -results=$outfile \
+        -out=$result_log
 
 # Plot results
-python3 plot_performance.py -infile=perf_results/perf_results.log -outfile=perf_results/plots/perf_results_plot.pdf
+python3 plot_performance.py \
+        -log=True \
+        -infile=$result_log \
+        -outfile=${result_pdf}
