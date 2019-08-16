@@ -213,12 +213,12 @@ class VDMSQuery(object):
         responses, blobs = self.db.query(all_cmds)
         # print("Time for metadata (ms):", endtime * 1000.0)
         # print(self.db.get_last_response_str())
-        
+
         # Find intersections by ID
         try:
             if (len(tags) > 1):
                 results = self.intersect_by_key(responses, "ID")
-            else:               
+            else:
                 results = responses[1]["FindImage"]["entities"]
         except:
                 results = []
@@ -229,7 +229,7 @@ class VDMSQuery(object):
         # print(results)
         if return_response:
             return results
-            
+
         out_dict = {'response_len':len(results),'response_time':endtime}
         return out_dict
 
@@ -238,11 +238,11 @@ class VDMSQuery(object):
                            lat=-1, long=-1, range_dist=0, return_images=True):
         start = time.time()
         results = self.get_metadata_by_tags(tags, probs, lat, long, range_dist)
-        
+
 
         all_cmds = []
 
-        for ele in results:            
+        for ele in results:
             fI = {
                 "FindImage": {
                     "constraints": {
@@ -253,7 +253,7 @@ class VDMSQuery(object):
                     }
                 }
             }
-            
+
             if len(operations) >= 0:
                 fI["FindImage"]["operations"] = operations
 
@@ -267,10 +267,10 @@ class VDMSQuery(object):
 
         vblobs = [img for img in blobs if img]
         print("Total valid images:", len(vblobs))
-        
+
         if return_images:
             return blobs
-        
-        out_dict = {'images_len':len(vblobs),'images_time':end_time}  
-        
+
+        out_dict = {'images_len':len(vblobs),'images_time':end_time}
+
         return out_dict

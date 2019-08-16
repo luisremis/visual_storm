@@ -16,13 +16,13 @@ def isfloat(value):
     return True
   except ValueError:
     return False
-    
+
 def instr2bool(in_value):
     if in_value.lower() in ['true', 't']:
         return True
     else:
         return False
-    
+
 obj = argparse.ArgumentParser()
 obj.add_argument('-infile', type=lambda s: Path(s), default="perf_results/results.log",
                      help='File containing plot data')
@@ -30,7 +30,7 @@ obj.add_argument('-outfile', type=lambda s: Path(s), default="perf_results/plots
                      help='PDF path for file containing plots')
 obj.add_argument('-log', type=instr2bool, default=False, const=True, nargs='?',
                      help='Use log scale for Tx/sec')
-                     
+
 params = obj.parse_args()
 
 plotfilename = str(params.outfile)
@@ -39,10 +39,10 @@ newpath = str(params.outfile.parents[0])
 if not os.path.exists(newpath):
     os.makedirs(newpath)
 
-color = ['red', 'blue', 'orange', 'g', 'brown', 'black']
-linestyles = ['-', '--', '-.', ':', '-', '--',]
-
-plot = "all" 
+color = ['red', 'blue', 'orange', 'red', 'blue', 'orange']
+linestyles = ['-', '-', '-', '--', '--', '--',]
+markers = ['o', 'o', 'o', '*', '*', '*']
+plot = "all"
 line_counter = 0
 
 with open(str(params.infile)) as f:
@@ -106,7 +106,7 @@ ax0 = plt.subplot(2,1,1)
 
 for i in range(0,len(yy[0,:])):
     ax0.plot(yy[:,i], label = indexes_name[i],
-                color=color[i], linestyle=linestyles[i], marker='o')
+                color=color[i], linestyle=linestyles[i], marker=markers[i])
 
 xticks = list(range(len(xlabels)))
 plt.xticks(xticks)
@@ -128,7 +128,7 @@ ax0 = plt.subplot(2,1,2)
 
 for i in range(0,len(yy[0,:])):
     ax0.plot(accuracy[:,i], label = indexes_name[i],
-             color=color[i], linestyle=linestyles[i], marker='o')
+             color=color[i], linestyle=linestyles[i], marker=markers[i])
 
 xticks = list(range(len(xlabels)))
 plt.xticks(xticks)

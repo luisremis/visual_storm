@@ -44,15 +44,16 @@ def get_args():
     parserobj.add_argument('-batch_size', type=int, default=100,
                            help='Number of entries per thread for autotags and images [default: 100; connections: max {}]'.format(connection_batch_limit))
     parserobj.add_argument('-data_file', type=lambda s: Path(s),
-                           default='/mnt/data/metadata/original/yfcc100m_photo_dataset',
+                           default='/mnt/yfcc100m/metadata/processed/yfcc100m_photo_dataset',
                            help='YFCC metadata [default: ' +
-                           '/mnt/data/metadata/original/yfcc100m_photo_dataset')
-    parserobj.add_argument('-tag_list', type=lambda s: Path(s), default='../../yfcc_parse_labels/autotag_list.txt',
+                           '/mnt/yfcc100m/metadata/processed/yfcc100m_photo_dataset')
+    parserobj.add_argument('-tag_list', type=lambda s: Path(s),
+                            default='../yfcc_parse_labels/autotag_list.txt',
                            help='List of expected tags [default: ../../yfcc_parse_labels/autotag_list.txt]')
     parserobj.add_argument('-tag_file', type=lambda s: Path(s),
-                           default='/mnt/data/metadata/original/yfcc100m_photo_autotags',
+                           default='/mnt/yfcc100m/metadata/processed/yfcc100m_photo_autotags',
                            help='YFCC file of autotags [default: ' +
-                                '/mnt/data/metadata/original/yfcc100m_photo_autotags]')
+                                '/mnt/yfcc100m/metadata/processed/yfcc100m_photo_autotags]')
 
     # Database Info
     parserobj.add_argument('-db_name', type=str, default='test',

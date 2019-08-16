@@ -24,7 +24,7 @@ def get_args():
     obj.add_argument('-db_name', type=str, default='100k',
                      choices=PORT_MAPPING.keys(),
                      help='Database names: 100k, 1M, 10M')
-    obj.add_argument('-db_host', type=str, default="sky3.jf.intel.com",
+    obj.add_argument('-db_host', type=str, default="sky4.jf.intel.com",
                      help='Name of vdms host')
 
     # Run Config
