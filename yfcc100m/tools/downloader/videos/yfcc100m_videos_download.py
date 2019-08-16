@@ -13,36 +13,38 @@ import logging
 
 FROOT = "input_files"
 LICENSETYPE = "Attribution License"
+
+'''
+License Options:
+ * Attribution License
+ * Attribution-ShareAlike License
+ * Attribution-NoDerivs License
+ * Attribution-NonCommercial License
+ * Attribution-NonCommercial-ShareAlike License
+ * Attribution-NonCommercial-NoDerivs License
+'''
+
 BASEURL = 'https://multimedia-commons.s3-us-west-2.amazonaws.com/data/videos/mp4/'
-SEARCH1 = "people"
+SEARCH1 = "party"
 
 def main():
     print("Starting dataset processing")
-    npgpdf, mdpdf = getMetaData()
+    mdpdf = getMetaData()
 
     ''' Get a subset that has appropriate license type '''
     goodlpdf = mdpdf[mdpdf['License name'] == LICENSETYPE]
 
     ''' Get a subset containing user tag SEARCH1 '''
-    searchpdf = goodlpdf[goodlpdf['Machine tags'].str.contains(SEARCH1)==True]
+    # searchpdf = goodlpdf[goodlpdf['User tags'].str.contains(SEARCH1)==True]
+    searchpdf = goodlpdf
 
     ''' Fetch those videos '''
     getVideos(searchpdf)
-
-    ''' For the specific videos NPG requested '''
-    # vidpdf = videoSlice(mdpdf,npgpdf)
-    # getVideos(vidpdf)
 
     print("Finished downloading")
     sys.exit(0)
 
 def getMetaData():
-    ''' PDF of videos to download '''
-    ''' NOTE: PDF = Pandas Dataframe '''
-
-    npgfile = getPath("npg-videos.tsv")
-    npgheader = ["Purpose","Description","URL","Finder","ID"]
-    npgpdf = pd.read_csv(npgfile,"\t", header = 1, names = npgheader)
 
     ''' PDF for yf100m metadata '''
     mdfile = getPath("yfcc100m_videos_metadata.tsv")
@@ -50,14 +52,7 @@ def getMetaData():
     mdheader = [x.strip() for x in open(mdheaderfile)]
     mdpdf = pd.read_csv(mdfile, "\t", header = None)
     mdpdf.columns = mdheader
-    return npgpdf, mdpdf
-
-def videoSlice(pdf,vididpdf):
-    ''' Shrink the metadata to just select data '''
-    slicelst = ["Identifier", "Title", "Description_x","Description_y", "Download URL","License name","User tags","Machine tags","Extension","Hash"]
-    vidpdf = pd.merge(pdf, vididpdf,left_on='Identifier',right_on='ID',how='inner')
-    vidpdf = vidpdf[slicelst]
-    return vidpdf
+    return mdpdf
 
 def getPath(fname):
     return os.path.join(FROOT,fname)
@@ -83,15 +78,15 @@ def getVideo(rowd,baseurl):
         return
 
     ''' All good -- get the video '''
-#    print("Downloading %s" % idf)
-    print(rowd)
+    # print("Downloading %s" % idf)
+    # print(rowd)
     hashd = rowd['Hash']
     sub1 = hashd[0:3]
     sub2 = hashd[3:6]
     hashf = hashd + ".mp4"
     fullurl = os.path.join(baseurl,*[sub1,sub2,hashf])
     print(fullurl)
-    return
+    # return
     try:
         urllib.request.urlretrieve(fullurl,idf)
     except Exception as e:

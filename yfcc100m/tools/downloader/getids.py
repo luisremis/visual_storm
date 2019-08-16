@@ -20,8 +20,8 @@ f_out=open(filename, 'w')
 for line in f:
     tokens = line.strip().split('\t')
     if tokens[24] == '0': # photo indicator
-        url = tokens[1]  # Image ID
-        f_out.write(url + "\n")
+        id = tokens[1]  # Image ID
+        f_out.write(id + "\n")
 
         if counter % 10000000 == 0:
 		break
