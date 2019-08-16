@@ -117,7 +117,7 @@ def build_db(params):
     db_size = PORT_MAPPING[params.db_name]
     cmd = "python3 build_yfcc_db_memsql.py -data_file '/mnt/data/metadata/yfcc100m_short/yfcc100m_photo_" + \
           "dataset_{}' -tag_file '/mnt/data/metadata/yfcc100m_short/yfcc100m_photo_autotags_{}_extended' ".format(db_size, db_size) + \
-          "-db_name '{}' -db_host '{}' -db_port {} -db_user '{}' -db_pswd '{}'".format(params.db_name, params.db_host, 
+          "-db_name '{}' -db_host '{}' -db_port {} -db_user '{}' -db_pswd '{}'".format(params.db_name, params.db_host,
               params.db_port, params.db_user, params.db_pswd)
     subprocess.run(cmd, shell=True)
 
@@ -127,14 +127,14 @@ def drop_database(params):
                                   user=params.db_user, password=params.db_pswd,
                                   database=params.db_name) as conn:
                 conn.query('DROP DATABASE %s' % params.db_name)
-                
+
 def main(params):
     # Prepare table of measurements
     if params.append_out:
         performance = pd.read_csv(params.append_out, index_col=0)
         outfile = params.append_out
     else:
-        outfile = params.out        
+        outfile = params.out
         performance = pd.DataFrame(columns=[PORT_MAPPING[params.db_name] + ' Tx/sec', PORT_MAPPING[params.db_name] + ' imgs/sec'])
 
     for query_args in QUERY_PARAMS:
@@ -146,8 +146,8 @@ def main(params):
 
             # Rebuild database
             print('\n')
-            build_db(params)
-            print('\n')
+            # build_db(params)
+            print('Skipping the database build...')
             print('====== ITERATION: {} ======'.format(iteration))
 
             # Get Metadata
@@ -156,8 +156,9 @@ def main(params):
             end_time_metadata = time.time() - start_t
 
             # Drop database
-            drop_database(params)
-            
+            print("Skipping Database Drop...")
+            # drop_database(params)
+
             # Metadata transactions per sec
             all_times = [res['response_time'] for res in results if res]
             tx_per_sec = (params.numtags * params.numthreads) / np.max(all_times)  # sum
