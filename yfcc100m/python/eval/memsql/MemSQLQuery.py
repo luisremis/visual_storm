@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 import time
 import os
 import cv2
+import random
 import numpy as np
 import requests
 
@@ -69,6 +70,8 @@ class MemSQL(object):
             # imgPath = FOLDER_CHOICES[quotient] + urlparse(res['download_url']).path
             imgPath = "http://"+IMG_HOST+FOLDER_CHOICES[quotient] + urlparse(res['download_url']).path
 
+            # print(imgPath)
+
             try:
                 # img = np.frombuffer(open(imgPath, 'rb').read(), dtype='uint8')
                 imgdata = requests.get(imgPath)
@@ -82,17 +85,21 @@ class MemSQL(object):
                 else:
                     resizedimg = dec_img
 
+
                 # enc_img = cv2.imencode(".jpg", img)-> cv2.error: OpenCV(4.1.0) /io/opencv/modules/imgcodecs/src/grfmt_base.cpp:145: error: (-10:Unknown error code -10) Raw image encoder error: Maximum supported image dimension is 65500 pixels in function 'throwOnEror'
                 create_dir('tmp')
-                tmp_file = 'tmp/' + '_'.join(imgPath.split('/')[-2:])
+                create_dir('tmp/memsql')
+                name = random.randint(0,90000000)
+                tmp_file = 'tmp/memsql/img_' + str(name) + ".jpg"
                 cv2.imwrite(tmp_file, resizedimg)
 
                 enc_img = open(tmp_file, 'rb').read()
 
-                if os.path.exists(tmp_file):
-                    os.remove(tmp_file)
+                # if os.path.exists(tmp_file):
+                #     os.remove(tmp_file)
 
             except:
+                print("Error processing image:", imgPath)
                 enc_img = None
 
             img_array.append(enc_img)

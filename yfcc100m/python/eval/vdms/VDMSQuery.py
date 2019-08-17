@@ -3,8 +3,13 @@ import struct
 import numpy as np
 import itertools
 import time
+import random
 
 import vdms
+
+def create_dir(folder):
+    if not os.path.isdir(folder):
+        os.mkdir(folder)
 
 # Returns index of x in arr if present, else -1
 def binarySearch (arr, l, r, x):
@@ -264,6 +269,14 @@ class VDMSQuery(object):
         end_time = time.time() - start
         # print("Time for images (ms):", end_time * 1000.0)
         # print(self.db.get_last_response_str())
+
+        create_dir('tmp')
+        create_dir('tmp/vdms')
+        for im in blobs:
+                name = random.randint(0,90000000)
+                tmp_file = 'tmp/vdms/img_' + str(name) + ".jpg"
+                f = open(tmp_file, 'wb')
+                f.write(im)
 
         vblobs = [img for img in blobs if img]
         print("Total valid images:", len(vblobs))

@@ -25,10 +25,16 @@ do
                 -numtags=$ntags \
                 -numthreads=$nthreads \
                 -numiters=$niter \
-                ${append}=$outfile > $result_folder/${db}_${size}.log
+                ${append}=$outfile \
+                > $result_folder/${db}_${size}.log
+                2> $result_folder/${db}_${size}_error.log
 
         append=-append_out
     done
+
+    echo "Number of images returned by ${db}: "
+    ls -ltrh tmp/${db}/ | wc -l
+
 done
 
 # Convert performance results to format for plotting
