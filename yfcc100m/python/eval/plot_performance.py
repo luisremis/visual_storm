@@ -132,6 +132,8 @@ for i in range(0,len(yy[0,:])):
 
 xticks = list(range(len(xlabels)))
 plt.xticks(xticks)
+if params.log:
+    ax0.set_yscale('log')
 ax0.set_xticklabels(xlabels, fontsize=14)
 
 plt.xlabel('Size', fontsize=12)

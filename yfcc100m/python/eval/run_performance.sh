@@ -1,5 +1,5 @@
 #!/bin/bash
-nthreads=1
+nthreads=10
 niter=1
 ntags=1
 
@@ -31,10 +31,6 @@ do
 
         append=-append_out
     done
-
-    echo "Number of images returned by ${db}: "
-    ls -ltrh tmp/${db}/ | wc -l
-
 done
 
 # Convert performance results to format for plotting

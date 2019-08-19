@@ -244,7 +244,6 @@ class VDMSQuery(object):
         start = time.time()
         results = self.get_metadata_by_tags(tags, probs, lat, long, range_dist)
 
-
         all_cmds = []
 
         for ele in results:
@@ -270,13 +269,13 @@ class VDMSQuery(object):
         # print("Time for images (ms):", end_time * 1000.0)
         # print(self.db.get_last_response_str())
 
-        create_dir('tmp')
-        create_dir('tmp/vdms')
-        for im in blobs:
-                name = random.randint(0,90000000)
-                tmp_file = 'tmp/vdms/img_' + str(name) + ".jpg"
-                f = open(tmp_file, 'wb')
-                f.write(im)
+        # create_dir('tmp')
+        # create_dir('tmp/vdms')
+        # for im in blobs:
+        #         name = random.randint(0,90000000)
+        #         tmp_file = 'tmp/vdms/img_' + str(name) + ".jpg"
+        #         f = open(tmp_file, 'wb')
+        #         f.write(im)
 
         vblobs = [img for img in blobs if img]
         print("Total valid images:", len(vblobs))
