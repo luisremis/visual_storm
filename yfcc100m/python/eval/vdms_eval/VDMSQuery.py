@@ -227,9 +227,12 @@ class VDMSQuery(object):
                 results = responses[1]["FindImage"]["entities"]
         except:
                 results = []
+                print("Error processing results in get_metadata_by_tags")
+
         endtime = time.time() - start
 
-        print("Total results:", len(results))
+        # print("Total results:", len(results))
+        # print("Time for metadata (ms):", endtime * 1000.0)
 
         # print(results)
         if return_response:
@@ -241,31 +244,75 @@ class VDMSQuery(object):
 
     def get_images_by_tags(self, tags, probs, operations = [],
                            lat=-1, long=-1, range_dist=0, return_images=True):
-        start = time.time()
-        results = self.get_metadata_by_tags(tags, probs, lat, long, range_dist)
 
-        all_cmds = []
+        if len(tags) > 1:
+            start = time.time()
+            results = self.get_metadata_by_tags(tags, probs, lat, long, range_dist)
 
-        for ele in results:
-            fI = {
-                "FindImage": {
+            all_cmds = []
+
+            for ele in results:
+                fI = {
+                    "FindImage": {
+                        "constraints": {
+                            "ID":  ["==", ele['ID']]
+                        }
+                    }
+                }
+
+                if len(operations) >= 0:
+                    fI["FindImage"]["operations"] = operations
+
+                all_cmds.append(fI)
+
+            # start = time.time()
+            responses, blobs = self.db.query(all_cmds)
+            end_time = time.time() - start
+
+        else:
+
+            start = time.time()
+            all_cmds = []
+
+            fE = {
+                "FindEntity": {
+                    "_ref": 10,
+                    "class": "autotags",
                     "constraints": {
-                        "ID":  ["==", ele['ID']]
-                    },
-                    "results": {
-                        "list": ["ID", "Latitude", "Longitude", "License name"]
+                        "name": ["==", tags[0]]
                     }
                 }
             }
 
+            fI = {
+                "FindImage": {
+                    "link": {
+                        "ref": 10,
+                        "constraints": {
+                            "tag_prob": [">=", probs[0]]
+                        }
+                    }
+                }
+            }
+
+            if (lat != -1):
+                fI["FindImage"]["constraints"] = {
+                    "Latitude": [">=", lat-range_dist*1.0,
+                                 "<=", lat + range_dist*1.0  ],
+                    "Longitude": [">=", long-range_dist*1.0,
+                                 "<=", long + range_dist*1.0  ]
+                }
+
             if len(operations) >= 0:
                 fI["FindImage"]["operations"] = operations
 
+            all_cmds.append(fE)
             all_cmds.append(fI)
 
-        # start = time.time()
-        responses, blobs = self.db.query(all_cmds)
-        end_time = time.time() - start
+            # start = time.time()
+            responses, blobs = self.db.query(all_cmds)
+            end_time = time.time() - start
+
         # print("Time for images (ms):", end_time * 1000.0)
         # print(self.db.get_last_response_str())
 
@@ -277,12 +324,11 @@ class VDMSQuery(object):
         #         f = open(tmp_file, 'wb')
         #         f.write(im)
 
-        vblobs = [img for img in blobs if img]
-        print("Total valid images:", len(vblobs))
+        # print("Total valid images:", len(vblobs))
 
         if return_images:
             return blobs
 
-        out_dict = {'images_len':len(vblobs),'images_time':end_time}
+        out_dict = {'images_len':len(blobs),'images_time':end_time}
 
         return out_dict

@@ -26,7 +26,7 @@ class MemSQL(object):
     def get_connection(self, params):
         return database.connect(host=params.db_host, port=params.db_port,
                             user=params.db_user, password=params.db_pswd,
-                            database=params.db_name)
+                            database="yfcc_" + params.db_name)
 
     def get_metadata_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0, return_response=True):
         # Conversion to miles help: https://stackoverflow.com/a/24372831
@@ -46,7 +46,7 @@ class MemSQL(object):
         endtime = time.time() - start_t
 
         # print("Time for metadata (ms):", endtime * 1000.0)
-        print("Total results:", len(response))
+        # print("Total results:", len(response))
 
         if return_response:
             return response
@@ -85,18 +85,18 @@ class MemSQL(object):
                 else:
                     resizedimg = dec_img
 
-
+                # enc_img = resizedimg
                 # enc_img = cv2.imencode(".jpg", img)-> cv2.error: OpenCV(4.1.0) /io/opencv/modules/imgcodecs/src/grfmt_base.cpp:145: error: (-10:Unknown error code -10) Raw image encoder error: Maximum supported image dimension is 65500 pixels in function 'throwOnEror'
-                create_dir('tmp')
-                create_dir('tmp/memsql')
+
+                create_dir('/tmp/memsql')
                 name = random.randint(0,90000000)
-                tmp_file = 'tmp/memsql/img_' + str(name) + ".jpg"
+                tmp_file = '/tmp/memsql/img_' + str(name) + ".jpg"
                 cv2.imwrite(tmp_file, resizedimg)
 
                 enc_img = open(tmp_file, 'rb').read()
 
-                # if os.path.exists(tmp_file):
-                #     os.remove(tmp_file)
+                if os.path.exists(tmp_file):
+                    os.remove(tmp_file)
 
             except:
                 print("Error processing image:", imgPath)
@@ -108,7 +108,7 @@ class MemSQL(object):
         # print("Time for images (ms):", end_time * 1000.0)
 
         blobs = [img for img in img_array if img]
-        print("Total valid images:", len(blobs))
+        # print("Total valid images:", len(blobs))
 
         if return_images:
             return blobs

@@ -1,6 +1,19 @@
 #!/bin/bash
 
-for size in 100k 1M
+# # Drop all the dbs
+# for size in 100k 500k 1M 5M
+# do
+# python3 drop_all.py \
+#     -db_name "yfcc_${size}" \
+#     -db_host "sky3.jf.intel.com" \
+#     -db_port 3306 \
+#     -db_user "root" \
+#     -db_pswd ""
+# done
+
+# Build dbs
+
+for size in 100k 500k 1M 5M
 do
 python3 build_yfcc_db_memsql.py \
     -data_file \

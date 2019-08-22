@@ -16,7 +16,8 @@ def get_args():
 
 def main(params):
     photoautotags = params.tag_file
-    photoautotagsex = params.tag_file + "_extended"
+    # photoautotagsex = params.tag_file + "_extended"
+    photoautotagsex = "./_extended"
     print('Separating autotags string to individual rows')
     start = time.time()
     with open(photoautotags, 'r') as f, open(photoautotagsex, 'w') as f_out:
