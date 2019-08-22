@@ -8,11 +8,11 @@ def get_args():
     # File Information
     obj.add_argument('-results', type=str, default='test_results.csv',
                      help='Results CSV file')
-    obj.add_argument('-out', type=str, default='perf_results/perf_results.log',
+    obj.add_argument('-out', type=str, default='perf_results-3-32-3//perf_results_new.log',
                      help='Filename to save results table [default: perf_results/perf_results.log]')
 
     # Configs from performance run
-    obj.add_argument('-cols', type=str, default='100k,1M,10M',
+    obj.add_argument('-cols', type=str, default='100k,500k,1M,5M',
                      help='Comma separated list of column names [default:100k,1M,10M]')
     obj.add_argument('-numtags', type=int, default=10,
                      help='Number of queries to process per thread [default: 10]')
@@ -35,7 +35,12 @@ def main(params):
         for descriptor in data.index:
             line = descriptor
             for c in params.cols.split(','): #cols:
-                line += ',{},{}'.format(data.at[descriptor, c + ' Tx/sec'],data.at[descriptor, c + ' imgs/sec'])
+                line += ',{},{},{},{}'.format(
+                    data.at[descriptor, c + ' Tx/sec'],
+                    data.at[descriptor, c + ' Tx/sec_std'],
+                    data.at[descriptor, c + ' imgs/sec'],
+                    data.at[descriptor, c + ' imgs/sec_std']
+                    )
             print(line, file=log)
 
 

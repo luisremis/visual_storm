@@ -24,11 +24,11 @@ def instr2bool(in_value):
         return False
 
 obj = argparse.ArgumentParser()
-obj.add_argument('-infile', type=lambda s: Path(s), default="perf_results/results.log",
+obj.add_argument('-infile', type=lambda s: Path(s), default="perf_results/perf_results.log",
                      help='File containing plot data')
-obj.add_argument('-outfile', type=lambda s: Path(s), default="perf_results/plots/results_plot.pdf",
+obj.add_argument('-outfile', type=lambda s: Path(s), default="perf_results/plots/results_plot_error.pdf",
                      help='PDF path for file containing plots')
-obj.add_argument('-log', type=instr2bool, default=False, const=True, nargs='?',
+obj.add_argument('-log', type=instr2bool, default=True, const=True, nargs='?',
                      help='Use log scale for Tx/sec')
 
 params = obj.parse_args()
@@ -63,11 +63,9 @@ with open(str(params.infile)) as f:
 
 print(title)
 
-indexes_name = []
+query_name = []
 for i in range(len(data)-1):
-    indexes_name.append(data[i+1][0])
-
-# print(indexes_name)
+    query_name.append(data[i+1][0])
 
 xlabels = []
 for i in range(len(data[0])-1):
@@ -86,60 +84,99 @@ for i in range(len(val)):
 
 val = np.array(val)
 
-columns_Tx = [i for i in range(0,len(data[0][1:]) * 2,2)]  # [0,2,4,6] Tx/sec
-yy = val[:, columns_Tx]
-yy = yy.transpose()
+print(data[0][1:])
 
-columns_imgs = [i for i in range(1,len(data[0][1:]) * 2,2)]  # [1,3,5,7]
-accuracy = val[:, columns_imgs]
-accuracy = accuracy.transpose()
+columns_Tx = [i for i in range(0,len(val[0]),4)]
+tx_sec = val[:, columns_Tx]
+tx_sec = tx_sec.transpose()
 
-# print(yy)
+print(tx_sec)
 
-fig = plt.figure(figsize=(8,10))
-plt.rc('lines', linewidth=1)
+columns_Tx_std = [i for i in range(1,len(val[0]),4)]
+tx_sec_std = val[:, columns_Tx_std]
+tx_sec_std = tx_sec_std.transpose()
+
+print(tx_sec_std)
+
+columns_imgs = [i for i in range(2,len(val[0]),4)]
+imgs_sec = val[:, columns_imgs]
+imgs_sec = imgs_sec.transpose()
+
+print(imgs_sec)
+
+columns_imgs_std = [i for i in range(3,len(val[0]),4)]
+imgs_sec_std = val[:, columns_imgs_std]
+imgs_sec_std = imgs_sec_std.transpose()
+
+print(imgs_sec_std)
+
+tick_labels = data[0][1:]
+x_pos = [1e5, 5e5, 1e6, 5e6]
+
+# fig = plt.figure(figsize=(8,10))
 
 """
 Plot Tx/sec
 """
-ax0 = plt.subplot(2,1,1)
+# ax0 = plt.subplot(2,1,1)
 
-for i in range(0,len(yy[0,:])):
-    ax0.plot(yy[:,i], label = indexes_name[i],
-                color=color[i], linestyle=linestyles[i], marker=markers[i])
+fig = plt.figure()
+plt.rc('lines', linewidth=1)
+ax0 = plt.subplot()
 
-xticks = list(range(len(xlabels)))
-plt.xticks(xticks)
-ax0.set_xticklabels(xlabels, fontsize=14)
+for i in range(0,len(tx_sec[0,:])):
+    ax0.errorbar(x_pos, tx_sec[:,i],
+                 yerr=tx_sec_std[:,i],
+                 label = query_name[i],
+                 color=color[i], linestyle=linestyles[i], marker=markers[i])
 
 if params.log:
     ax0.set_yscale('log')
-ax0.set_title(title)
-plt.xlabel('Size', fontsize=12)
+    ax0.set_xscale('log')
+
+# xticks = list(range(len(x_pos)))
+# ax0.set_xticklabels(x_pos, fontsize=14)
+plt.xticks(x_pos, tick_labels)
+
+# ax0.set_title(title)
+plt.xlabel('Number of Images', fontsize=12)
 plt.ylabel('Tx/sec', fontsize=12)
 
 plt.legend(loc="best", ncol=1, shadow=True, fancybox=True)
 
+plt.savefig(plotfilename + "_metadata.pdf", format="pdf", bbox_inches='tight')
+
 """
 Plot Images/sec
 """
+# ax0 = plt.subplot(2,1,2)
 
-ax0 = plt.subplot(2,1,2)
+fig = plt.figure()
+plt.rc('lines', linewidth=1)
+ax0 = plt.subplot()
 
-for i in range(0,len(yy[0,:])):
-    ax0.plot(accuracy[:,i], label = indexes_name[i],
-             color=color[i], linestyle=linestyles[i], marker=markers[i])
+for i in range(0,len(imgs_sec[0,:])):
+    ax0.errorbar(x_pos, imgs_sec[:,i],
+                 yerr=imgs_sec_std[:,i],
+                 label = query_name[i],
+                 color=color[i], linestyle=linestyles[i], marker=markers[i])
 
-xticks = list(range(len(xlabels)))
-plt.xticks(xticks)
 if params.log:
     ax0.set_yscale('log')
-ax0.set_xticklabels(xlabels, fontsize=14)
+    ax0.set_xscale('log')
 
-plt.xlabel('Size', fontsize=12)
+# xticks = list(range(len(xlabels)))
+# plt.xticks(xticks)
+# ax0.set_xticklabels(xlabels, fontsize=14)
+plt.xticks(x_pos, tick_labels)
+
+# ax0.set_title(title)
+plt.xlabel('Number of Images', fontsize=12)
 plt.ylabel('images/sec', fontsize=12)
+
+plt.savefig(plotfilename + "_images.pdf", format="pdf", bbox_inches='tight')
 
 """
 Write to pdf
 """
-plt.savefig(plotfilename, format="pdf")
+# plt.savefig(plotfilename, format="pdf")

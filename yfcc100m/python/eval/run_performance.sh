@@ -1,7 +1,7 @@
 #!/bin/bash
-nthreads=32
-niter=3
-ntags=3
+nthreads=56
+niter=10
+ntags=10
 
 result_folder=perf_results
 outfile=${result_folder}/perf_ntags${ntags}_nthread${nthreads}_niter${niter}.csv

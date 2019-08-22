@@ -166,10 +166,15 @@ def get_metadata(params, query_arguments):
 
     return results
 
-def add_performance_row(params, perf_df, database, descriptor, tx_per_sec, img_per_sec):
+def add_performance_row(params, perf_df, database, descriptor,
+                        avg_tx_per_sec, std_tx_per_sec,
+                        avg_img_per_sec, std_img_per_sec):
 
-    perf_df.at[descriptor, database + ' Tx/sec'] = tx_per_sec
-    perf_df.at[descriptor, database + ' imgs/sec'] = img_per_sec
+    perf_df.at[descriptor, database + ' Tx/sec']       = avg_tx_per_sec
+    perf_df.at[descriptor, database + ' Tx/sec_std']   = std_tx_per_sec
+    perf_df.at[descriptor, database + ' imgs/sec']     = avg_img_per_sec
+    perf_df.at[descriptor, database + ' imgs/sec_std'] = std_img_per_sec
+
     return perf_df
 
 
@@ -180,7 +185,12 @@ def main(params):
         outfile = params.append_out
     else:
         outfile = params.out
-        performance = pd.DataFrame(columns=[params.db_name + ' Tx/sec', params.db_name + ' imgs/sec'])
+        performance = pd.DataFrame(columns=[
+                    params.db_name + ' Tx/sec',
+                    params.db_name + ' Tx/sec_std',
+                    params.db_name + ' imgs/sec',
+                    params.db_name + ' imgs/sec_std',
+                    ])
 
     for query_args in QUERY_PARAMS:
         print('Query:{}'.format(query_args))
@@ -222,8 +232,11 @@ def main(params):
         print('[!] Avg. Images per sec: {:0.4f} - std:{:0.4f}'.format(avg_img_per_sec, std_img_per_sec))
 
         # Log Measurements
-        performance = add_performance_row(params, performance, params.db_name, params.db_type + query_args['key'], avg_tx_per_sec,
-                                          avg_img_per_sec)
+        performance = add_performance_row(params, performance,
+                                            params.db_name,
+                                            params.db_type + query_args['key'],
+                                            avg_tx_per_sec, std_tx_per_sec,
+                                            avg_img_per_sec, std_img_per_sec)
     performance.to_csv(outfile)
 
 
