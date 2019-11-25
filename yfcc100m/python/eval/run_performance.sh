@@ -13,7 +13,7 @@ rm -rf $result_folder
 mkdir -p $result_folder
 append=-out # The first need to be create and not append
 
-for db in vdms memsql
+for db in vdms mysql
 do
     for size in 100k 500k 1M 5M
     do

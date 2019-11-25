@@ -5,15 +5,12 @@ from threading import Thread
 import pandas as pd
 import numpy as np
 
+from mysql_eval import MySQLQuery
 from memsql_eval import MemSQLQuery
 from vdms_eval import VDMSQuery
 
-VDMS_PORT_MAPPING = {'100k': 55500, '500k': 55405,
-                     '1M': 55501, '5M': 55450,
-                     '10M': 55510, 'None': 55555}
-MEMSQL_PORT_MAPPING = {'yfcc_100k': '100k', 'yfcc_500k': '500k',
-                       'yfcc_1M': '1M', 'yfcc_5M': '5M',
-                       'yfcc_10M': '10M'}
+VDMS_PORT_MAPPING = {'100k': 55500, '500k': 55405, '1M': 55501, '5M': 55450,
+                     '10M': 55510, '50M': 55000, '100M': 50000}
 
 RESIZE = {"type": "resize", "width": 224, "height": 224}
 QUERY_PARAMS = [{'key': '_1tag_resize', 'tags': ["alligator"], 'probs': [0.2], 'operations': [RESIZE]},
@@ -26,8 +23,8 @@ def get_args():
 
     # Database Info
     obj.add_argument('-db_type', type=str, default='vdms',
-                     choices=["vdms", "memsql"],
-                     help='Database names: 100k, 1M, 10M')
+                     choices=["vdms", "memsql", "mysql"],
+                     help='Database names: vdms, memsql, mysql')
     obj.add_argument('-db_name', type=str, default='100k',
                      choices=VDMS_PORT_MAPPING.keys(),
                      help='Database names: 100k, 1M, 10M')
@@ -58,6 +55,9 @@ def get_args():
 
     if params.db_type == "memsql":
         params.db_host = "sky3.jf.intel.com"
+    elif params.db_type == "mysql":
+        params.db_host = "127.0.0.1" #TODO: Get to work with hostname
+        params.db_port = 3360
     else:
         # VDMS needs port mapping
         params.db_host = "sky4.jf.intel.com"
@@ -115,6 +115,9 @@ def get_metadata(params, query_arguments):
         for i in range(params.numthreads):
             list_of_objs.append(
                         VDMSQuery.VDMSQuery(params.db_host, params.db_port))
+    elif (params.db_type == "mysql"):
+        for i in range(params.numthreads):
+            list_of_objs.append(MySQLQuery.MySQL(params))
     else:
         for i in range(params.numthreads):
             list_of_objs.append(MemSQLQuery.MemSQL(params))
