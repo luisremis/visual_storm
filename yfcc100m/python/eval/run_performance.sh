@@ -33,13 +33,21 @@ do
     done
 done
 
+# Read number of images returned from logs
+python3 parse_logs.py \
+        -dir=$result_folder \
+        -perf_csv=$outfile \
+        -db_sizes="100k,500k,1M,5M" \
+        -out=${result_folder}/perf_run_summary.csv \
+        -dbs='vdms,mysql'
+
 # Convert performance results to format for plotting
 python3 convert_perf_results.py \
         -cols="100k,500k,1M,5M" \
         -numtags=$ntags \
         -numthreads=$nthreads \
         -numiters=$niter \
-        -results=$outfile \
+        -results=${result_folder}/perf_run_summary.csv \
         -out=$result_log
 
 # Plot results

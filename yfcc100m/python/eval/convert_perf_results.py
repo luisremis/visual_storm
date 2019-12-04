@@ -35,11 +35,13 @@ def main(params):
         for descriptor in data.index:
             line = descriptor
             for c in params.cols.split(','): #cols:
-                line += ',{},{},{},{}'.format(
+                line += ',{},{},{},{},{},{}'.format(
                     data.at[descriptor, c + ' Tx/sec'],
                     data.at[descriptor, c + ' Tx/sec_std'],
                     data.at[descriptor, c + ' imgs/sec'],
-                    data.at[descriptor, c + ' imgs/sec_std']
+                    data.at[descriptor, c + ' imgs/sec_std'],
+                    data.at[descriptor, c + ' #imgs'],
+                    data.at[descriptor, c + ' #imgs_std']
                     )
             print(line, file=log)
 
