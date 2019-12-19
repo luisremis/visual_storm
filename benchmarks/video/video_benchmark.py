@@ -29,9 +29,9 @@ import time
 import psutil
 import numpy as np
 
-num_queries = 20
+num_queries = 50
 
-def reject_outliers(data, m=2):
+def reject_outliers(data, m=1):
     return data[abs(data - np.mean(data)) < m * np.std(data)]
 
 class TestVideosRead(TestCommand.TestCommand):
