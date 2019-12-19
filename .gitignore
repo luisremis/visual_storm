@@ -1,0 +1,5 @@
+*.log
+*.pyc
+
+*.so
+.sconsign.dblite
