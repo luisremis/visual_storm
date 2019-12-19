@@ -23,15 +23,20 @@ def get_args():
     params = obj.parse_args()
     return params
 
-
 def main(params):
     data = pd.read_csv(params.results, index_col=0)
     # cols = list(set([c.split(' ')[0] for c in data.columns if c.split(' ')[0] in params.cols]))
 
     with open(params.out, 'w') as log:
-        print('YFCC100M - Queries - ntags: {} nthr: {} niter: {}'.format(params.numtags, params.numthreads, params.numiters), file=log)
+
+        print('YFCC100M - Queries - ntags: {} nthr: {} niter: {}'.format(
+                            params.numtags,
+                            params.numthreads,
+                            params.numiters),
+                            file=log)
         # print('idx,{}'.format(','.join(cols)), file=log)
         print('idx,{}'.format(params.cols), file=log)
+
         for descriptor in data.index:
             line = descriptor
             for c in params.cols.split(','): #cols:

@@ -79,7 +79,6 @@ def make_logger(name, log_file, level=logging.INFO):
 
     return logger
 
-
 def get_parameters(params, all_data, num_entries_per_thread=None):
     if num_entries_per_thread is None:
         num_entries_per_thread = params.batch_size
