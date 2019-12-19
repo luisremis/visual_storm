@@ -13,7 +13,7 @@ NUM_IMGS_PER_DATA_DIR = 8400000
 FOLDER_CHOICES = ['/set_0/data_0/images', '/set_0/data_1/images',               '/set_0/data_2/images', '/set_0/data_3/images',
                   '/set_1/data_0/images', '/set_1/data_1/images', '/set_1/data_2/images', '/set_1/data_3/images']
 
-IMG_HOST = 'sky4.jf.intel.com'
+IMG_HOST = 'sky4.local'
 
 def create_dir(folder):
     if not os.path.isdir(folder):
