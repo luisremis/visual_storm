@@ -25,7 +25,7 @@ License Options:
 '''
 
 BASEURL = 'https://multimedia-commons.s3-us-west-2.amazonaws.com/data/videos/mp4/'
-SEARCH1 = "party"
+SEARCH1 = "backpack"
 
 def main():
     print("Starting dataset processing")
