@@ -32,7 +32,7 @@ def get_args():
     parserobj.add_argument('-tag_list', type=str,
                            default='../yfcc_parse_labels/autotag_list.txt',
                            help='List of expected tags [default: ../yfcc_parse_labels/autotag_list.txt]')
-    parserobj.add_argument('-add_tags', type=bool, default=True,
+    parserobj.add_argument('-add_tags', default=False, action="store_true",
                            help='Whether or not insert tags')
     parserobj.add_argument('-tag_file', type=str,
                            default='yfcc100m_autotags_1M',
@@ -40,6 +40,9 @@ def get_args():
                                 './yfcc100m_autotags_1M]')
 
     params = parserobj.parse_args()
+
+
+    print(params.add_tags)
     return params
 
 def get_data(params):
@@ -158,7 +161,7 @@ def process_connections(params, dbs, all_data):
 
     thread_arr = []
 
-    batch = 100
+    batch = 50
     params.num_threads = 2
 
     per_thread = int(num_lines / params.num_threads)
@@ -199,7 +202,7 @@ def main(in_args):
 
     func_list = []
     func_data = []
-    if (in_args.add_tags):
+    if (in_args.add_tags == True):
         func_list.append('process_tag_entities')
         func_data.append(all_tags)
 
