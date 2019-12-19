@@ -7,13 +7,18 @@ import random
 import numpy as np
 import requests
 
-NUM_IMGS_PER_DATA_DIR = 8400000
-# FOLDER_CHOICES = ['/mnt/yfcc100m/set_0/data_0/images', '/mnt/yfcc100m/set_0/data_1/images', '/mnt/yfcc100m/set_0/data_2/images', '/mnt/yfcc100m/set_0/data_3/images',
-                  # '/mnt/yfcc100m/set_1/data_0/images', '/mnt/yfcc100m/set_1/data_1/images', '/mnt/yfcc100m/set_1/data_2/images', '/mnt/yfcc100m/set_1/data_3/images']
-FOLDER_CHOICES = ['/set_0/data_0/images', '/set_0/data_1/images', '/set_0/data_2/images', '/set_0/data_3/images',
-                  '/set_1/data_0/images', '/set_1/data_1/images', '/set_1/data_2/images', '/set_1/data_3/images']
+# These are no longer needed
+# NUM_IMGS_PER_DATA_DIR = 8400000
+# FOLDER_CHOICES = ['/set_0/data_0/images',
+#                   '/set_0/data_1/images',
+#                   '/set_0/data_2/images',
+#                   '/set_0/data_3/images',
+#                   '/set_1/data_0/images',
+#                   '/set_1/data_1/images',
+#                   '/set_1/data_2/images',
+#                   '/set_1/data_3/images']
 
-IMG_HOST = 'sky4.jf.intel.com'
+IMG_HOST = 'sky4.local'
 
 def create_dir(folder):
     if not os.path.isdir(folder):
@@ -24,24 +29,24 @@ class MySQL(object):
         self.db = self.get_connection(params)
         # creating database_cursor to perform SQL operation
         self.db_cursor = self.db.cursor()
-        
+
     def close_connection(self):
         self.db.close()
-        self.db_cursor.close()         
+        self.db_cursor.close()
 
     def get_connection(self, params):
         return mysql.connector.connect(host=params.db_host, user=params.db_user, passwd=params.db_pswd, port=params.db_port, database="yfcc_" + params.db_name)
 
     def get_metadata_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0, return_response=True):
-        
+
         if lat != -1:
             location_qstr = '''(latitude >= {} AND latitude <= {} ) AND (longitude >= {} AND longitude <= {})'''.format(lat-range_dist*1.0,lat+range_dist*1.0,long-range_dist*1.0,long+range_dist*1.0)
             qstr = ['''(test_taglist.tagid=(select t.tagid from test_taglist t where t.tag='{}' limit 1) AND a.probability >= {} AND {})'''.format(tag,prob,location_qstr) for tag, prob in zip(tags, probs)]
         else:
             qstr = ['''(test_taglist.tagid=(select t.tagid from test_taglist t where t.tag='{}' limit 1) AND a.probability >= {})'''.format(tag,prob) for tag, prob in zip(tags, probs)]
-        
+
         query = '''select line_number, download_url, id, latitude, longitude, license_name from (test_metadata INNER JOIN test_autotags a on test_metadata.id=a.metadataid INNER JOIN test_taglist on a.tagid=test_taglist.tagid) WHERE {}'''.format(qstr[0])
-        
+
         if len(qstr) > 1:
             for q in qstr[1:]:
                 tmp = ''' AND id IN (select id from (test_metadata INNER JOIN test_autotags on id=test_autotags.metadataid INNER JOIN test_taglist on test_autotags.tagid=test_taglist.tagid) WHERE {})'''.format(q)
@@ -57,10 +62,18 @@ class MySQL(object):
         # print("Time for metadata (ms):", endtime * 1000.0)
         # print("Total results:", len(response))
 
+        # if len(probs) == 1:
+        #     out_file = open("perf_results/mysql_img_list.txt", 'w')
+        #     cols = ['line_number', 'download_url', 'id', 'latitude', 'longitude', 'license_name']
+        #     for res in response:
+        #         out_file.write(str(res[cols.index('id')]))
+        #         out_file.write("\n")
+
         if return_response:
             return response
 
         out_dict = {'response_len':len(response),'response_time':endtime}
+
         return out_dict
 
     def get_images_by_tags(self, tags, probs, operations = [],
@@ -68,7 +81,6 @@ class MySQL(object):
         start = time.time()
         metadata = self.get_metadata_by_tags(tags, probs, lat, long, range_dist)
 
-        """out_dict = self.get_images_from_query(results, operations, return_images)"""
         height = operations[0]["height"]
         width = operations[0]["width"]
 
@@ -76,11 +88,15 @@ class MySQL(object):
         cols = ['line_number', 'download_url', 'id', 'latitude', 'longitude', 'license_name']
 
         for res in metadata:
-            quotient = int(res[cols.index('line_number')]) // NUM_IMGS_PER_DATA_DIR
-            # imgPath = FOLDER_CHOICES[quotient] + urlparse(res[cols.index('download_url')]).path
-            imgPath = "http://"+IMG_HOST+FOLDER_CHOICES[quotient] + urlparse(res[cols.index('download_url')]).path
+
+            # quotient = int(res[cols.index('line_number')]) // NUM_IMGS_PER_DATA_DIR
+            # # imgPath = FOLDER_CHOICES[quotient] + urlparse(res[cols.index('download_url')]).path
+            # imgPath = "http://"+IMG_HOST+FOLDER_CHOICES[quotient] + urlparse(res[cols.index('download_url')]).path
 
             # print(imgPath)
+            # print(res[cols.index('id')])
+
+            imgPath = "http://"+IMG_HOST+"/images/" + urlparse(res[cols.index('download_url')]).path
 
             try:
                 # img = np.frombuffer(open(imgPath, 'rb').read(), dtype='uint8')
