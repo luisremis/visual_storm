@@ -256,7 +256,10 @@ class VDMSQuery(object):
                     "FindImage": {
                         "constraints": {
                             "ID":  ["==", ele['ID']]
-                        }
+                        },
+                        # "results": {
+                        #     "list": ["ID"]
+                        # }
                     }
                 }
 
@@ -291,7 +294,10 @@ class VDMSQuery(object):
                         "constraints": {
                             "tag_prob": [">=", probs[0]]
                         }
-                    }
+                    },
+                    # "results": {
+                    #     "list": ["ID"]
+                    # }
                 }
             }
 
@@ -313,6 +319,13 @@ class VDMSQuery(object):
             responses, blobs = self.db.query(all_cmds)
             end_time = time.time() - start
 
+            # print(responses[len(responses)-1])
+            # out_file = open("perf_results/vdms_img_list.txt", 'w')
+            # for ent in responses[len(responses)-1]["FindImage"]["entities"]:
+            #     out_file.write(str(ent["ID"]))
+            #     out_file.write("\n")
+
+
         # print("Time for images (ms):", end_time * 1000.0)
         # print(self.db.get_last_response_str())
 
@@ -324,7 +337,7 @@ class VDMSQuery(object):
         #         f = open(tmp_file, 'wb')
         #         f.write(im)
 
-        # print("Total valid images:", len(vblobs))
+        # print("Total valid images:", len(blobs))
 
         if return_images:
             return blobs

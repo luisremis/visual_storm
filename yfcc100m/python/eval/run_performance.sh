@@ -1,14 +1,15 @@
 #!/bin/bash
-nthreads=56
-niter=10
-ntags=10
+nthreads=2
+niter=1
+ntags=1
 
 result_folder=perf_results
 outfile=${result_folder}/perf_ntags${ntags}_nthread${nthreads}_niter${niter}.csv
 result_log=${result_folder}/perf_results.log
-result_pdf=${result_folder}/plots/perf_results_plot.pdf
+result_pdf_prefix=${result_folder}/plots/res
 
 # Force remove temporary storage for images
+
 rm -rf $result_folder
 mkdir -p $result_folder
 append=-out # The first need to be create and not append
@@ -53,7 +54,11 @@ python3 convert_perf_results.py \
 # Plot results
 python3 plot_performance.py \
         -log=True \
+        -db_sizes="100k,500k,1M,5M" \
         -infile=$result_log \
-        -outfile=${result_pdf}
+        -outfile=${result_pdf_prefix}
 
-cp -r ${result_folder} perf_results-${ntags}-${nthreads}-${niter}
+results_folder_copy=perf_results-${ntags}-${nthreads}-${niter}
+
+rm -r $results_folder_copy
+cp -r $result_folder $results_folder_copy

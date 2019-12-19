@@ -62,7 +62,6 @@ def get_args():
     parserobj.add_argument('-db_pswd', type=str, default='',
                            help='Password of database [default: ""]')
 
-
     params = parserobj.parse_args()
     return params
 
@@ -79,8 +78,8 @@ def setup_test_db(params):
     """ Create a database and table for this benchmark to use. """
     conn = util.get_connection(params, db="information_schema")
     # creating database_cursor to perform SQL operation
-    db_cursor = conn.cursor() 
-    
+    db_cursor = conn.cursor()
+
     print('Creating database %s' % params.db_name)
     db_cursor.execute('DROP DATABASE IF EXISTS %s' % params.db_name)
     db_cursor.execute('CREATE DATABASE %s' % params.db_name)
@@ -135,13 +134,13 @@ def setup_test_db(params):
     conn.commit()
     db_cursor.close()
     conn.close()
-    
+
 
 def cleanup():
     """ Cleanup the database this benchmark is using. """
 
     conn = util.get_connection(params)
-    db_cursor = conn.cursor() 
+    db_cursor = conn.cursor()
     db_cursor.execute('DROP DATABASE %s' % params.db_name)
     conn.commit()
     db_cursor.close()
@@ -151,7 +150,7 @@ def process_tag_entities(params):
     num_lines = len([line.strip() for line in open(str(params.tag_list), 'r')])
     query = "LOAD DATA LOCAL INFILE '{}' INTO TABLE test_taglist (tag)".format(str(params.tag_list.absolute()))
     conn = util.get_connection(params)
-    db_cursor = conn.cursor() 
+    db_cursor = conn.cursor()
     db_cursor.execute(query)
     db_cursor.execute("SELECT COUNT(*) FROM test_taglist")
     (count,) = db_cursor.fetchone()
@@ -163,24 +162,24 @@ def process_tag_entities(params):
 def process_autotags_entities(params):
     num_lines = len([line.strip() for line in open(str(params.tag_file), 'r')])
     conn = util.get_connection(params)
-    db_cursor = conn.cursor() 
-    
+    db_cursor = conn.cursor()
+
     # Read data from file
     query = \
         '''LOAD DATA LOCAL INFILE '{}'
             INTO TABLE test_autotags
             FIELDS TERMINATED BY '\t'(metadataid,tagname,probability)'''.format(str(params.tag_file.absolute()))
     db_cursor.execute(query)
-    
+
     # Add column (tagid) for index of autotag taken from test_taglist table
     query1 = \
         '''ALTER TABLE test_autotags ADD column tagid INT AFTER metadataid;'''
     query2 = \
         '''UPDATE test_autotags INNER JOIN test_taglist ON test_autotags.tagname=test_taglist.tag
         SET test_autotags.tagid = test_taglist.tagid'''
-    db_cursor.execute(query1)    
+    db_cursor.execute(query1)
     db_cursor.execute(query2)
-    
+
     # Drop column (tagname) from test_autotags and add tagid and metadataid as index
     query3 = \
         '''ALTER TABLE test_autotags DROP column tagname;''' #, ADD PRIMARY KEY(metadataid,tagid);'''
@@ -188,10 +187,10 @@ def process_autotags_entities(params):
         '''create index tagid ON test_autotags(tagid);'''
     query5 = \
         '''create index metadataid ON test_autotags(metadataid);'''
-    db_cursor.execute(query3)    
-    db_cursor.execute(query4)    
+    db_cursor.execute(query3)
+    db_cursor.execute(query4)
     db_cursor.execute(query5)
-    
+
     db_cursor.execute("SELECT COUNT(*) FROM test_autotags")
     (count,) = db_cursor.fetchone()
     conn.commit()
@@ -205,7 +204,7 @@ def process_metadata_entities(params):
     query = "LOAD DATA LOCAL INFILE '{}' INTO TABLE test_metadata ({})".format(str(params.data_file.absolute()), ','.join(util.property_names_sql[:-3]))
 
     conn = util.get_connection(params)
-    db_cursor = conn.cursor() 
+    db_cursor = conn.cursor()
     db_cursor.execute(query)
     db_cursor.execute("SELECT COUNT(*) FROM test_metadata")
     (count,) = db_cursor.fetchone()

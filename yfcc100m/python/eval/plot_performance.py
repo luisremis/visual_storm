@@ -19,12 +19,24 @@ def isfloat(value):
     except ValueError:
         return False
 
-
 def instr2bool(in_value):
     if in_value.lower() in ['true', 't']:
         return True
     else:
         return False
+
+def value_to_float(x):
+    if type(x) == float or type(x) == int:
+        return x
+    if 'k' in x:
+        if len(x) > 1:
+            return float(x.replace('k', '')) * 1000
+        return 1000.0
+    if 'M' in x:
+        if len(x) > 1:
+            return float(x.replace('M', '')) * 1000000
+        return 1000000.0
+    return 0.0
 
 
 obj = argparse.ArgumentParser()
@@ -32,6 +44,8 @@ obj.add_argument('-infile', type=lambda s: Path(s), default="perf_results/perf_r
                  help='File containing plot data')
 obj.add_argument('-outfile', type=lambda s: Path(s), default="perf_results/plots/results_plot_error.pdf",
                  help='PDF path for file containing plots')
+obj.add_argument('-db_sizes', type=str, default="100k,500k,1M,5M",
+                 help='Sizes of database')
 obj.add_argument('-log', type=instr2bool, default=True, const=True, nargs='?',
                  help='Use log scale for Tx/sec')
 
@@ -65,7 +79,7 @@ with open(str(params.infile)) as f:
             # line = [float(i) for i in line]
             data.append(line)
 
-print(title)
+# print(title)
 
 query_name = []
 for i in range(len(data) - 1):
@@ -88,46 +102,48 @@ for i in range(len(val)):
 
 val = np.array(val)
 
-print(data[0][1:])
+# print(data[0][1:])
 
 columns_Tx = [i for i in range(0, len(val[0]), 6)]
 tx_sec = val[:, columns_Tx]
 tx_sec = tx_sec.transpose()
 
-print(tx_sec)
+# print(tx_sec)
 
 columns_Tx_std = [i for i in range(1, len(val[0]), 6)]
 tx_sec_std = val[:, columns_Tx_std]
 tx_sec_std = tx_sec_std.transpose()
 
-print(tx_sec_std)
+# print(tx_sec_std)
 
 columns_imgs = [i for i in range(2, len(val[0]), 6)]
 imgs_sec = val[:, columns_imgs]
 imgs_sec = imgs_sec.transpose()
 
-print(imgs_sec)
+# print(imgs_sec)
 
 columns_imgs_std = [i for i in range(3, len(val[0]), 6)]
 imgs_sec_std = val[:, columns_imgs_std]
 imgs_sec_std = imgs_sec_std.transpose()
 
-print(imgs_sec_std)
+# print(imgs_sec_std)
 
 columns_imgs = [i for i in range(4, len(val[0]), 6)]
 imgs_ = val[:, columns_imgs]
 imgs_ = imgs_.transpose()
 
-print(imgs_)
+# print(imgs_)
 
 columns_imgs_std = [i for i in range(5, len(val[0]), 6)]
 imgs_std = val[:, columns_imgs_std]
 imgs_std = imgs_std.transpose()
 
-print(imgs_std)
+# print(imgs_std)
 
 tick_labels = data[0][1:]
-x_pos = [1e5, 5e5, 1e6, 5e6]
+
+x_pos = [value_to_float(i) for i in params.db_sizes.split(',')]
+# x_pos = [1e5, 5e5, 1e6, 5e6]
 
 # fig = plt.figure(figsize=(8,10))
 

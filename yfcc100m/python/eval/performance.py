@@ -9,14 +9,31 @@ from mysql_eval import MySQLQuery
 from memsql_eval import MemSQLQuery
 from vdms_eval import VDMSQuery
 
-VDMS_PORT_MAPPING = {'100k': 55500, '500k': 55405, '1M': 55501, '5M': 55450,
-                     '10M': 55510, '50M': 55000, '100M': 50000}
+VDMS_PORT_MAPPING = {'100k': 55500, '500k': 55405,
+                     '1M': 55501, '5M': 55450,
+                     '10M': 55510, '50M': 55000,
+                     '100M': 50000}
+
+SIZE_PROB_MAPPING = {'100k': 0.21, '500k': 0.21,
+                     '1M':   0.41, '5M':   0.70,
+                     '10M':  0.95, '50M':  0.98,
+                     '100M': 0.95}
 
 RESIZE = {"type": "resize", "width": 224, "height": 224}
-QUERY_PARAMS = [{'key': '_1tag_resize', 'tags': ["alligator"], 'probs': [0.2], 'operations': [RESIZE]},
-                {'key': '_2tag_resize', 'tags': ["alligator", "lake"], 'probs': [0.2, 0.2], 'operations': [RESIZE]},
-                {'key': '_2tag_loc20_resize', 'tags': ["alligator", "lake"], 'probs': [0.2, 0.2],
-                 'lat': -14.354356, 'long': -39.002567, 'range_dist': 20, 'operations': [RESIZE]}]
+QUERY_PARAMS = [{'key': '_1tag_resize',
+                 'tags': ["alligator"],
+                 'probs': [0.2],
+                 'operations': [RESIZE] },
+                {'key': '_2tag_resize',
+                 'tags': ["alligator", "lake"],
+                 'probs': [0.2, 0.2],
+                 'operations': [RESIZE] },
+                {'key': '_2tag_loc20_resize',
+                 'tags': ["alligator", "lake"],
+                  'probs': [0.3, 0.3],
+                  'lat': -14.354356, 'long': -39.002567,
+                  'range_dist': 20,
+                  'operations': [RESIZE] }]
 
 def get_args():
     obj = argparse.ArgumentParser()
@@ -28,7 +45,7 @@ def get_args():
     obj.add_argument('-db_name', type=str, default='100k',
                      choices=VDMS_PORT_MAPPING.keys(),
                      help='Database names: 100k, 1M, 10M')
-    obj.add_argument('-db_host', type=str, default="sky4.jf.intel.com",
+    obj.add_argument('-db_host', type=str, default="sky4.local",
                      help='Name of host')
 
     obj.add_argument('-db_port', type=int, default=3306,
@@ -54,13 +71,13 @@ def get_args():
     params = obj.parse_args()
 
     if params.db_type == "memsql":
-        params.db_host = "sky3.jf.intel.com"
+        params.db_host = "sky3.local"
     elif params.db_type == "mysql":
         params.db_host = "127.0.0.1" #TODO: Get to work with hostname
         params.db_port = 3360
     else:
         # VDMS needs port mapping
-        params.db_host = "sky4.jf.intel.com"
+        params.db_host = "sky4.local"
         params.db_port = VDMS_PORT_MAPPING[params.db_name]
 
     if params.out == params.append_out:
@@ -83,7 +100,9 @@ def get_thread_metadata(obj, params, index, results, query_arguments):
         range_dist = query_arguments['range_dist'] if 'range_dist' in query_arguments else 0
         operations = query_arguments['operations'] if 'operations' in query_arguments else []
 
-        data_dict = obj.get_metadata_by_tags(tag, probs, lat, long, range_dist, return_response=False)
+        data_dict = obj.get_metadata_by_tags(tag, probs, lat,
+                                             long, range_dist,
+                                             return_response=False)
         results[index + ix].update(data_dict)
 
     if params.numthreads == 1:
@@ -100,7 +119,10 @@ def get_thread_images(obj, params, index, results, query_arguments):
         range_dist = query_arguments['range_dist'] if 'range_dist' in query_arguments else 0
         operations = query_arguments['operations'] if 'operations' in query_arguments else []
 
-        data_dict = obj.get_images_by_tags(tag, probs, operations, lat, long, range_dist, return_images=False)
+        data_dict = obj.get_images_by_tags(tag, probs,
+                                           operations, lat, long,
+                                           range_dist,
+                                           return_images=False)
         results[index + ix].update(data_dict)
 
     if params.numthreads == 1:
@@ -128,10 +150,12 @@ def get_metadata(params, query_arguments):
         idx = (thread * params.numtags)
         if idx < (params.numthreads * params.numtags):
             if params.numthreads == 1:
-                results = get_thread_metadata(list_of_objs[thread], params, idx, results, query_arguments)
+                results = get_thread_metadata(list_of_objs[thread], params,
+                                              idx, results, query_arguments)
             else:
                 thread_add = Thread(target=get_thread_metadata,
-                                    args=(list_of_objs[thread], params, idx, results, query_arguments))
+                                    args=(list_of_objs[thread], params, idx,
+                                          results, query_arguments))
                 thread_arr.append(thread_add)
         else:
             break
@@ -151,10 +175,12 @@ def get_metadata(params, query_arguments):
         idx = (thread * params.numtags)
         if idx < (params.numthreads * params.numtags):
             if params.numthreads == 1:
-                results = get_thread_images(list_of_objs[thread], params, idx, results, query_arguments)
+                results = get_thread_images(list_of_objs[thread], params, idx,
+                                            results, query_arguments)
             else:
                 thread_add = Thread(target=get_thread_images,
-                                    args=(list_of_objs[thread], params, idx, results, query_arguments))
+                                    args=(list_of_objs[thread], params, idx,
+                                          results, query_arguments))
                 thread_arr.append(thread_add)
         else:
             break
@@ -196,12 +222,17 @@ def main(params):
                     ])
 
     for query_args in QUERY_PARAMS:
+
+        for i in range(len(query_args["probs"])):
+            query_args["probs"][i] = SIZE_PROB_MAPPING[params.db_name]
+
         print('Query:{}'.format(query_args))
         print('DATABASE: {}'.format(params.db_name))
+
         all_tx_per_sec = []
         all_img_per_sec = []
         for iteration in range(params.numiters):  # Number of times to average
-            print('====== ITERATION: {} ======'.format(iteration))
+            print('====== ITERATION: {} ======'.format(iteration), flush=True)
 
             # Get Metadata
             start_t = time.time()
@@ -212,18 +243,24 @@ def main(params):
             all_times = [res['response_time'] for res in results if res]
             tx_per_sec = (params.numthreads) / np.mean(all_times)
             all_tx_per_sec.append(tx_per_sec)
-            print('Queries metadata TIME: {:0.4f}s ({:0.4f} mins)'.format(np.sum(all_times), np.sum(all_times) / 60.))
+            print('Queries metadata TIME: {:0.4f}s ({:0.4f} mins)'.format(
+                                    np.sum(all_times),
+                                    np.sum(all_times) / 60.), flush=True)
 
             # Images per sec
             num_images = np.sum([res['images_len'] for res in results if res])
             all_times = [res['images_time'] for res in results if res]
             img_per_sec = num_images / (np.mean(all_times) * params.numtags)
             all_img_per_sec.append(img_per_sec)
-            print('Queries images TIME: {:0.4f}s ({:0.4f} mins)'.format(np.sum(all_times), np.sum(all_times) / 60.))
+            print('Queries images TIME: {:0.4f}s ({:0.4f} mins)'.format(
+                                    np.sum(all_times),
+                                    np.sum(all_times) / 60.))
 
             print('# responses: {}'.format(len(all_times)))
             print('# images: {}'.format(num_images))
-            print('ITERATION TIME: {:0.4f}s ({:0.4f} mins)'.format(end_time_metadata, end_time_metadata / 60.))
+            print('ITERATION TIME: {:0.4f}s ({:0.4f} mins)'.format(
+                                    end_time_metadata,
+                                    end_time_metadata / 60.), flush=True)
 
         avg_tx_per_sec  = np.mean(all_tx_per_sec)
         std_tx_per_sec  = np.std(all_tx_per_sec)
@@ -231,8 +268,11 @@ def main(params):
         std_img_per_sec = np.std(all_img_per_sec)
 
         # Print info
-        print('\n[!] Avg. Metadata Transactions per sec: {:0.4f} - std:{:0.4f}'.format(avg_tx_per_sec, std_tx_per_sec))
-        print('[!] Avg. Images per sec: {:0.4f} - std:{:0.4f}'.format(avg_img_per_sec, std_img_per_sec))
+        print('[!] Avg. Metadata Transactions per sec: {:0.4f} - std:{:0.4f}'.format(avg_tx_per_sec, std_tx_per_sec))
+        print('[!] Avg. Images per sec: {:0.4f} - std:{:0.4f}'.format(
+                                    avg_img_per_sec,
+                                    std_img_per_sec))
+        print("\n")
 
         # Log Measurements
         performance = add_performance_row(params, performance,
