@@ -29,28 +29,23 @@ class MySQL(object):
         self.db = self.get_connection(params)
         # creating database_cursor to perform SQL operation
         self.db_cursor = self.db.cursor()
-
+        
     def close_connection(self):
         self.db.close()
-        self.db_cursor.close()
+        self.db_cursor.close()         
 
     def get_connection(self, params):
         return mysql.connector.connect(host=params.db_host, user=params.db_user, passwd=params.db_pswd, port=params.db_port, database="yfcc_" + params.db_name)
 
     def get_metadata_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0, return_response=True):
-
+        
         if lat != -1:
             location_qstr = '''(latitude >= {} AND latitude <= {} ) AND (longitude >= {} AND longitude <= {})'''.format(lat-range_dist*1.0,lat+range_dist*1.0,long-range_dist*1.0,long+range_dist*1.0)
-            qstr = ['''(test_taglist.tagid=(select t.tagid from test_taglist t where t.tag='{}' limit 1) AND a.probability >= {} AND {})'''.format(tag,prob,location_qstr) for tag, prob in zip(tags, probs)]
+            qstr = ['''id IN (select id from (test_metadata INNER JOIN test_autotags a on test_metadata.id=a.metadataid and a.probability >={} AND {} and a.tagid=(select test_taglist.tagid from test_taglist where test_taglist.tag='{}' limit 1)))'''.format(prob, location_qstr, tag) for prob,tag in zip(probs, tags)]
         else:
-            qstr = ['''(test_taglist.tagid=(select t.tagid from test_taglist t where t.tag='{}' limit 1) AND a.probability >= {})'''.format(tag,prob) for tag, prob in zip(tags, probs)]
-
-        query = '''select line_number, download_url, id, latitude, longitude, license_name from (test_metadata INNER JOIN test_autotags a on test_metadata.id=a.metadataid INNER JOIN test_taglist on a.tagid=test_taglist.tagid) WHERE {}'''.format(qstr[0])
-
-        if len(qstr) > 1:
-            for q in qstr[1:]:
-                tmp = ''' AND id IN (select id from (test_metadata INNER JOIN test_autotags on id=test_autotags.metadataid INNER JOIN test_taglist on test_autotags.tagid=test_taglist.tagid) WHERE {})'''.format(q)
-                query += tmp
+            qstr = ['''id IN (select id from (test_metadata INNER JOIN test_autotags a on test_metadata.id=a.metadataid and a.probability >={} and a.tagid=(select test_taglist.tagid from test_taglist where test_taglist.tag='{}' limit 1)))'''.format(prob, tag) for prob,tag in zip(probs, tags)]
+        
+        query = '''SELECT line_number, download_url, id, latitude, longitude, license_name FROM test_metadata WHERE {}'''.format(''' AND '''.join(qstr))
 
         start_t = time.time()
         self.db_cursor.execute(query)
