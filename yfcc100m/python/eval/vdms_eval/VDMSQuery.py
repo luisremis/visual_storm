@@ -195,7 +195,7 @@ class VDMSQuery(object):
                         }
                     },
                     "results": {
-                        "list": ["ID", "Latitude", "Longitude", "License name"],
+                        "list": ["ID"],
                         "blob": False
                     }
                 }
@@ -203,10 +203,10 @@ class VDMSQuery(object):
 
             if (lat != -1):
                 fI["FindImage"]["constraints"] = {
-                    "Latitude": [">=", lat-range_dist*1.0,
-                                 "<=", lat + range_dist*1.0  ],
-                    "Longitude": [">=", long-range_dist*1.0,
-                                 "<=", long + range_dist*1.0  ]
+                    "Latitude":  [">=", lat  - range_dist*1.0,
+                                  "<=", lat  + range_dist*1.0  ],
+                    "Longitude": [">=", long - range_dist*1.0,
+                                  "<=", long + range_dist*1.0  ]
                 }
 
             all_cmds.append(fE)
@@ -247,7 +247,8 @@ class VDMSQuery(object):
 
         if len(tags) > 1:
             start = time.time()
-            results = self.get_metadata_by_tags(tags, probs, lat, long, range_dist)
+            results = self.get_metadata_by_tags(tags, probs,
+                                                lat, long, range_dist)
 
             all_cmds = []
 
@@ -272,9 +273,14 @@ class VDMSQuery(object):
             responses, blobs = self.db.query(all_cmds)
             end_time = time.time() - start
 
+            # if lat == -1:
+            #     out_file = open("perf_results/vdms_img_list.txt", 'w')
+            #     for ent in responses:
+            #         out_file.write(str(ent["FindImage"]["entities"][0]["ID"]))
+            #         out_file.write("\n")
+
         else:
 
-            start = time.time()
             all_cmds = []
 
             fE = {
@@ -315,7 +321,7 @@ class VDMSQuery(object):
             all_cmds.append(fE)
             all_cmds.append(fI)
 
-            # start = time.time()
+            start = time.time()
             responses, blobs = self.db.query(all_cmds)
             end_time = time.time() - start
 
