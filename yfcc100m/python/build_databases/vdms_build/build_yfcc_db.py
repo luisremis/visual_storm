@@ -12,7 +12,7 @@ import util
 import vdms
 import sys
 
-# process_first_n = 100000
+# process_first_n = 500000
 
 log_name = sys.argv[0].split('/')[-1].replace('.py','.log')
 connection_batch_limit = 100  #10
@@ -41,8 +41,6 @@ def get_args():
 
     params = parserobj.parse_args()
 
-
-    print(params.add_tags)
     return params
 
 def get_data(params):
@@ -56,7 +54,7 @@ def get_db_list(num):
     dbs = []
     for i in range(0, num):
         db = vdms.vdms()
-        db.connect("localhost")
+        db.connect("sky4.local")
         dbs.append(db)
     return dbs
 
