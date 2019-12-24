@@ -1,7 +1,7 @@
 #!/bin/bash
-nthreads=2
-niter=1
-ntags=1
+nthreads=32
+niter=4
+ntags=4
 
 result_folder=perf_results
 outfile=${result_folder}/perf_ntags${ntags}_nthread${nthreads}_niter${niter}.csv
@@ -14,9 +14,11 @@ rm -rf $result_folder
 mkdir -p $result_folder
 append=-out # The first need to be create and not append
 
+db_sizes="100k,500k,1M,5M,10M"
+
 for db in vdms mysql
 do
-    for size in 100k 500k 1M 5M
+    for size in 100k 500k 1M 5M 10M
     do
         # Run VDMS Queries
         echo "Running $db ${size}..."
@@ -38,13 +40,13 @@ done
 python3 parse_logs.py \
         -dir=$result_folder \
         -perf_csv=$outfile \
-        -db_sizes="100k,500k,1M,5M" \
+        -db_sizes=$db_sizes \
         -out=${result_folder}/perf_run_summary.csv \
         -dbs='vdms,mysql'
 
 # Convert performance results to format for plotting
 python3 convert_perf_results.py \
-        -cols="100k,500k,1M,5M" \
+        -cols=$db_sizes \
         -numtags=$ntags \
         -numthreads=$nthreads \
         -numiters=$niter \
@@ -53,8 +55,6 @@ python3 convert_perf_results.py \
 
 # Plot results
 python3 plot_performance.py \
-        -log=True \
-        -db_sizes="100k,500k,1M,5M" \
         -infile=$result_log \
         -outfile=${result_pdf_prefix}
 

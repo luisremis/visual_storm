@@ -40,13 +40,16 @@ def value_to_float(x):
 
 
 obj = argparse.ArgumentParser()
-obj.add_argument('-infile', type=lambda s: Path(s), default="perf_results/perf_results.log",
+obj.add_argument('-infile', type=lambda s: Path(s),
+                 default="./perf_results.log",
                  help='File containing plot data')
-obj.add_argument('-outfile', type=lambda s: Path(s), default="perf_results/plots/results_plot_error.pdf",
+obj.add_argument('-outfile', type=lambda s: Path(s),
+                 default="./plots/res",
                  help='PDF path for file containing plots')
-obj.add_argument('-db_sizes', type=str, default="100k,500k,1M,5M",
-                 help='Sizes of database')
 obj.add_argument('-log', type=instr2bool, default=True, const=True, nargs='?',
+                 help='Use log scale for Tx/sec')
+obj.add_argument('-single_page_plot', type=instr2bool,
+                 default=True, const=True, nargs='?',
                  help='Use log scale for Tx/sec')
 
 params = obj.parse_args()
@@ -64,37 +67,31 @@ plot = "all"
 line_counter = 0
 
 with open(str(params.infile)) as f:
+
+    title = f.readline().replace('\n', '')
+    db_sizes = f.readline().replace('\n', '').split(',')[1:]
+
     data = []
     for line in f:
-        line = line.replace('\n', '')
-
-        if line_counter == 0:
-            title = line
-            line_counter = + 1
-            continue
-
-        line = line.split(',')  # to deal with blank
+        line = line.replace('\n', '').split(',')
 
         if line:  # lines (ie skip them)
-            # line = [float(i) for i in line]
             data.append(line)
 
 # print(title)
+# print(db_sizes)
+# print(data)
 
 query_name = []
-for i in range(len(data) - 1):
-    query_name.append(data[i + 1][0])
-
-xlabels = []
-for i in range(len(data[0]) - 1):
-    xlabels.append(data[0][i + 1])
+for i in range(len(data)):
+    query_name.append(data[i][0])
 
 val = []
 
-for i in range(len(data) - 1):
+for i in range(len(data)):
     new = []
-    for j in range(len(data[1]) - 1):
-        new.append(float(data[i + 1][j + 1]))
+    for j in range(len(data[0]) - 1):
+        new.append(float(data[i][j + 1]))
     val.append(new)
 
 for i in range(len(val)):
@@ -140,21 +137,20 @@ imgs_std = imgs_std.transpose()
 
 # print(imgs_std)
 
-tick_labels = data[0][1:]
-
-x_pos = [value_to_float(i) for i in params.db_sizes.split(',')]
-# x_pos = [1e5, 5e5, 1e6, 5e6]
-
-# fig = plt.figure(figsize=(8,10))
+x_pos = [value_to_float(i) for i in db_sizes]
 
 """
 Plot Tx/sec
 """
-# ax0 = plt.subplot(2,1,1)
 
-fig = plt.figure()
+if params.single_page_plot:
+    fig = plt.figure(figsize=(8,10))
+    ax0 = plt.subplot(2,1,1)
+else:
+    fig = plt.figure()
+    ax0 = plt.subplot()
+
 plt.rc('lines', linewidth=1)
-ax0 = plt.subplot()
 
 for i in range(0, len(tx_sec[0, :])):
     ax0.errorbar(x_pos, tx_sec[:, i],
@@ -166,26 +162,28 @@ if params.log:
     ax0.set_yscale('log')
     ax0.set_xscale('log')
 
-# xticks = list(range(len(x_pos)))
-# ax0.set_xticklabels(x_pos, fontsize=14)
-plt.xticks(x_pos, tick_labels)
+plt.xticks(x_pos, db_sizes)
 
-# ax0.set_title(title)
+ax0.set_title(title)
 plt.xlabel('Number of Images', fontsize=12)
 plt.ylabel('Tx/sec', fontsize=12)
 
 plt.legend(loc="best", ncol=1, shadow=True, fancybox=True)
 
-plt.savefig(plotfilename + "_metadata.pdf", format="pdf", bbox_inches='tight')
+if not params.single_page_plot:
+    plt.savefig(plotfilename + "_metadata.pdf", format="pdf", bbox_inches='tight')
 
 """
 Plot Images/sec
 """
-# ax0 = plt.subplot(2,1,2)
 
-fig = plt.figure()
+if params.single_page_plot:
+    ax0 = plt.subplot(2,1,2)
+else:
+    fig = plt.figure()
+    ax0 = plt.subplot()
+
 plt.rc('lines', linewidth=1)
-ax0 = plt.subplot()
 
 for i in range(0, len(imgs_sec[0, :])):
     ax0.errorbar(x_pos, imgs_sec[:, i],
@@ -197,21 +195,21 @@ if params.log:
     ax0.set_yscale('log')
     ax0.set_xscale('log')
 
-# xticks = list(range(len(xlabels)))
-# plt.xticks(xticks)
-# ax0.set_xticklabels(xlabels, fontsize=14)
-plt.xticks(x_pos, tick_labels)
+plt.xticks(x_pos, db_sizes)
 
-# ax0.set_title(title)
 plt.xlabel('Number of Images', fontsize=12)
 plt.ylabel('images/sec', fontsize=12)
 
-plt.savefig(plotfilename + "_images.pdf", format="pdf", bbox_inches='tight')
+if not params.single_page_plot:
+    ax0.set_title(title)
+    plt.savefig(plotfilename + "_images.pdf", format="pdf", bbox_inches='tight')
+else:
+    plt.savefig(plotfilename + "_all.pdf", format="pdf", bbox_inches='tight')
 
 """
 Plot # Images
+This plot if for sanity check only, no need to be displayed.
 """
-# ax0 = plt.subplot(2,1,2)
 
 fig = plt.figure()
 plt.rc('lines', linewidth=1)
@@ -227,14 +225,9 @@ if params.log:
     ax0.set_yscale('log')
     ax0.set_xscale('log')
 
-# xticks = list(range(len(xlabels)))
-# plt.xticks(xticks)
-# ax0.set_xticklabels(xlabels, fontsize=14)
-plt.xticks(x_pos, tick_labels)
+plt.xticks(x_pos, db_sizes)
 
-# ax0.set_title(title)
 plt.xlabel('Number of Images', fontsize=12)
 plt.ylabel('Avg. # images', fontsize=12)
 
 plt.savefig(plotfilename + "_numimages.pdf", format="pdf", bbox_inches='tight')
-
