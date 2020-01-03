@@ -1,0 +1,73 @@
+\section{Introduction}
+\label{intro}
+
+Visual computing workloads performing analytics on
+video or image data, either off-line or streaming,
+have become prolific across a wide range of application domains.
+This is in part due to the growing ability of machine learning techniques to
+extract information out of the visual data which can subsequently be used
+for informed decision making.
+The insights this information can provide depend on the
+application: a retail vendor might be interested in the amount of time
+shoppers spend in front of a specific product, while a medical expert might
+want to see the effect of a specific treatment on the size of a tumor.
+
+Despite this rich and varied usage environment, there has been very little
+research on the management of visual data.
+Most of the current storage solutions are
+an ad-hoc collection of tools combined with custom scripts to tie them
+together, unique not only to a specific discipline but often to individual
+researchers. For example, consider an ML developer constructing a pipeline
+for extracting brain tumor information from existing brain images in a
+classic medical imaging use case. This requires assigning consistent
+identifiers for the scans and adding their metadata in
+some form of relational or key-value database. If the queries require
+search over some patient information, then patients have to be associated
+with their brain scans. Finally, if the ML pipeline needs images that
+are of a size different than the stored ones, there is additional compute
+diverted towards preprocessing after the potentially larger images are
+fetched. All these steps require investigation of different software
+solutions that provide various functionalities that can then be stitched
+together with a script for this specific use case.
+Moreover, if the pipeline identifies
+new metadata to be added for the tumor images, most databases make it
+hard to evolve the schema on the fly.
+Not only do these ad hoc solutions make replicating experiments
+difficult, they do not scale well to real-world applications.
+Addressing the storage and retrieval of visual data necessitates a complete
+overhaul of the storage architecture,
+preferably using emerging breakthroughs in
+heterogeneous memory and storage for efficiency.
+
+We present the Visual Data Management System (VDMS)\cite{darkside},
+an Open Source project designed to enable efficient access of visual data.
+Since visual data often contains
+rich metadata (such as objects, locations, and time), VDMS stores this
+information in a high performance graph database. Using this metadata, VDMS
+can quickly identify which data is relevant to a given query.
+Additionally, VDMS uses a custom library to store and retrieve visual data,
+which provides an interface for machine friendly formats as well as
+traditional formats. These new formats are designed to support applications
+that are often interested in specific areas of images or videos,
+particularly when the individual object is large.
+
+While there are a number of big-data frameworks~\cite{spark, hadoop}, systems
+that can be used to store metadata~\cite{memsql, vertica}, and systems that
+manipulate a specific category of visual data~\cite{scidb, rasdaman}, VDMS can
+be distinguished from them on the following aspects:
+
+\begin{itemize}
+\item {\em Design for analytics and machine learning}: by targeting
+visual data for use cases that require manipulation
+of visual information and associated metadata,
+\item {\em Ease-of-use}: By defining a common API that allows applications to
+combine their complex metadata searches with operations on resulting visual
+data, and together with full support for feature vectors, VDMS goes beyond the
+traditional SQL or OpenCV level interfaces that do one or the other. Given our
+focus on enabling machine learning, we also provide a client API in Python.
+\item {\em Performance}: We show how a unified system such as VDMS can
+outperform an ad-hoc system constructed with well-known discrete components.
+Because of the capabilities we have built into VDMS, it handles complex
+queries significantly better than the ad-hoc system without compromising the
+performance of simple queries.
+\end{itemize}

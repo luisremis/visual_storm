@@ -1,0 +1,173 @@
+% THIS IS AN EXAMPLE DOCUMENT FOR VLDB 2012
+% based on ACM SIGPROC-SP.TEX VERSION 2.7
+% Modified by  Gerald Weber <gerald@cs.auckland.ac.nz>
+% Removed the requirement to include *bbl file in here. (AhmetSacan, Sep2012)
+% Fixed the equation on page 3 to prevent line overflow. (AhmetSacan, Sep2012)
+
+\documentclass{vldb}
+\usepackage{graphicx}
+\usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
+\usepackage{hyperref}       % hyperlinks
+\usepackage{graphicx}
+\usepackage{comment}
+\usepackage{multicol}
+\usepackage{framed}
+\usepackage{subcaption}
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{amsmath}
+
+% Include information below and uncomment for camera ready
+\vldbTitle{A Sample Proceedings of the VLDB Endowment Paper in LaTeX Format}
+\vldbAuthors{Ben Trovato, G. K. M. Tobin, Lars Th{\sf{\o}}rv{$\ddot{\mbox{a}}$}ld, Lawrence P. Leipuner, Sean Fogarty, Charles Palmer, John Smith, Julius P.~Kumquat, and Ahmet Sacan}
+\vldbDOI{https://doi.org/10.14778/xxxxxxx.xxxxxxx}
+\vldbVolume{12}
+\vldbNumber{xxx}
+\vldbYear{2019}
+
+\begin{document}
+
+% ****************** TITLE ****************************************
+
+\title{Using VDMS to Search 100M Images: A Piece of Cake}
+
+
+% possible, but not really needed or used for PVLDB:
+%\subtitle{[Extended Abstract]
+%\titlenote{A full version of this paper is available 
+% as\textit{Author's Guide to Preparing ACM SIG Proceedings Using 
+% \LaTeX$2_\epsilon$\ and BibTeX} at \texttt{www.acm.org/eaddress.htm}}}
+
+% ****************** AUTHORS **************************************
+
+% You need the command \numberofauthors to handle the 'placement
+% and alignment' of the authors beneath the title.
+%
+% For aesthetic reasons, we recommend 'three authors at a time'
+% i.e. three 'name/affiliation blocks' be placed beneath the title.
+%
+% NOTE: You are NOT restricted in how many 'rows' of
+% "name/affiliations" may appear. We just ask that you restrict
+% the number of 'columns' to three.
+%
+% Because of the available 'opening page real-estate'
+% we ask you to refrain from putting more than six authors
+% (two rows with three columns) beneath the article title.
+% More than six makes the first-page appear very cluttered indeed.
+%
+% Use the \alignauthor commands to handle the names
+% and affiliations for an 'aesthetic maximum' of six authors.
+% Add names, affiliations, addresses for
+% the seventh etc. author(s) as the argument for the
+% \additionalauthors command.
+% These 'additional authors' will be output/set for you
+% without further effort on your part as the last section in
+% the body of your article BEFORE References or any Appendices.
+
+\numberofauthors{8} %  in this sample file, there are a *total*
+% of EIGHT authors. SIX appear on the 'first-page' (for formatting
+% reasons) and the remaining two appear in the \additionalauthors section.
+
+\author{
+% You can go ahead and credit any number of authors here,
+% e.g. one 'row of three' or two rows (consisting of one row of three
+% and a second row of one, two or three).
+%
+% The command \alignauthor (no curly braces needed) should
+% precede each author name, affiliation/snail-mail address and
+% e-mail address. Additionally, tag each line of
+% affiliation/address with \affaddr, and tag the
+% e-mail address with \email.
+%
+% Authors
+\alignauthor
+Luis Remis\titlenote{Most of the work was done while at Intel Labs.}\\
+%       \affaddr{Institute for Clarity in Documentation}\\
+%       \affaddr{1932 Wallamaloo Lane}\\
+       \affaddr{ApertureData Inc.}\\
+       \email{luis@aperturedata.io}
+\alignauthor
+Chaunte Lacewell\\
+%       \affaddr{Institute for Clarity in Documentation}\\
+%       \affaddr{P.O. Box 1212}\\
+       \affaddr{Intel Labs}\\
+       \email{chaunte.w.lacewell@intel.com}
+}
+% There's nothing stopping you putting the seventh, eighth, etc.
+% author on the opening page (as the 'third row') but we ask,
+% for aesthetic reasons that you place these 'additional authors'
+% in the \additional authors block, viz.
+%\additionalauthors{Additional authors: John Smith (The Th{\o}rv\"{a}ld Group, {\texttt{jsmith@affiliation.org}}), Julius P.~Kumquat
+%(The \raggedright{Kumquat} Consortium, {\small \texttt{jpkumquat@consortium.net}}), and Ahmet Sacan (Drexel University, {\small \texttt{ahmetdevel@gmail.com}})}
+%\date{30 July 1999}
+% Just remember to make sure that the TOTAL number of authors
+% is the number that will appear on the first page PLUS the
+% number that will appear in the \additionalauthors section.
+
+
+\maketitle
+
+\begin{abstract}
+We introduce the Visual Data Management System (VDMS),
+which enables faster access to big-{\em visual}-data
+and adds support to visual analytics.
+This is achieved by searching for relevant visual data via metadata stored as
+a graph, and enabling faster access to visual data through new
+machine-friendly storage formats. VDMS differs from existing large scale photo
+serving, video streaming, and textual big-data management systems due to
+its primary focus on supporting machine learning and
+data analytics pipelines that use visual data
+(images, videos, and feature vectors), treating these as first class entities.
+We describe how to use VDMS via its user friendly interface and how
+it enables rich and efficient vision analytics through a machine learning
+pipeline for processing medical images. We show the improved
+performance of 2x in complex queries over a comparable set-up.
+\end{abstract}
+
+\input{intro.tex}
+\input{design.tex}
+%\input{demo.tex}
+%\input{conclusion.tex}
+
+% \balance
+
+% The following two commands are all you need in the
+% initial runs of your .tex file to
+% produce the bibliography for the citations in your paper.
+\bibliographystyle{abbrv}
+\bibliography{vdms-vldb2020}
+% vldb_sample.bib is the name of the Bibliography in this case
+% You must have a proper ".bib" file
+%  and remember to run:
+% latex bibtex latex latex
+% to resolve all references
+
+\input{legal.tex}
+
+\subsection{References}
+Generated by bibtex from your ~.bib file.  Run latex,
+then bibtex, then latex twice (to resolve references).
+
+%APPENDIX is optional.
+% ****************** APPENDIX **************************************
+% Example of an appendix; typically would start on a new page
+%pagebreak
+
+\begin{appendix}
+You can use an appendix for optional proofs or details of your evaluation which are not absolutely necessary to the core understanding of your paper. 
+
+\section{Final Thoughts on Good Layout}
+Please use readable font sizes in the figures and graphs. Avoid tempering with the correct border values, and the spacing (and format) of both text and captions of the PVLDB format (e.g. captions are bold).
+
+At the end, please check for an overall pleasant layout, e.g. by ensuring a readable and logical positioning of any floating figures and tables. Please also check for any line overflows, which are only allowed in extraordinary circumstances (such as wide formulas or URLs where a line wrap would be counterintuitive).
+
+Use the \texttt{balance} package together with a \texttt{\char'134 balance} command at the end of your document to ensure that the last page has balanced (i.e. same length) columns.
+
+\end{appendix}
+
+
+
+\end{document}
