@@ -11,6 +11,13 @@ visual data.
 VDMS and its components are fully available as open source tools
 \footnote{https://github.com/IntelLabs/\{vdms, pmgd, vcl\}}.
 
+\begin{figure}[]
+\centering
+\includegraphics[width=1\columnwidth]{figures/vdms_arch.pdf}
+\caption{VDMS Architecture}
+\label{fig:arch}
+\end{figure}
+
 \textbf{Persistent Memory Graph Database:}
 Recent developments in persistent memory technologies
 like 3D XPoint~\cite{IntelXPoint15}
@@ -89,19 +96,19 @@ metadata and data requests, invokes the relevant calls behind the scene,
 and returns a coherent response to the user after applying any additional
 operations (explained in the next section).
 
-% \textbf{Client Library:}
-% A user application can use the VDMS API by defining metadata conforming to the
-% query protocol we have defined and passing along blobs. The client side VDMS
-% library provides a simple query function that accepts a JSON string with
-% commands and an array or vector of blobs.
-% Internally, the library wraps the query string and blob using Google Protobufs
-% and sends it to VDMS. It also receives a similarly wrapped response from VDMS
-% and returns it to the client. The responses require JSON parsing on the client
-% side for the metadata string that indicates how to interpret blobs.
-% VDMS provides Python and C++ client libraries with mainly
-% one function: a query that passes metadata as a JSON string and,
-% optionally, data as a vector of blobs. The VDMS client library manages the
-% rest.
+\textbf{Client Library:}
+A user application can use the VDMS API by defining metadata conforming to the
+query protocol we have defined and passing along blobs. The client side VDMS
+library provides a simple query function that accepts a JSON string with
+commands and an array or vector of blobs.
+Internally, the library wraps the query string and blob using Google Protobufs
+and sends it to VDMS. It also receives a similarly wrapped response from VDMS
+and returns it to the client. The responses require JSON parsing on the client
+side for the metadata string that indicates how to interpret blobs.
+VDMS provides Python and C++ client libraries with mainly
+one function: a query that passes metadata as a JSON string and,
+optionally, data as a vector of blobs. The VDMS client library manages the
+rest.
 
 \section{VDMS API}
 \label{arch}
@@ -123,7 +130,7 @@ We have developed Python and C++ client
 library to provide a simple query function that accepts a JSON string with
 commands and an array or vector of blobs.
 
-\begin{comment} 
+\begin{comment}
 % All of the folliwng is commented out.
 
 \begin{figure}[ht!]
@@ -159,7 +166,7 @@ Adding new operations to VDMS is easy, as our software architecture
 encapsulates all operations in VCL, and any new operation can use
 or wrap around OpenCV, which is used internally.
 
-\end{comment} 
+\end{comment}
 % End of Comment
 
 
