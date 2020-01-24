@@ -4,15 +4,9 @@
 \subsection{YFCC100M Dataset}
 \label{dataset}
 
-\textbf{\textit{Here goes an explanation of the dataset and all the source
-(images, metadata, videos, features).}}
-
-We use the Yahoo! Flickr Creative Commons 100m (YFCC100M) dataset ~\cite{Thomee_2016} for a large collection of 100 million public Flickr media objects.  This dataset contains approximately 99.2 million images and 0.8 million videos along with respective metadata characterized by 25 fields such as the identifier (metaid), the user who created the media (image/video), the date the media was taken and uploaded, the longitude/latitude it was taken, and the device the media was captured from.  The metadata also provides information including the URL to download the media, a title, a description of the media, user and machine tags, and license information.  To understand the content of the media, the YFCC100M also provides autotags which is a set of comma-separated tags and confidence scores generated from 1,570 trained Caffe binary SVM classifiers.  
+We use the Yahoo! Flickr Creative Commons 100m (YFCC100M) dataset ~\cite{Thomee_2016} for a large collection of 100 million public Flickr media objects.  This dataset contains approximately 99.2 million images and 0.8 million videos along with respective metadata characterized by 25 fields such as the identifier (metaid), the user who created the media (image/video), the date the media was taken and uploaded, the location in longitude/latitude coordinates, and the device the media was captured.  The metadata also provides information including the URL to download the media, a title, a description of the media, user and machine tags, and license information.  To understand the content of the media, the YFCC100M also provides autotags which is a set of comma-separated tags and confidence scores generated from 1,570 trained Caffe binary SVM classifiers.  
 
 \subsection{Experimental Setup}
-
-\textbf{\textit{Here goes explanation of the comparison systems.
-Need versions of MySQL, OS, amount of memory and CPU info.}}
 
 \begin{figure*}[]
 \centering
@@ -21,16 +15,18 @@ Need versions of MySQL, OS, amount of memory and CPU info.}}
 \label{fig:systems}
 \end{figure*}
 
-As a baseline, we implemented a similar database system, depicted in Figure~\ref{fig:systems}, with popular components: MySQL Server 5.7, Apache Web Server, and OpenCV.  Each database system used the following configuration: Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} Platinum 8180 CPU @ 2.50GHz (Skylake) server running Ubuntu 16.04.  
+As a baseline, we implemented a similar database system, depicted in Figure~\ref{fig:systems}, comprised of a combination of widely available and out-of-the-box components: MySQL Server 5.7, Apache Web Server, and OpenCV.  Each database system used the following configuration: Intel\textsuperscript{\textregistered} Xeon\textsuperscript{\textregistered} Platinum 8180 CPU @ 2.50GHz (Skylake) server running Ubuntu 16.04.  
  
-For the experiments, we built VDMS and MySQL databases for the YFCC100M dataset for dataset sizes 100k, 500k, 1M, 5M, 10M, 50M, and 100M. The VDMS Python client library was used to build queries to insert the necessary elements to build the database.  In the database, we insert the edges for the 1570 autotags and the YFCC media objects with the appropriate metadata. To add the autotag confidence scores, we parse the autotag data and add a connection between the media object and tag edges with metadata denoting its appropriate confidence score. Table~\ref{table:vdmsedges} shows the number of elements in each database.  
+For the experiments, we built VDMS and MySQL databases for the YFCC100M dataset sizes 100k, 500k, 1M, 5M, 10M, 50M, and 100M. The VDMS Python client library was used to add the necessary elements to the database.  In the database, we insert the nodes for the 1,570 autotags and the YFCC media objects with the appropriate metadata. To add the autotag confidence scores, we parse the autotag data and add a connection between the media object and tag nodes with metadata denoting its appropriate confidence score. Table~\ref{table:vdmsnodes} shows the number of elements in each database.  
+
+Alternatively, three tables were created for the MySQL system: taglist, metadata, and autotags.  The number of rows in the MySQL databases are shown in Table~\ref{table:mysqltables}. The taglist table contains the 1,570 autotags where each entry is given an integer key named tagid.  The metadata table contains image metadata where the metadata identifier is the primary key. The autotags table contains the confidence scores for the generated autotags for metadata entries of the metadata table.  This table also relates the other two tables and includes the tagid associated with the autotag and the metaid associated with the metadata identifier which are both keys to allow faster retrieval of data. 
 
 \begin{table}[h]
-\caption{Edges in VDMS database}
+\caption{Nodes in VDMS database}
 \centering
 \begin{tabular}{c c c c}
 \hline\hline
-Database Size & No. Connections & Metadata (Images) & Autotags\\
+Database Size & Connections & Images & Autotags\\
 \hline
 100k & 848,432 & 100,000 & 1,570\\
 500k & 4,249,500 & 500,000 & 1,570\\
@@ -41,11 +37,8 @@ Database Size & No. Connections & Metadata (Images) & Autotags\\
 100M & 895,572,430 & 99,205,984 & 1,570\\
 \hline
 \end{tabular}
-\label{table:vdmsedges}
+\label{table:vdmsnodes}
 \end{table}
-
-Alternatively, three tables were created for the MySQL system: taglist, metadata, and autotags.  The number of rows in the MySQL databases are shown in Table~\ref{table:mysqltables}. The taglist table contains the 1570 YFCC100M autotags where each entry is given an integer key named tagid.  The metadata table contains image metadata where the metadata identifier is the primary key. The autotags table contains the confidence scores for the generated autotags for metadata entries of the metadata table, the tagid associated with the autotag, and the metaid associated with the metadata identifier. 
-
 
 \begin{table}[h]
 \caption{Rows in MySQL database}
@@ -68,7 +61,7 @@ Database Size & Autotags & MetaData & Tag List\\
 \label{table:mysqltables}
 \end{table}
 
-The VDMS and MySQL databases have comparable number of elements as shown in Table~\ref{table:vdmsedges} and ~\ref{table:mysqltables} but on average it takes MySQL 3.7x hours longer to build than VDMS. Figure~\ref{fig:db_time_size} compares the time to build and the size of the VDMS and MySQL databases. VDMS requires approximately 1.4x more storage than MySQL each database.  This is due to the need to store relationship information for the graph database.
+The VDMS and MySQL databases have comparable number of elements as shown in Table~\ref{table:vdmsnodes} and ~\ref{table:mysqltables} but VDMS outperforms MySQL in build speed.  Figure~\ref{fig:db_time_size} illustrates how VDMS can build databases faster than MySQL as the database size grows.  On average, it took MySQL 3.72x hours longer to build than VDMS. For example, to build the 100M database, MySQL took 263 hours while VDMS only needed 72.5 hours.  This is a difference of over a week of processing data with VDMS missing less than 0.001\% images and 0.048\% connections from the entire dataset.  Alternatively, VDMS requires more storage, shown in Figure~\ref{fig:db_time_size}, to store relationship information about each node/connection.  This may become a factor if storage is a limitation but for the YFCC databases, VDMS required 30-41\% more storage than MySQL.
 
 \begin{figure}[]
 \centering
@@ -82,10 +75,11 @@ The VDMS and MySQL databases have comparable number of elements as shown in Tabl
 
 \textbf{\textit{Explanation of the evaluation and description of some of the queries.}}
 
+
 \begin{figure}[]
 \centering
 \includegraphics[width=\columnwidth]{figures/concurrency_vdms}
-\caption{Concurrency Analisys - VDMS}
+\caption{Concurrency Analysis - VDMS}
 \label{fig:concurrency_vdms}
 \end{figure}
 
@@ -95,6 +89,8 @@ The VDMS and MySQL databases have comparable number of elements as shown in Tabl
 \caption{Query 1 - Latency}
 \label{fig:q1_latency}
 \end{figure}
+
+Figure~\ref{fig:q1_latency} illustrates the performance of a simple query (find metadata/images for an alligator and resize the image to 224x224) over 15 iterations. In this case, the performance of VDMS is always better than MySQL and increases as the size of the database grows.  For the 100M database, the VDMS metadata and image query times are almost \textbf{6x?} and \textbf{3x?} faster than MySQL, respectively.  
 
 \begin{figure}[t!]
 \centering
@@ -140,3 +136,4 @@ were ingested and handled.}}
 \caption{Feature Collection Size in Disk}
 \label{fig:features_size_does_matter}
 \end{figure*}
+
