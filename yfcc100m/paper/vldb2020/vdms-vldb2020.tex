@@ -111,20 +111,26 @@ Chaunt\'e W. Lacewell\\
 \maketitle
 
 \begin{abstract}
-We introduce the Visual Data Management System (VDMS),
-which enables faster access to big-{\em visual}-data
-and adds support to visual analytics.
-This is achieved by searching for relevant visual data via metadata stored as
-a graph, and enabling faster access to visual data through new
-machine-friendly storage formats. VDMS differs from existing large scale photo
+Data scientists spend most of their time dealing with data preparation,
+rather than doing what they know best:
+build machine learning models and algorithms to solve problems.
+The problem grows as the scale of the data that is used for analysis or training
+grows. In this paper, we demonstrate how VDMS (Visual Data Management System)
+can be used to simplify the data preparation process and we show how we gain
+in efficient just because we are using a tool that was design for the job.
+To demonstrate this, we use the largest available public dataset (YFCC100M),
+with 99+ million images, 800+ thousand videos plus add-ons that include
+machine-generated tags and 4K dimensional feature vectors,
+a total of ± 13TB of data.
+VDMS differs from existing large scale photo
 serving, video streaming, and textual big-data management systems due to
 its primary focus on supporting machine learning and
 data analytics pipelines that use visual data
-(images, videos, and feature vectors), treating these as first class entities.
-We describe how to use VDMS via its user friendly interface and how
-it enables rich and efficient vision analytics through a machine learning
-pipeline for processing medical images. We show the improved
-performance of 2x in complex queries over a comparable set-up.
+(images, videos, and feature vectors), treating these as first class citizens.
+We demonstrate how VDMS outperforms well-know and widely used tools for
+data access by a 10x factor in certain queries, while simplifying the process
+of data preparation and data access, and providing functionalities non-existent
+in alternative options.
 \end{abstract}
 
 \input{intro.tex}
@@ -144,7 +150,7 @@ performance of 2x in complex queries over a comparable set-up.
 \bibliography{vdms-vldb2020}
 % vldb_sample.bib is the name of the Bibliography in this case
 % You must have a proper ".bib" file
-%  and remember to run:
+% and remember to run:
 % latex bibtex latex latex
 % to resolve all references
 
@@ -170,7 +176,5 @@ At the end, please check for an overall pleasant layout, e.g. by ensuring a read
 Use the \texttt{balance} package together with a \texttt{\char'134 balance} command at the end of your document to ensure that the last page has balanced (i.e. same length) columns.
 
 \end{appendix}
-
-
 
 \end{document}
