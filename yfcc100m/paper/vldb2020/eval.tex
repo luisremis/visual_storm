@@ -229,7 +229,6 @@ MySQL in metadata throughput while 32 clients is similar but not as high.
 The overall performance for both MySQL and VDMS is better with 56 clients;
 therefore, we used this value for our per-query analysis.
 
-
 \begin{figure}[]
 \centering
 \includegraphics[width=\columnwidth]{figures/q1_latency}
@@ -237,18 +236,84 @@ therefore, we used this value for our per-query analysis.
 \label{fig:q1_latency}
 \end{figure}
 
-
 \subsection{Videos}
 
-\textbf{\textit{Explanation of the video queries and comparison.
-Explain concurrency.}}
-
-\begin{figure*}[]
+\begin{figure*}[ht!]
 \centering
 \includegraphics[width=\textwidth]{figures/video_overhead}
-\caption{Concurrency and Overhead}
+\caption{Concurrency (left) and Overhead (right)}
 \label{fig:video}
 \end{figure*}
+
+VDMS provides full support for video storage and operations.
+This includes support for encoding/decoding and trans-coding of mp4, avi, and
+mov containers, as well as support for xvid, H.263 and H.264 encoders.
+This is supported through the Visual Compute Module that provides an abstraction
+layer on top of OpenCV (and ffmpeg directly).
+All the operations supported for images in VDMS are also supported at the
+video and frame level on the API. On top of that, there are a number of
+video-specific operations that are supported, such as the interval operations,
+that allow users to retrieve clips at different FPS versions of the video.
+
+All this functionality is provided and integrated with the rest of the
+metadata API as part of the comprehensive VDMS interface. This makes it
+possible for users to interact with metadata and video in a transactional
+manner, enabling users to run queries like: "Retrieve all the videos
+where there is a lake with probability higher than X, converting all videos
+to H.264 mp4 of size 224x244".
+In particular, this functionality was used internally to select a subset
+of videos with the right licenses for a video summarization application.
+
+To the best of our knowledge, there is no solution that can provide
+all the functionality mentioned above. Also, implementing a baseline is a very
+complex task as there is a large number of options and parameters that can
+be chosen, which makes it hard to accurately compare against VDMS functionality.
+For this reason, we chose to make a study using VDMS in various scenarios,
+and analysis what is the impact of having the overhead of VDMS' Request
+Server in the overall access time.
+
+Figure \ref{fig:video} shows the analysis of different queries aimed to retrieve
+a video using VDMS interface. We show how VDMS increases throughput of serving
+a video object as the number of simultaneous client increases, as well as the
+overhead VDMS introduces in the overall query execution time.
+The figure on the left compares the number of video transaction per second
+(i.e., number of videos returned per second) when different operations
+are executed as part of the transaction. The upper-bound of this would be
+simply returning the video as-is (without running any encoding/decoding or
+operation), represented by the red line. This query is the upper-limit because
+it essentially translates to reading the video from the file-system and sending
+it over a TCP/IP socket, without any other overhead or operations.
+
+We also run a set of other queries that involve: (a) running a resize operation
+on the video and, consequently, needs a decoding and
+encoding operations as well (blue line),
+(b) transcoding, meaning the use a different container and encoder
+than the one originally used (yellow line), and (c) both resize and transcoding.
+Note that the resize operation performs a downsize, which translates in less
+data being sent over the wire. This is specially noticeable when supporting 32
+simultaneous clients, where the systems provides more videos per second due to
+sending less data to the client, when compares to just transcoding and not resizing (yellow line).
+
+We can see that the system performs best when using all the physical cores.
+COMPLETE THIS BETTER.
+
+Because we see almost 3 orders of magnitude drop in performance when including
+operations as part of the query, we wanted to understand where most of the time
+was spent on the query, and optimize the Request Server and Visual Compute Module
+if necessary. For this, we run the experiment shown at
+Figure \ref{fig:video} (right) which breaks down the different components of the
+queries. This figure shows that more than 97\% of the query execution is spent
+on encoding/decoding operations, which is well-known to be a
+heavy and compute intensive operation.
+On the one hand, this results show that VDMS introduced overhead for
+video operation is minimal. On the other hand, this result means a
+limit on the opportunities for optimization for video queries given
+that biggest time factors are accounted by encoding/decoding, which is
+outside the scope of VDMS.
+This result also was the inspiration point for one optimization we included
+in future versions of VDMS, which involves using ffmpeg C++ API to
+limit the number of frames being encoding/decoding when possible.
+
 
 \subsection{Feature Vectors}
 
@@ -268,6 +333,7 @@ the newly inserted feature vectors.
 By natively supporting feature vectors and knn,
 VDMS allows out-of-the-box classification
 functionalities for many applications.
+
 
 % Figure~\ref{fig:features} shows an example of how this functionality
 % can be integrated in a medical imaging analytics pipeline:

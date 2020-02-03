@@ -26,10 +26,6 @@ as it involves loading all metadata into a solution that enables searched
 based on tags (relational database, graph database, csv files, etc), and
 building the necessary pipelines for querying and retrieving the right data.
 
-Data scientist and machine learning developers usually end up building ad-hoc
-solutions through a combination of databases and file systems to store metadata
-and visual data (images, videos), respectively.
-
 Despite this rich and varied usage environment, there has been very little
 research on the management of visual data.
 Most of the current storage solutions are
@@ -57,6 +53,19 @@ overhaul of the storage architecture,
 preferably using emerging breakthroughs in
 heterogeneous memory and storage for efficiency.
 
+Data scientist and machine learning developers usually end up building ad-hoc
+solutions through a combination of databases and file systems to store metadata
+and visual data (images, videos), respectively.
+
+In this paper, we also expand on the Video and Feature Vector capabilities of
+VDMS, which are part of the latest additions to the system.
+We analyse different functionalities and trade-offs for this type of data,
+in combination with metadata filtering. To the best of out knowledge, this
+set of functionalities are unique to VDMS and we were not able to find a system
+with similar functionality.
+
+\begin{comment}
+
 We present the Visual Data Management System (VDMS)\cite{darkside},
 an Open Source project designed to enable efficient access of visual data.
 Since visual data often contains
@@ -68,3 +77,5 @@ which provides an interface for machine friendly formats as well as
 traditional formats. These new formats are designed to support applications
 that are often interested in specific areas of images or videos,
 particularly when the individual object is large.
+
+\end{comment}
