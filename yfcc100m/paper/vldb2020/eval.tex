@@ -31,11 +31,10 @@ each CPU with 28 physical cores with multithreading enabeled,
 for a total of 112 logical cores per server.
 The server hosting MySQL has 256GB of DDR4 DRAM, while the server hosting VDMS
 has 64GB of DDR4 DRAM. Both servers run Ubuntu 16.04.
-We use MySQL version XXXXX.
 
 As a baseline, we implemented a similar database system comprised of a
 combination of widely available and out-of-the-box components: MySQL Server 5.7,
-Apache Web Server, and OpenCV.
+Apache Web Server 2.4.18, and OpenCV 3.3.
 Figure \ref{figure:systems} shows a logical view of the difference between the
 interaction of the client application (which wants to retrieve metadata and
 imaged) with VDMS (left) and the baseline (right).
@@ -251,6 +250,42 @@ Explain concurrency.}}
 \end{figure*}
 
 \subsection{Feature Vectors}
+
+Another key differentiating factor of VDMS is that it allows the creation of
+indexes for high-dimensional feature vectors and the insertion of
+these feature vectors associated with entities or visual objects.
+Feature vectors are intermediate results of various machine
+learning or computer vision algorithms when run on visual data.
+These vectors can be labeled and classified to build search indexes,
+and there are many in-memory libraries that are designed for
+this task~\cite{flann, faiss}.
+Using the VDMS API, users can manage feature vector indexes,
+query previously inserted elements (images),
+run a k-nearest neighbor search (knn) and express relationships
+between existing images or feature vectors and
+the newly inserted feature vectors.
+By natively supporting feature vectors and knn,
+VDMS allows out-of-the-box classification
+functionalities for many applications.
+
+% Figure~\ref{fig:features} shows an example of how this functionality
+% can be integrated in a medical imaging analytics pipeline:
+% (1) A feature vector is extracted from an bounding
+% box in a brain image and labeled;
+% (2) the feature vector is inserted together
+% with all the associated metadata (type of cancer, for example)
+% and a link to the original image.
+% (3) A new feature vector is extracted from a new image,
+% (4) a query to VDMS is issued to classify that feature vector based on the
+% indexed features in VDMS, and
+% (5) VDMS can respond to the query with the label
+% associated to that feature vector.
+% Note that, even if the example is based on the medical images used for the
+% performance evaluation, this methodology is applicable in many other contexts
+% and use cases, such as face detection and matching.
+% More details about the JSON API for this functionality can be found on
+% our Github wiki page.
+
 
 \textbf{\textit{Explain different engines supported, and how the features vectors
 were ingested and handled.}}

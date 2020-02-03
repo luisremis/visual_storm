@@ -51,23 +51,4 @@ traditional formats. These new formats are designed to support applications
 that are often interested in specific areas of images or videos,
 particularly when the individual object is large.
 
-While there are a number of big-data frameworks~\cite{spark, hadoop}, systems
-that can be used to store metadata~\cite{memsql, vertica}, and systems that
-manipulate a specific category of visual data~\cite{scidb, rasdaman}, VDMS can
-be distinguished from them on the following aspects:
 
-\begin{itemize}
-\item {\em Design for analytics and machine learning}: by targeting
-visual data for use cases that require manipulation
-of visual information and associated metadata,
-\item {\em Ease-of-use}: By defining a common API that allows applications to
-combine their complex metadata searches with operations on resulting visual
-data, and together with full support for feature vectors, VDMS goes beyond the
-traditional SQL or OpenCV level interfaces that do one or the other. Given our
-focus on enabling machine learning, we also provide a client API in Python.
-\item {\em Performance}: We show how a unified system such as VDMS can
-outperform an ad-hoc system constructed with well-known discrete components.
-Because of the capabilities we have built into VDMS, it handles complex
-queries significantly better than the ad-hoc system without compromising the
-performance of simple queries.
-\end{itemize}

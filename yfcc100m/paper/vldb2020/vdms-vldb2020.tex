@@ -19,6 +19,7 @@
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 \usepackage{amsmath}
+\usepackage{mathtools}
 
 % Include information below and uncomment for camera ready
 \vldbTitle{A Sample Proceedings of the VLDB Endowment Paper in LaTeX Format}
@@ -117,18 +118,20 @@ build machine learning models and algorithms to solve problems.
 The problem grows as the scale of the data that is used for analysis or training
 grows. In this paper, we demonstrate how VDMS (Visual Data Management System)
 can be used to simplify the data preparation process and we show how we gain
-in efficient just because we are using a tool that was design for the job.
-To demonstrate this, we use the largest available public dataset (YFCC100M),
+in efficiency just because we are using a tool that was design for the job.
+To demonstrate this, we use one of the largest available
+public dataset (YFCC100M),
 with 99+ million images, 800+ thousand videos plus add-ons that include
 machine-generated tags and 4K dimensional feature vectors,
-a total of ± 13TB of data.
+a total of $\sim$13TB of data.
 VDMS differs from existing large scale photo
 serving, video streaming, and textual big-data management systems due to
 its primary focus on supporting machine learning and
 data analytics pipelines that use visual data
 (images, videos, and feature vectors), treating these as first class citizens.
 We demonstrate how VDMS outperforms well-know and widely used tools for
-data access by a 10x factor in certain queries, while simplifying the process
+data access by a $\sim$10x factor in certain queries,
+while simplifying the process
 of data preparation and data access, and providing functionalities non-existent
 in alternative options.
 \end{abstract}
@@ -141,9 +144,9 @@ in alternative options.
 
 \section{Acknowledgments}
 
-We have to acknowledge Philip, Vishakha, Nilesh, and any other reviewer.
+We have to acknowledge Philip and Vishakha for help in fixing PMGD bug,
+Nilesh for his help/input, and any other reviewer.
 
-% \balance
 
 \clearpage
 
@@ -169,15 +172,16 @@ We have to acknowledge Philip, Vishakha, Nilesh, and any other reviewer.
 % Example of an appendix; typically would start on a new page
 %pagebreak
 
+\balance
 \begin{appendix}
 You can use an appendix for optional proofs or details of your evaluation which are not absolutely necessary to the core understanding of your paper.
 
-\section{Final Thoughts on Good Layout}
-Please use readable font sizes in the figures and graphs. Avoid tempering with the correct border values, and the spacing (and format) of both text and captions of the PVLDB format (e.g. captions are bold).
+% \section{Final Thoughts on Good Layout}
+% Please use readable font sizes in the figures and graphs. Avoid tempering with the correct border values, and the spacing (and format) of both text and captions of the PVLDB format (e.g. captions are bold).
 
-At the end, please check for an overall pleasant layout, e.g. by ensuring a readable and logical positioning of any floating figures and tables. Please also check for any line overflows, which are only allowed in extraordinary circumstances (such as wide formulas or URLs where a line wrap would be counterintuitive).
+% At the end, please check for an overall pleasant layout, e.g. by ensuring a readable and logical positioning of any floating figures and tables. Please also check for any line overflows, which are only allowed in extraordinary circumstances (such as wide formulas or URLs where a line wrap would be counterintuitive).
 
-Use the \texttt{balance} package together with a \texttt{\char'134 balance} command at the end of your document to ensure that the last page has balanced (i.e. same length) columns.
+% Use the \texttt{balance} package together with a \texttt{\char'134 balance} command at the end of your document to ensure that the last page has balanced (i.e. same length) columns.
 
 \end{appendix}
 
