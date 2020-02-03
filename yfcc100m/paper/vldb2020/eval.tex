@@ -297,6 +297,8 @@ sending less data to the client, when compares to just transcoding and not resiz
 We can see that the system performs best when using all the physical cores.
 COMPLETE THIS BETTER.
 
+WE SHOULD ADD HERE SAMPLES OF THE QUERYS TO SHOW HOW THESE ARE RETRIEVED.
+
 Because we see almost 3 orders of magnitude drop in performance when including
 operations as part of the query, we wanted to understand where most of the time
 was spent on the query, and optimize the Request Server and Visual Compute Module
@@ -334,6 +336,7 @@ By natively supporting feature vectors and knn,
 VDMS allows out-of-the-box classification
 functionalities for many applications.
 
+For this work, we wanted to
 
 % Figure~\ref{fig:features} shows an example of how this functionality
 % can be integrated in a medical imaging analytics pipeline:
@@ -354,8 +357,12 @@ functionalities for many applications.
 % our Github wiki page.
 
 
-\textbf{\textit{Explain different engines supported, and how the features vectors
-were ingested and handled.}}
+\begin{figure*}[]
+\centering
+\includegraphics[width=\textwidth]{figures/feature_img_results}
+\caption{Sample Results of Similarity Search}
+\label{fig:similarity}
+\end{figure*}
 
 \begin{figure*}[]
 \centering
