@@ -100,20 +100,55 @@ The VDMS and MySQL databases have comparable number of elements as shown in Tabl
 
 \subsection{Images + Metadata}
 
-To evaluate the access to metadata and images, we use the following four queries:
+In order to evaluate VDMS and the baseline on certain queries, we
+implement 4 queries that would enable us to retrieve certain specific images.
+We choose these queries because they represent typical use-case where a
+cohort of images is to be retrieve and processed from a large corpus of data.
+We use the metadata associated to the images to filter said images.
+In particular, this dataset contains a set of around 1500 machine generated
+tags to each image.
+Tags includes things like objects (chair, person, people, etc), and
+concepts like places (indoor, outdoor, lake) and others (party, etc).
+Together with each tag, a probability is assign.
+This is, an image can have the tags people, person, party, outdoor, and each
+tag will be accompanied by a probability of that tag in that image.
+We represent that probability
+On average there are 8 tags assigned to each image.
+Also, some images have geo-location information (latitude/longitude).
+
+We use the tags (because they contain information about the content of
+the image), as well as the geo-location (as an example of searchable properties
+of the images).
+
+On top of that, we assume the use case of further processing of images
+through the use of ML, such as Convolutional Neural Networks TODO-CITE HERE.
+For this, we resize the images to 224x224, which is the input layer size for
+a popular neural network for object detection on images: ResNet TODO-CITEHERE.
+
+To evaluate the access to metadata and images,
+we use the following four queries:
 \begin{enumerate}
-\item {\bf {\em 1tag}}: Find metadata/images of alligator.
-\item {\bf {\em 1tag\_resize}}: Find metadata/images of alligator and resize to 224x224.
-\item {\bf {\em 1tag\_resize\_geo}}: Find metadata/images of alligator, resize to 224x224, and in a particular geolocation (20 degrees radius).
-\item {\bf {\em 2tag\_resize}}: Find metadata/images of BOTH alligator and lake and resize to 224x224.
+\item {\bf {\em 1tag}}: Find metadata/images with 1 specific tag (i.e. alligator, lake, etc).
+\item {\bf {\em 1tag\_resize}}: Find metadata/images with 1 specific tag and resize to 224x224.
+\item {\bf {\em 1tag\_resize\_geo}}: Find metadata/images with 1 specific tag, resize to 224x224, and in a particular geolocation (with a 20 degrees radius in latitude and longitude).
+\item {\bf {\em 2tag\_resize\_geo}}: Find metadata/images with 2 specific tags (i.e. alligator AND lake) and resize to 224x224.
 \end{enumerate}
+
+It is important to note that then querying for images with certain tags, we
+also apply a filter using the probability. To give an example, we only retrieve
+images with a tag "alligator" and a probability higher than 92\%.
+This probabilities are both present in VDMS (in the form of metadata present
+in the connection between the image and that tag), as well as in MySQL (in
+the form of a column of the table that links images with tags).
 
 \begin{figure}[]
 \centering
 \includegraphics[width=\columnwidth]{figures/concurrency_comparison}
-\caption{Concurrency Analysis - VDMS vs Baseline}
+\caption{Concurrency Analysis on Query \"1tag\_resize\"- VDMS vs Baseline}
 \label{fig:concurrency_vdms}
 \end{figure}
+
+
 
 \begin{figure}[t!]
 \centering
