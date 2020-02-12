@@ -4,7 +4,20 @@
 \subsection{YFCC100M Dataset}
 \label{dataset}
 
-The Yahoo! Flickr Creative Commons 100m (YFCC100M) dataset is a large collection of 100 million public Flickr media objects created to provide free, sharable multimedia data for research. This dataset contains approximately 99.2 million images and 0.8 million videos with metadata characterized by 25 fields such as the identifier, user, date the media was taken/uploaded, location in longitude/latitude coordinates, device the media was captured, URL to download the media object, and Creative Commons license information.  The YFCC100M dataset also used a deep learning approach to generate autotags which is a set of comma-separated concepts such as people, scenery, objects, and animals and confidence scores generated from 1,570 trained Caffe classifiers ~\cite{Thomee_2016}.
+The Yahoo! Flickr Creative Commons 100m (YFCC100M) dataset is a large
+collection of 100 million public Flickr media objects created to provide free,
+sharable multimedia data for research. This dataset contains approximately
+99.2 million images and 0.8 million videos with metadata characterized by
+25 fields such as the unique identifier, userid,
+date the media was taken/uploaded, location in longitude/latitude coordinates,
+device type the media was captured, URL to download the media object,
+and the Creative Commons license type information.
+The YFCC100M dataset also used a deep learning approach to generate autotags
+which is a set of comma-separated concepts such as people, scenery, objects,
+and animals and confidence scores generated from 1,570 trained
+Caffe classifiers ~\cite{Thomee_2016}. Together with the autotag, there is a
+probability associated to each tag to indicate the certainty level of the tag
+in that image/frame.
 We have also used feature vectors generated for every image and first frame
 of every video \cite{features} to implement similarity search.
 
@@ -14,7 +27,7 @@ For all our experiments, we use 2 servers, one hosting VDMS server and
 another hosting MySQL server. Both servers have a dual-socket
 Intel\textsuperscript{\textregistered}
 Xeon\textsuperscript{\textregistered} Platinum 8180 CPU @ 2.50GHz (Skylake),
-each CPU with 28 physical cores with multithreading enabeled,
+each CPU with 28 physical cores with multithreading enabled,
 for a total of 112 logical cores per server.
 The server hosting MySQL has 256GB of DDR4 DRAM, while the server hosting VDMS
 has 64GB of DDR4 DRAM. Both servers run Ubuntu 16.04.
@@ -44,7 +57,24 @@ performance when using SSDs directly).
 \label{fig:systems}
 \end{figure*}
 
-We built VDMS and MySQL databases using the YFCC100M dataset with incremental database sizes 100k, 500k, 1M, 5M, 10M, 50M, and 100M. For each database size, we created a PMGD graph from the YFCC100m metadata, the YFCC100m autotags associated with each metadata identifier, and a list of 1,570 autotags using 100 concurrent VDMS Python clients.  With simple queries, we insert 1,570 nodes for the autotags and insert nodes for the YFCC media objects with the appropriate metadata.  Adding the autotag confidence scores is a recursive process and requires more complex queries than adding the previous nodes. For each metadata identifier in autotags, the query must find the associated metadata node and tag node.  A connection between the two nodes is created with the confidence score as a property. The number of metadata nodes are dependent on the database size and the connections are responsible for 90\% of the elements in each database as shown in Table~\ref{table:vdmsnodes}. It is important to note that the metadata identifier, autotags, and longitude/latitude coordinates are set as indexes of the database to allow faster retrieval of the metadata.
+We built VDMS and MySQL databases using the YFCC100M dataset with incremental
+database sizes 100k, 500k, 1M, 5M, 10M, 50M, and 100M.
+For each database size, we created a PMGD graph from the YFCC100m metadata,
+the YFCC100m autotags associated with each metadata identifier,
+and a list of 1,570 autotags using 100 concurrent VDMS Python clients.
+With simple queries, we insert 1,570 nodes for the autotags and insert nodes
+for the YFCC media objects with the appropriate metadata.
+Adding the autotag confidence scores is a recursive process and requires more
+complex queries than adding the previous nodes.
+For each metadata identifier in autotags, the query must find the associated
+metadata node and tag node.
+A connection between the two nodes is created with the confidence score as a
+property. The number of metadata nodes are dependent on the database size and
+the connections are responsible for 90\% of the elements in each database as
+shown in Table~\ref{table:vdmsnodes}.
+It is important to note that the metadata identifier, autotags, and
+longitude/latitude coordinates are set as indexes of the database to allow
+faster retrieval of the metadata.
 
 \begin{table}[h]
 \caption{Nodes in VDMS database}
@@ -65,7 +95,24 @@ Database Size & Connections & Images & Autotags\\
 \label{table:vdmsnodes}
 \end{table}
 
-Each MySQL database is created in a similar manner but the data is represented as three tables: taglist, metadata, and autotags.  By default, MySQL uses inifinite number of threads inside InnoDB when processing requests using four threads per IO read/write.  In some cases, when creating large databases data locks may occur to protect the data from concurrent updates.  To minimize locking in our runs, we increased the InnoDB buffer pool size to increase the amount of memory allocated to in-memory data structures ~\cite{mysql,mysql_blog}. Using a Python client and simple queries, the taglist table is read from the list of tags with an auto-incremented tagid as an index and the metadata table is read from the YFCC100m metadata using the identifier as an index. The autotags table contains the generated autotags and confidence scores for metadata entries of the metadata table. To generate the table, we split the autotags data for each database by the metadata identifier and autotag into new files. The new files are read into the respective autotags table with the metadata identifier and tagid as indexes.
+Each MySQL database is created in a similar manner but the data is represented
+as three tables: taglist, metadata, and autotags.
+By default, MySQL uses infinite number of threads inside InnoDB when processing
+requests using four threads per IO read/write.
+In some cases, when creating large databases data locks may occur to protect the
+data from concurrent updates.
+To minimize locking in our runs, we increased the InnoDB buffer pool size to
+increase the amount of memory allocated to in-memory data structures
+~\cite{mysql,mysql_blog}.
+Using a Python client and simple queries, the taglist table is read from the
+list of tags with an auto-incremented tagid as an index and the metadata table
+is read from the YFCC100m metadata using the identifier as an index.
+The autotags table contains the generated autotags and confidence scores for
+metadata entries of the metadata table.
+To generate the table, we split the autotags data for each database by the
+metadata identifier and autotag into new files.
+The new files are read into the respective autotags table with the metadata
+identifier and tagid as indexes.
 
 \begin{table}[h]
 \caption{Rows in MySQL database}
@@ -95,7 +142,38 @@ Database Size & Autotags & MetaData & Tag List\\
 \label{fig:db_time_size}
 \end{figure}
 
-The VDMS and MySQL databases have comparable number of elements as shown in Table~\ref{table:vdmsnodes} and ~\ref{table:mysqltables} but VDMS outperforms MySQL in build speed.  Figure~\ref{fig:db_time_size} illustrates how VDMS can build databases faster than MySQL as the database size grows.  Key difference in the build times are contributed to the low-level implementation of how MySQL reads and stores data from the files and the optimizations (increased InnoDB pool size, etc.) needed to handle large datasets such as YFCC100m.  On average, it took MySQL 3.72x hours longer to build each database than VDMS. For example, to build the 100M database, MySQL took 263 hours while VDMS only needed 72.5 hours.  This is a difference of over 7 days of processing data with VDMS missing less than 0.001\% images and 0.048\% connections from the entire dataset.  Alternatively, VDMS requires more storage, shown in Figure~\ref{fig:db_time_size}, to store information about each node/connection.  This may become a factor if storage is a limitation.  For our runs, VDMS required 30-41\% more storage than MySQL.
+The VDMS and MySQL databases have comparable number of elements as shown in
+Table~\ref{table:vdmsnodes} and ~\ref{table:mysqltables},
+but VDMS outperforms MySQL in build speed.
+Figure~\ref{fig:db_time_size} illustrates how VDMS can build databases
+faster than MySQL as the database size grows.
+Key difference in the build times are contributed to the low-level
+implementation of how MySQL reads and stores data from the files and the
+optimizations (increased InnoDB pool size, etc.) needed
+to handle large datasets such as YFCC100m.
+On average, it took MySQL 3.72x hours longer to build each database than VDMS.
+For example, to build the 100M database, MySQL took 263 hours
+while VDMS only needed 72.5 hours.
+This is a difference of over 7 days of processing data with VDMS missing less
+than 0.001\% images and 0.048\% connections from the entire dataset.
+
+
+Note that VDMS requires more storage for metadata, shown in
+Figure~\ref{fig:db_time_size}.
+This is space used to store information about each node/connection.
+The Graph Database internal to VDMS (called PMGD) was designed for performance,
+specially in environments where persistent memory is present.
+This design decision comes as a trade-off for storage footprint, which is
+noticeable in our results.
+VDMS required 30-41\% more storage than MySQL for storing the same amount
+of metadata.
+This may become a factor if storage is a limitation, but it should also be noted
+that even if we have a 41\% increase in metadata size,
+metadata accounts for less than 2\% of the overall database size.
+Take, for example, the largest database (both metadata and images) we built
+(100M): around 230GB of metadata and 12TB of images.
+On the other hand, in systems were persistent memory is a scarce resource,
+the increase storage foot print of PMGD may represent a challenge.
 
 
 \subsection{Images + Metadata}
@@ -147,7 +225,6 @@ the form of a column of the table that links images with tags).
 \caption{Concurrency Analysis on Query \"1tag\_resize\"- VDMS vs Baseline}
 \label{fig:concurrency_vdms}
 \end{figure}
-
 
 
 \begin{figure}[t!]
