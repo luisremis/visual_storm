@@ -1,6 +1,34 @@
 \section{Evaluation}
 \label{eval}
 
+We have used the YFCC100M dataset to evaluate different aspects of our system.
+We use the images in the dataset and its associated metadata to implement
+an image-search engine based on properties associated to those images.
+This is a very common use-case we have encountered when attacking
+applications such as smart-retail, sports applications, and video summarization,
+where the starting point is a large set of data that must be curated
+before proceeding with the data processing and neural network training.
+In order to evaluate the different aspects of the performance on the
+image search, we built a baseline following the methodology used in the industry, and following what we have done in the past in order to solve
+the data search problem, which we describe in Section \ref{images}.
+
+We also cover evaluation we have done using the Video interface VDMS offers,
+in order to asses how the implementation performs and scale when used
+for video handling.
+When it comes to video, ad-hoc solutions have a large number of parameters that
+can be tunned, and complex ways to handle the data. Together with that,
+there is no system that enables transactional operations over videos files
+in the way VDMS does. Because of these two reasons, we focus our efforts in
+understanding variations in the the performance of VDMS and its scalability,
+rather than comparing it to a baseline that would no represent a fair comparison
+for either of the systems. We describe the results in Section \ref{videos}
+
+Similarly, we explore the behaviour of the feature vector functionality in VDMS,
+and an evaluation of the different trade-offs that the systems offers for
+applications developers. For this, we implemented an image-search application
+based on \textit{similarity} search, which we describe in Section \ref{features}
+
+
 \subsection{YFCC100M Dataset}
 \label{dataset}
 
@@ -23,32 +51,51 @@ of every video \cite{features} to implement similarity search.
 
 \subsection{Experimental Setup}
 
-For all our experiments, we use 2 servers, one hosting VDMS server and
-another hosting MySQL server. Both servers have a dual-socket
-Intel\textsuperscript{\textregistered}
+As a baseline, and given that there are no other open-source system
+that implements similar functionality and interfaces as VDMS,
+we implemented an equivalent visual data management system comprised of a
+combination of widely available, off-the-shelve components:
+MySQL Server 5.7 (for storing metadata),
+Apache Web Server 2.4.18 (as interface for image access), and
+OpenCV 3.3 (to provide pre-processing operations on images).
+We have implemented a set of client-side applications that takes care
+of retrieving the components from the different systems, and applies
+pre-processing operations when needed.
+For visual data workloads, building an approach like the one
+implemented as a baseline for this work
+is the common practice in the industry \cite{heystack, tao}.
+
+For all our experiments, we use 2 servers, one hosting a VDMS server and
+another hosting a the Baseline implementation.
+Both servers have a dual-socket Intel\textsuperscript{\textregistered}
 Xeon\textsuperscript{\textregistered} Platinum 8180 CPU @ 2.50GHz (Skylake),
 each CPU with 28 physical cores with multithreading enabled,
 for a total of 112 logical cores per server.
 The server hosting MySQL has 256GB of DDR4 DRAM, while the server hosting VDMS
 has 64GB of DDR4 DRAM. Both servers run Ubuntu 16.04.
-The servers and client are connected through a 1GB wired link.
+The client application (running the queries and measuring round-trip time)
+is connected to the server through a 1GB wired link through
+a 10GB-backplane switch.
 
-As a baseline, we implemented a similar database system comprised of a
-combination of widely available and out-of-the-box components: MySQL Server 5.7,
-Apache Web Server 2.4.18, and OpenCV 3.3.
 Figure~\ref{fig:systems} shows a logical view of the difference between the
 interaction of the client application (which wants to retrieve metadata and
 imaged) with VDMS (left) and the baseline (right).
+The client application was implemented using Python 3 for both VDMS and
+the baseline.
+
 It is worth noting that the images are stored in a shared repository
 (ext4 filesystem on a RAID 6 configuration of 16TB) that both Apache WebServer
-and VDMS have direct access. In the case of MySQL, metadata is stored in an
-attached SSD disk. Even if VDMS has native support for Optane Persistent Memory,
+and VDMS have direct access. In the case of the baseline, metadata is
+stored in MySQL using an attached SSD disk.
+Even if VDMS has native support for Optane Persistent Memory,
 we do not use it in this experiment because of fairness of comparison w.r.t
-MySQL. The benefits of Persistent Memory on metadata operations is left
+MySQL (which was not design for Persistent Memory type of storage).
+The benefits of Persistent Memory on metadata operations is left
 for another paper, and outside the scope of this evaluation.
-For this experiment then, we simply use a similar attached SSD disk to store
-metadata (even if VDMS Graph store is designed for PM, it can deliver good
-performance when using SSDs directly).
+For this experiment then, in the case of VDMS we simply use a similar
+attached SSD disk to store metadata.
+Even if PMGD, the graph database used by VDMS, is designed for PM,
+it can deliver good performance when using SSDs directly.
 
 \begin{figure*}[]
 \centering
@@ -57,11 +104,15 @@ performance when using SSDs directly).
 \label{fig:systems}
 \end{figure*}
 
-We built VDMS and MySQL databases using the YFCC100M dataset with incremental
-database sizes 100k, 500k, 1M, 5M, 10M, 50M, and 100M.
+For the metadata, we built VDMS and MySQL databases
+using the YFCC100M dataset with incremental database sizes.
+For simplicity, we named the database based on the number of images
+it contains, as follows: 100k, 500k, 1M, 5M, 10M, 50M, 100M.
+The exact number of images/elements on each database is shown in
+Table~\ref{table:vdmsnodes} and ~\ref{table:mysqltables}
 For each database size, we created a PMGD graph from the YFCC100m metadata,
 the YFCC100m autotags associated with each metadata identifier,
-and a list of 1,570 autotags using 100 concurrent VDMS Python clients.
+and the list of 1,570 autotags using 100 concurrent VDMS Python clients.
 With simple queries, we insert 1,570 nodes for the autotags and insert nodes
 for the YFCC media objects with the appropriate metadata.
 Adding the autotag confidence scores is a recursive process and requires more
@@ -77,26 +128,40 @@ longitude/latitude coordinates are set as indexes of the database to allow
 faster retrieval of the metadata.
 
 \begin{table}[h]
-\caption{Nodes in VDMS database}
+\caption{VDMS Database - Number of Elements}
 \centering
 \begin{tabular}{c c c c}
 \hline\hline
-Database Size & Connections & Images & Autotags\\
+Database Name & \# of Images & \# of Connections & \# of Autotags\\
 \hline
-100k & 848,432      & 100,000     & 1,570\\
-500k & 4,249,500    & 500,000     & 1,570\\
-1M   & 8,503,045    & 1,000,000   & 1,570\\
-5M   & 42,505,478   & 5,000,000   & 1,570\\
-10M  & 85,040,404   & 10,000,000  & 1,570\\
-50M  & 425,162,070  & 50,000,000  & 1,570\\
-100M & 895,572,430  & 99,205,984  & 1,570\\
+100k & 100,000     & 848,432      & 1,570\\
+500k & 500,000     & 4,249,500    & 1,570\\
+1M   & 1,000,000   & 8,503,045    & 1,570\\
+5M   & 5,000,000   & 42,505,478   & 1,570\\
+10M  & 10,000,000  & 85,040,404   & 1,570\\
+50M  & 50,000,000  & 425,162,070  & 1,570\\
+100M & 99,205,984  & 895,572,430  & 1,570\\
 \hline
 \end{tabular}
 \label{table:vdmsnodes}
 \end{table}
 
 Each MySQL database is created in a similar manner but the data is represented
-as three tables: taglist, metadata, and autotags.
+as three tables, following the relational model:
+1) \textit{metadata} table, contains one row per image,
+and a column for each property
+associated with the images (some of which are listed in \ref{dataset});
+2) \textit{taglist} table: contains one row per each autotag elements
+(always 1570 rows);
+3) \textit{autotags} table: contains on row per each autotag
+assigned to an image, each row containing a foreign key to the
+image and a foreign key to the tag, and
+the probability assigned to that tag belonging to that image.
+Given that there are 8 autotags, on average, per image, the \textit{autotags}
+table has around 8 times the number of rows present in the
+\textit{metadata} table, as can be seen in~\ref{table:mysqltables}.
+
+THIS NEEDS FIX, NOT SURE I UNDERSTAND WHAT YOU MEAN:
 By default, MySQL uses infinite number of threads inside InnoDB when processing
 requests using four threads per IO read/write.
 In some cases, when creating large databases data locks may occur to protect the
@@ -104,32 +169,34 @@ data from concurrent updates.
 To minimize locking in our runs, we increased the InnoDB buffer pool size to
 increase the amount of memory allocated to in-memory data structures
 ~\cite{mysql,mysql_blog}.
+
 Using a Python client and simple queries, the taglist table is read from the
 list of tags with an auto-incremented tagid as an index and the metadata table
 is read from the YFCC100m metadata using the identifier as an index.
 The autotags table contains the generated autotags and confidence scores for
 metadata entries of the metadata table.
+
 To generate the table, we split the autotags data for each database by the
 metadata identifier and autotag into new files.
 The new files are read into the respective autotags table with the metadata
 identifier and tagid as indexes.
 
 \begin{table}[h]
-\caption{Rows in MySQL database}
+\caption{MySQL Database - Number of Elements}
 \centering
 \begin{tabular}{c c c c}
 \hline\hline
  & \multicolumn{3}{c}{Table}\\
 \cline{2-4}
-Database Size & Autotags & MetaData & Tag List\\
+Database Name & \# of Images & \# of Image Tags & Tag List\\
 \hline
-100k & 848,912     & 100,000    & 1,570\\
-500k & 4,241,200   & 498,707    & 1,570\\
-1M   & 8,508,380   & 1,000,000  & 1,570\\
-5M   & 42,425,905  & 4,987,379  & 1,570\\
-10M  & 85,095,265  & 10,000,000 & 1,570\\
-50M  & 425,446,208 & 50,000,000 & 1,570\\
-100M & 896,002,496 & 99,206,564 & 1,570\\
+100k & 100,000    & 848,912     & 1,570\\
+500k & 498,707    & 4,241,200   & 1,570\\
+1M   & 1,000,000  & 8,508,380   & 1,570\\
+5M   & 4,987,379  & 42,425,905  & 1,570\\
+10M  & 10,000,000 & 85,095,265  & 1,570\\
+50M  & 50,000,000 & 425,446,208 & 1,570\\
+100M & 99,206,564 & 896,002,496 & 1,570\\
 \hline
 \end{tabular}
 \label{table:mysqltables}
@@ -143,23 +210,30 @@ Database Size & Autotags & MetaData & Tag List\\
 \end{figure}
 
 The VDMS and MySQL databases have comparable number of elements as shown in
-Table~\ref{table:vdmsnodes} and ~\ref{table:mysqltables},
-but VDMS outperforms MySQL in build speed.
+Table~\ref{table:vdmsnodes} and ~\ref{table:mysqltables}, and the differences
+can be attributed to failures in data preparation/loading because of
+incomplete/inconsistent formating, which is common on large datasets.
+The difference is less than 0.1\% in terms of number of elements (images and/or
+metadata information).
+
+\subsubsection{Database Loading Time}
+
+One of the first things we noted is the difference is loading times,
+where VDMS outperforms MySQL by a large margin.
 Figure~\ref{fig:db_time_size} illustrates how VDMS can build databases
-faster than MySQL as the database size grows.
-Key difference in the build times are contributed to the low-level
+faster than MySQL, and how the speedup is sustained as the database size grows.
+Key difference in the build times are attributed to the low-level
 implementation of how MySQL reads and stores data from the files and the
 optimizations (increased InnoDB pool size, etc.) needed
 to handle large datasets such as YFCC100m.
-On average, it took MySQL 3.72x hours longer to build each database than VDMS.
+On average, it took MySQL 3.72x longer to build each database than VDMS.
 For example, to build the 100M database, MySQL took 263 hours
 while VDMS only needed 72.5 hours.
-This is a difference of over 7 days of processing data with VDMS missing less
-than 0.001\% images and 0.048\% connections from the entire dataset.
 
+\subsubsection{Database Storage Footprint}
 
-Note that VDMS requires more storage for metadata, shown in
-Figure~\ref{fig:db_time_size}.
+Another aspect important to note is that
+VDMS requires more storage for metadata, shown in Figure~\ref{fig:db_time_size}.
 This is space used to store information about each node/connection.
 The Graph Database internal to VDMS (called PMGD) was designed for performance,
 specially in environments where persistent memory is present.
@@ -175,8 +249,10 @@ Take, for example, the largest database (both metadata and images) we built
 On the other hand, in systems were persistent memory is a scarce resource,
 the increase storage foot print of PMGD may represent a challenge.
 
+%=========================================
 
 \subsection{Images + Metadata}
+\label{images}
 
 In order to evaluate VDMS and the baseline on certain queries, we
 implement 4 queries that would enable us to retrieve certain specific images.
@@ -222,17 +298,19 @@ the form of a column of the table that links images with tags).
 \begin{figure}[]
 \centering
 \includegraphics[width=\columnwidth]{figures/concurrency_comparison}
-\caption{Concurrency Analysis on Query \"1tag\_resize\"- VDMS vs Baseline}
+\caption{Concurrency Analysis on Query "1tag\_resize\- VDMS vs Baseline}
 \label{fig:concurrency_vdms}
 \end{figure}
 
 
-\begin{figure}[t!]
-\centering
-\includegraphics[width=\columnwidth]{figures/queries_throughput_32}
-\caption{Queries - Throughput - 32 Clients}
-\label{fig:q_throughput_32}
-\end{figure}
+% We decided to remove this image because it is redudant with the concurrency
+% analysis.
+% \begin{figure}[t!]
+% \centering
+% \includegraphics[width=\columnwidth]{figures/queries_throughput_32}
+% \caption{Queries - Throughput - 32 Clients}
+% \label{fig:q_throughput_32}
+% \end{figure}
 
 \begin{figure}[t!]
 \centering
@@ -243,15 +321,15 @@ the form of a column of the table that links images with tags).
 
 An image and metadata search on the YFCC100M databases are very extensive
 and would benefit from multithreading to process queries simultaneously.
-Figure~\ref{fig:concurrency_vdms} illustrates a concurrency analysis for
+Figure~\ref{fig:concurrency_comparison} illustrates a concurrency analysis for
 the \textit{1tag} query using VDMS to investigate the number of
 concurrent clients to use for the per-query performance analysis.
 This figure shows the metadata performance plateaus at 32 clients and
 the image performance at 56 clients for a simple query.
-To further investigate, Figure~\ref{fig:q_throughput_32} and
-Figure~\ref{fig:q_throughput_56} illustrate the throughput performance
-for the \textit{1tag} and \textit{1tag\_resize} queries for 32 and 56 clients,
-respectively.
+% To further investigate, Figure~\ref{fig:q_throughput_32} and
+% Figure~\ref{fig:q_throughput_56} illustrate the throughput performance
+% for the \textit{1tag} and \textit{1tag\_resize} queries for 32 and 56 clients,
+% respectively.
 On the 56-client experiment, a 10x difference occurs between VDMS and
 MySQL in metadata throughput while 32 clients is similar but not as high.
 The overall performance for both MySQL and VDMS is better with 56 clients;
@@ -264,14 +342,11 @@ therefore, we used this value for our per-query analysis.
 \label{fig:q1_latency}
 \end{figure}
 
-\subsection{Videos}
 
-\begin{figure*}[ht!]
-\centering
-\includegraphics[width=\textwidth]{figures/video_overhead}
-\caption{Concurrency (left) and Overhead (right)}
-\label{fig:video}
-\end{figure*}
+%=========================================
+
+\subsection{Videos}
+\label{videos}
 
 VDMS provides full support for video storage and operations.
 This includes support for encoding/decoding and trans-coding of mp4, avi, and
@@ -299,6 +374,13 @@ be chosen, which makes it hard to accurately compare against VDMS functionality.
 For this reason, we chose to make a study using VDMS in various scenarios,
 and analysis what is the impact of having the overhead of VDMS' Request
 Server in the overall access time.
+
+\begin{figure*}[ht!]
+\centering
+\includegraphics[width=\textwidth]{figures/video_overhead}
+\caption{Concurrency (left) and Overhead (right)}
+\label{fig:video}
+\end{figure*}
 
 Figure \ref{fig:video} shows the analysis of different queries aimed to retrieve
 a video using VDMS interface. We show how VDMS increases throughput of serving
@@ -344,27 +426,28 @@ This result also was the inspiration point for one optimization we included
 in future versions of VDMS, which involves using ffmpeg C++ API to
 limit the number of frames being encoding/decoding when possible.
 
+%=========================================
 
 \subsection{Feature Vectors}
+\label{features}
 
 Another key differentiating factor of VDMS is that it allows the creation of
 indexes for high-dimensional feature vectors and the insertion of
 these feature vectors associated with entities or visual objects.
 Feature vectors are intermediate results of various machine
 learning or computer vision algorithms when run on visual data.
-Feature vectors are also known as "descriptors" or "visual descriptors".
-We use these terms interchangeably.
-These descriptors can be labeled and classified to build search indexes,
+Feature vectors are also known as \textit{descriptors}
+or \textit{visual descriptors}. We use these terms interchangeably.
+These descriptors can be classified and labeled and used to build search indexes,
 and there are many in-memory libraries that are designed for
 this task~\cite{flann, faiss}.
 Using the VDMS API, users can manage feature vector indexes,
 query previously inserted elements (images),
-run a k-nearest neighbor search (knn) and express relationships
+run a k-nearest neighbor search (knn), and express relationships
 between existing images or descriptors and
 the newly inserted descriptors.
 By natively supporting descriptors and knn,
-VDMS allows out-of-the-box classification
-functionalities for many applications.
+VDMS allows out-of-the-box classification functionalities for many applications.
 
 For this work, and as part of a comprehensive image search implementation,
 we have used 4096-dimensional descriptors extracted from every image
