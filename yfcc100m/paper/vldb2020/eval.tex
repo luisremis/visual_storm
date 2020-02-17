@@ -18,12 +18,13 @@ for video handling.
 When it comes to video, ad-hoc solutions have a large number of parameters that
 can be tunned, and complex ways to handle the data. Together with that,
 there is no system that enables transactional operations over videos files
-in the way VDMS does. Because of these two reasons, we focus our efforts in
-understanding variations in the the performance of VDMS and its scalability,
-rather than comparing it to a baseline that would no represent a fair comparison
-for either of the systems. We describe the results in Section \ref{videos}
+in the way VDMS does. Because of the two reasons above mentioned,
+we focus our efforts in understanding variations in the the performance of
+VDMS and its scalability, rather than comparing it to a baseline that
+would no represent a fair comparison for either of the systems.
+We describe the results in Section \ref{videos}.
 
-Similarly, we explore the behaviour of the feature vector functionality in VDMS,
+Similarly, we explore the behavior of the feature vector functionality in VDMS,
 and an evaluation of the different trade-offs that the systems offers for
 applications developers. For this, we implemented an image-search application
 based on \textit{similarity} search, which we describe in Section \ref{features}
@@ -48,6 +49,11 @@ probability associated to each tag to indicate the certainty level of the tag
 in that image/frame.
 We have also used feature vectors generated for every image and first frame
 of every video \cite{features} to implement similarity search.
+Given that there is no standard benchmark oriented towards visual data queries,
+we have built a series of queries to filter this dataset that is model after
+our internal use cases for many of the mentioned applications we have worked
+with.
+
 
 \subsection{Experimental Setup}
 
@@ -106,24 +112,60 @@ it can deliver good performance when using SSDs directly.
 
 For the metadata, we built VDMS and MySQL databases
 using the YFCC100M dataset with incremental database sizes.
-For simplicity, we named the database based on the number of images
+For simplicity, we named the database based on the approximate number of images
 it contains, as follows: 100k, 500k, 1M, 5M, 10M, 50M, 100M.
 The exact number of images/elements on each database is shown in
 Table~\ref{table:vdmsnodes} and ~\ref{table:mysqltables}
-For each database size, we created a PMGD graph from the YFCC100m metadata,
-the YFCC100m autotags associated with each metadata identifier,
-and the list of 1,570 autotags using 100 concurrent VDMS Python clients.
-With simple queries, we insert 1,570 nodes for the autotags and insert nodes
-for the YFCC media objects with the appropriate metadata.
+For each database size, we created an instance of VDMS using YFCC100m metadata,
+the YFCC100m machine-generated \textit{autotags} associated with
+each metadata identifier, and the list of 1,570 \textit{autotags}
+using 100 concurrent VDMS Python clients.
+Internally, that information is represented as a property graph,
+where we have one node for each image, one node for each tag
+(always 1570 tags), and connections between images.
+For instance, if an image has 4 \textit{autotags} assigned,
+there will be 4 connections between that image and
+the different nodes for those \textit{autotags}.
+The information about the probability the \textit{autotag} present in an image
+is expressed as a property in the \textit{connection} between the 2 nodes.
+Figure \ref{fig:graph_representation} shows an example on two images and
+2 \textit{autotags}, and the \textit{connections} between those \textit{autotags}
+and the images.
+Image id: 23143252 has two \textit{autotags} assigned:
+\textit{Alligator} with probability 0.285 and \textit{Lake} with probability 0.872.
+Image id: 86756231, on the other hand, has a single \textit{autotags} assigned:
+\textit{Alligator} with probability 0.894.
+
+\begin{figure}[]
+\centering
+\includegraphics[width=\columnwidth]{figures/graph_representation}
+\caption{VDMS Data Representation Using a Property Graph:
+Example on two images and 2 \textit{autotags} with
+their respective probabilities expressed in the \textit{connection}.
+Image id: 23143252 has two \textit{autotags} assigned:
+\textit{Alligator} with probability 0.285 and \textit{Lake} with probability 0.872.
+Similarly, Image id: 86756231 has a single \textit{autotags} assigned:
+\textit{Alligator} with probability 0.894.}
+\label{fig:graph_representation}
+\end{figure}
+
+Because there are on average 8 tags assigned to each image,
+there will be around 8 times more connections than images, as can be seen
+in Table~\ref{table:vdmsnodes}.
+Also, each image node will contain multiple properties associated
+with that object.
+Using the Python Client Module, we insert 1,570 nodes for the \textit{autotags},
+and then insert nodes for the YFCC media objects (images or videos)
+with the associated metadata.
 Adding the autotag confidence scores is a recursive process and requires more
 complex queries than adding the previous nodes.
-For each metadata identifier in autotags, the query must find the associated
-metadata node and tag node.
+For each metadata identifier in \textit{autotags},
+the query must find the associated metadata node and tag node.
 A connection between the two nodes is created with the confidence score as a
 property. The number of metadata nodes are dependent on the database size and
 the connections are responsible for 90\% of the elements in each database as
 shown in Table~\ref{table:vdmsnodes}.
-It is important to note that the metadata identifier, autotags, and
+It is important to note that the metadata identifier, \textit{autotags}, and
 longitude/latitude coordinates are set as indexes of the database to allow
 faster retrieval of the metadata.
 
@@ -132,7 +174,7 @@ faster retrieval of the metadata.
 \centering
 \begin{tabular}{c c c c}
 \hline\hline
-Database Name & \# of Images & \# of Connections & \# of Autotags\\
+DB Name & \# Images & \# Connections & \# Autotags\\
 \hline
 100k & 100,000     & 848,432      & 1,570\\
 500k & 500,000     & 4,249,500    & 1,570\\
@@ -148,7 +190,7 @@ Database Name & \# of Images & \# of Connections & \# of Autotags\\
 
 Each MySQL database is created in a similar manner but the data is represented
 as three tables, following the relational model:
-1) \textit{metadata} table, contains one row per image,
+1) \textit{images} table, contains one row per image,
 and a column for each property
 associated with the images (some of which are listed in \ref{dataset});
 2) \textit{taglist} table: contains one row per each autotag elements
@@ -170,25 +212,26 @@ To minimize locking in our runs, we increased the InnoDB buffer pool size to
 increase the amount of memory allocated to in-memory data structures
 ~\cite{mysql,mysql_blog}.
 
-Using a Python client and simple queries, the taglist table is read from the
-list of tags with an auto-incremented tagid as an index and the metadata table
-is read from the YFCC100m metadata using the identifier as an index.
-The autotags table contains the generated autotags and confidence scores for
-metadata entries of the metadata table.
+Using a Python client and simple queries, the \textit{taglist}
+table is read from the list of tags with an auto-incremented
+\textit{tagid} as a primary key and the metadata table
+is read from the YFCC100m metadata using the identifier as a primary key.
+The \textit{autotags} table contains the generated autotags and
+probabilities for entries of the \textit{images} table.
 
-To generate the table, we split the autotags data for each database by the
-metadata identifier and autotag into new files.
-The new files are read into the respective autotags table with the metadata
-identifier and tagid as indexes.
+To generate the table, we split the \textit{autotags} data for each database
+by the image identifier and autotag into new files.
+The new files are read into the \textit{autotags} table with the image
+identifier and \textit{tagid} as foreign keys.
 
 \begin{table}[h]
-\caption{MySQL Database - Number of Elements}
+\caption{MySQL Database - Number of Rows in each Table}
 \centering
 \begin{tabular}{c c c c}
 \hline\hline
  & \multicolumn{3}{c}{Table}\\
 \cline{2-4}
-Database Name & \# of Images & \# of Image Tags & Tag List\\
+DB Name & images & autotags & taglist\\
 \hline
 100k & 100,000    & 848,912     & 1,570\\
 500k & 498,707    & 4,241,200   & 1,570\\
@@ -218,7 +261,7 @@ metadata information).
 
 \subsubsection{Database Loading Time}
 
-One of the first things we noted is the difference is loading times,
+One of the first things we noticed is the difference is loading times,
 where VDMS outperforms MySQL by a large margin.
 Figure~\ref{fig:db_time_size} illustrates how VDMS can build databases
 faster than MySQL, and how the speedup is sustained as the database size grows.
@@ -254,54 +297,58 @@ the increase storage foot print of PMGD may represent a challenge.
 \subsection{Images + Metadata}
 \label{images}
 
-In order to evaluate VDMS and the baseline on certain queries, we
-implement 4 queries that would enable us to retrieve certain specific images.
+In order to evaluate VDMS and the baseline on our use-case queries,
+we implemented 4 queries that that filter and retrieve certain specific images.
 We choose these queries because they represent typical use-case where a
 cohort of images is to be retrieve and processed from a large corpus of data.
+As we mentioned before, we took this approach due to the lack of a standard
+benchmarks that are oriented towards visual data retrieval.
 We use the metadata associated to the images to filter said images.
-In particular, this dataset contains a set of around 1500 machine generated
-tags to each image.
-Tags includes things like objects (chair, person, people, etc), and
+In particular, this dataset contains a set of 1570 machine generated
+tags (\textit{autotags})assigned to the images depending on the content.
+\textit{autotags} includes things like objects (chair, person, people, etc), and
 concepts like places (indoor, outdoor, lake) and others (party, etc).
-Together with each tag, a probability is assign.
-This is, an image can have the tags people, person, party, outdoor, and each
-tag will be accompanied by a probability of that tag in that image.
-We represent that probability
-On average there are 8 tags assigned to each image.
+Together with each \textit{autotag}, a probability is assign.
+This is, an image can have the \textit{autotags} people, person, party,
+outdoor, and each \textit{autotag} assigned will be accompanied by a
+probability of that \textit{autotags} being present in that image.
+As mentioned earlier, there are 8 tags assigned to each image on average.
 Also, some images have geo-location information (latitude/longitude).
 
-We use the tags (because they contain information about the content of
-the image), as well as the geo-location (as an example of searchable properties
-of the images).
+We use the \textit{autotags} (as they contain information about
+the content of the image), as well as the geo-location
+(as an example of properties of the images used used for search and filtering).
 
-On top of that, we assume the use case of further processing of images
-through the use of ML, such as Convolutional Neural Networks TODO-CITE HERE.
+On top of that and for our use case, we would like to extract more information
+about the content of the image through the use of ML,
+such as Convolutional Neural Networks TODO-CITE HERE.
 For this, we resize the images to 224x224, which is the input layer size for
 a popular neural network for object detection on images: ResNet TODO-CITEHERE.
 
 To evaluate the access to metadata and images,
-we use the following four queries:
+we use the following four queries, modeled after our internal use cases:
 \begin{enumerate}
-\item {\bf {\em 1tag}}: Find metadata/images with 1 specific tag (i.e. alligator, lake, etc).
-\item {\bf {\em 1tag\_resize}}: Find metadata/images with 1 specific tag and resize to 224x224.
-\item {\bf {\em 1tag\_resize\_geo}}: Find metadata/images with 1 specific tag, resize to 224x224, and in a particular geolocation (with a 20 degrees radius in latitude and longitude).
+\item {\bf {\em 1tag}}: Find metadata/images with 1 specific autotag (i.e. alligator, lake, etc).
+\item {\bf {\em 1tag\_resize}}: Find metadata/images with 1 specific autotag and resize to 224x224.
+\item {\bf {\em 1tag\_resize\_geo}}: Find metadata/images with 1 specific autotag, resize to 224x224, and in a particular geolocation (with a 20 degrees radius in latitude and longitude).
 \item {\bf {\em 2tag\_resize\_geo}}: Find metadata/images with 2 specific tags (i.e. alligator AND lake) and resize to 224x224.
 \end{enumerate}
 
-It is important to note that then querying for images with certain tags, we
-also apply a filter using the probability. To give an example, we only retrieve
-images with a tag "alligator" and a probability higher than 92\%.
-This probabilities are both present in VDMS (in the form of metadata present
-in the connection between the image and that tag), as well as in MySQL (in
-the form of a column of the table that links images with tags).
+It is important to note that when querying for images with certain
+\textit{autotags}, we also apply a filter using the probability.
+For instance, we only retrieve images with a autotag \textit{alligator}
+and a probability higher than 92\%.
+This probabilities are both present in VDMS (in the form of a property
+of the \textit{connection} between the image and that \textit{autotag}),
+as well as in MySQL (in the form of a column in the \textit{autotags} table
+that links images with tags.
 
 \begin{figure}[]
 \centering
 \includegraphics[width=\columnwidth]{figures/concurrency_comparison}
-\caption{Concurrency Analysis on Query "1tag\_resize\- VDMS vs Baseline}
-\label{fig:concurrency_vdms}
+\caption{Concurrency Analysis on Query \textit{1tag\_resize} \- VDMS vs Baseline}
+\label{fig:concurrency_comparison}
 \end{figure}
-
 
 % We decided to remove this image because it is redudant with the concurrency
 % analysis.
@@ -319,19 +366,52 @@ the form of a column of the table that links images with tags).
 \label{fig:q_throughput_56}
 \end{figure}
 
-An image and metadata search on the YFCC100M databases are very extensive
-and would benefit from multithreading to process queries simultaneously.
+Image search based on metadata is very expensive on large databases.
+Because of the large volume of data, the processing of the retrieve images
+is perform in parallel, using multi-core and/or distributed systems.
+For instance, a common implementation of an image processing pipeline
+would involve the use of distributed processing frameworks
+like Hadoop \cite{hadoop} or Spark \cite{spark}.
+Consequently, it is key that the data management system used supports
+concurrency, providing multiple workers with data in parallel.
+The ability to scale with the number of simultaneous clients is key for the
+applicability of visual data management systems like VDMS.
+
 Figure~\ref{fig:concurrency_comparison} illustrates a concurrency analysis for
-the \textit{1tag} query using VDMS to investigate the number of
-concurrent clients to use for the per-query performance analysis.
+the \textit{1tag\_resize} query, described above, using both VDMS and
+the baseline to evaluate the scalability of both solutions, as the
+size of the databases grows and as the number of concurrent clients grows.
+
+It is important to note that the size of the result (number of images retrieved)
+is linear with the size of the database. This is, if a query returns 100 images
+for the 1M database, it will return around 1000 images for the 10M database.
+This poses a problem when evaluating performance as database increase,
+and clearly understanding the measurements.
+Because of this reason, we control the number of returned images for all the
+database using the probability of the \textit{autotags}, so that the queries
+in this experiment returns a similar number of images for all database sizes.
+Essentially, as the size of the database increase, we increase the probability
+threshold for the queries. We do this for both VDMS and the baseline, of course.
+
+The first thing to notice is that when it comes to retrieving metadata
+in the case of VDMS, (Figure ~\ref{fig:concurrency_comparison} (top),
+the size of the database (in terms of number of images) does not have
+a strong effect on the performance
+(measured in aggregated transactions per second).
+This means that even as database increase in size, there is no large increase
+in the query time.
+
+
+
+ the number of concurrent clients to use for the per-query performance analysis.
 This figure shows the metadata performance plateaus at 32 clients and
 the image performance at 56 clients for a simple query.
 % To further investigate, Figure~\ref{fig:q_throughput_32} and
 % Figure~\ref{fig:q_throughput_56} illustrate the throughput performance
 % for the \textit{1tag} and \textit{1tag\_resize} queries for 32 and 56 clients,
 % respectively.
-On the 56-client experiment, a 10x difference occurs between VDMS and
-MySQL in metadata throughput while 32 clients is similar but not as high.
+On the 56-client experiment, a 10x difference can be seen between VDMS and
+baseline in metadata throughput while 32 clients is similar but not as high.
 The overall performance for both MySQL and VDMS is better with 56 clients;
 therefore, we used this value for our per-query analysis.
 
@@ -349,21 +429,23 @@ therefore, we used this value for our per-query analysis.
 \label{videos}
 
 VDMS provides full support for video storage and operations.
-This includes support for encoding/decoding and trans-coding of mp4, avi, and
-mov containers, as well as support for xvid, H.263 and H.264 encoders.
+This includes support for encoding/decoding and trans-coding of
+\textit{mp4}, \textit{avi}, and \textit{mov} containers,
+as well as support for \textit{xvid}, \textit{H.263} and \textit{H.264} encoders.
 This is supported through the Visual Compute Module that provides an abstraction
-layer on top of OpenCV (and ffmpeg directly).
+layer on top of OpenCV (and \textit{ffmpeg} directly).
 All the operations supported for images in VDMS are also supported at the
 video and frame level on the API. On top of that, there are a number of
 video-specific operations that are supported, such as the interval operations,
-that allow users to retrieve clips at different FPS versions of the video.
+that allow users to retrieve clips at different
+frames-per-second (FPS) versions of the video.
 
 All this functionality is provided and integrated with the rest of the
 metadata API as part of the comprehensive VDMS interface. This makes it
 possible for users to interact with metadata and video in a transactional
 manner, enabling users to run queries like: "Retrieve all the videos
 where there is a lake with probability higher than X, converting all videos
-to H.264 mp4 of size 224x244".
+to \textit{H.264} \textit{mp4} of size 224x244".
 In particular, this functionality was used internally to select a subset
 of videos with the right licenses for a video summarization application.
 
@@ -423,7 +505,7 @@ limit on the opportunities for optimization for video queries given
 that biggest time factors are accounted by encoding/decoding, which is
 outside the scope of VDMS.
 This result also was the inspiration point for one optimization we included
-in future versions of VDMS, which involves using ffmpeg C++ API to
+in future versions of VDMS, which involves using \textit{ffmpeg} C++ API to
 limit the number of frames being encoding/decoding when possible.
 
 %=========================================
@@ -443,18 +525,18 @@ and there are many in-memory libraries that are designed for
 this task~\cite{flann, faiss}.
 Using the VDMS API, users can manage feature vector indexes,
 query previously inserted elements (images),
-run a k-nearest neighbor search (knn), and express relationships
+run a k-nearest neighbor search (\textit{knn}), and express relationships
 between existing images or descriptors and
 the newly inserted descriptors.
-By natively supporting descriptors and knn,
+By natively supporting descriptors and \textit{knn},
 VDMS allows out-of-the-box classification functionalities for many applications.
 
 For this work, and as part of a comprehensive image search implementation,
 we have used 4096-dimensional descriptors extracted from every image
 (and first frame of every video) and created a collection of these feature
 vectors in VDMS to be able to perform similarity search (i.e., find
-images that are "similar" to an query (input) image).
-"Similarity" in this particular case is defined as closeness
+images that are \textit{similar} to an query (input) image).
+\textit{Similarity} in this particular case is defined as closeness
 in a an 4096-dimensional space using euclidean distance as the metric.
 
 EXPLAIN HERE DIFFERENT ACCURACY/EXECUTIME TIME TRADEOFF.
@@ -463,7 +545,8 @@ The process of loading descriptors in VDMS is simple.
 First, the user has to create a DescriptorsSet, using a single command.
 At creation of the DescriptorSet, the dimensionality of the descriptors
 is specified, together with the desired indexing method and the desired metric
-for computing distances (Euclidean Distance, L2, or Inner Product, IP).
+for computing distances (Euclidean Distance, \textit{L2},
+or Inner Product, \textit{IP}).
 Once the DescriptorSet is created, descriptors can be inserted to the set.
 After the descriptors are inserted, similarity search can be performed.
 Note that descriptors can be inserted later on, and any search will reflect
@@ -519,14 +602,14 @@ For this evaluation, we query the 10 closest neighbors (k = 10), and compute
 accuracy using recall at 4 (r\_k = 4) (i.e. percentage of the top 4 ground-truth
 results that is present within the top 10 computed neighbors).
 We average the query execution time and accuracy for 100 queries (nq = 100).
-The "flat" index (red line) implements exact search and
+The \textit{flat} index (red line) implements exact search and
 represents ground-truth, which explain why the accuracy is always 100\% on the
-right plot. The other indexes implement "approximate search", which trade-offs
-between accuracy and speed of search~\cite{flann, faiss}.
-We have also tried the "ivfflat" index (inverted file index), as well as
-LSH-based indexes using a different number of bits per descriptor.
+right plot. The other indexes implement \textit{approximate search},
+which trade-offs between accuracy and speed of search~\cite{flann, faiss}.
+We have also tried the \textit{ivfflat} index (inverted file index), as well as
+\textit{LSH}-based indexes using a different number of bits per descriptor
 \footnote{https://github.com/facebookresearch/faiss/wiki/Faiss-indexes}.
-Results show how "ivfflat" is the fastest option by comes at the trade-off
+Results show how \textit{ivfflat} is the fastest option by comes at the trade-off
 of about 30\% lost in accuracy, while simple brute-force search
 is among the slowest options at the expenses of 100\% accuracy,
 meaning exact search.
@@ -552,7 +635,6 @@ it may be worth trading off accuracy to speed and space.
 Figure \ref{fig:features_size_does_matter} show the different indexes and
 their size in disk. These indexes already contain all the descriptors (or
 a quantized version of them), and can be loaded in memory directly when it fits.
-Note how, because of quantization of the descriptors,
-LSH provides a significantly lower space foot print, which can be a great option
-for large collections of descriptors when accuracy is not a main factor.
-
+Note how, because of quantization of the descriptors, \textit{LSH} provides a
+significantly lower space foot print, which can be a great option for
+large collections of descriptors when accuracy is not a main factor.
