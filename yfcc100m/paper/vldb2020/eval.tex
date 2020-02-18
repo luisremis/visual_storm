@@ -327,12 +327,12 @@ a popular neural network for object detection on images: ResNet TODO-CITEHERE.
 
 To evaluate the access to metadata and images,
 we use the following four queries, modeled after our internal use cases:
-\begin{enumerate}
-\item {\bf {\em 1tag}}: Find metadata/images with 1 specific autotag (i.e. alligator, lake, etc).
-\item {\bf {\em 1tag\_resize}}: Find metadata/images with 1 specific autotag and resize to 224x224.
-\item {\bf {\em 1tag\_resize\_geo}}: Find metadata/images with 1 specific autotag, resize to 224x224, and in a particular geolocation (with a 20 degrees radius in latitude and longitude).
-\item {\bf {\em 2tag\_resize\_geo}}: Find metadata/images with 2 specific tags (i.e. alligator AND lake) and resize to 224x224.
-\end{enumerate}
+\begin{itemize}
+\item Query 1 - {\bf {\em 1tag}}: Find metadata/images with 1 specific autotag (i.e. alligator, lake, etc).
+\item Query 2 - {\bf {\em 1tag\_resize}}: Find metadata/images with 1 specific autotag and resize to 224x224.
+\item Query 3 - {\bf {\em 1tag\_resize\_geo}}: Find metadata/images with 1 specific autotag, resize to 224x224, and in a particular geolocation (with a 20 degrees radius in latitude and longitude).
+\item Query 4 - {\bf {\em 2tag\_resize\_geo}}: Find metadata/images with 2 specific tags (i.e. alligator AND lake) and resize to 224x224.
+\end{itemize}
 
 It is important to note that when querying for images with certain
 \textit{autotags}, we also apply a filter using the probability.
@@ -359,12 +359,31 @@ that links images with tags.
 % \label{fig:q_throughput_32}
 % \end{figure}
 
-\begin{figure}[t!]
-\centering
-\includegraphics[width=\columnwidth]{figures/queries_throughput_56}
+% \begin{figure}[t!]
+% \centering
+% \includegraphics[width=\columnwidth]{figures/queries_throughput_56}
+% \caption{Queries - Throughput - 56 Clients}
+% \label{fig:q_throughput_56}
+% \end{figure}
+
+\begin{figure*}[ht]
+\begin{subfigure}{.5\linewidth}
+  \centering
+  % include first image
+  \includegraphics[width=\columnwidth]{figures/queries_throughput_56_q1_q2}
+  \caption{Query 1 (red), and Query 2 (blue).}
+  \label{fig:q1_q2}
+\end{subfigure}
+\begin{subfigure}{.5\linewidth}
+  \centering
+  % include second image
+  \includegraphics[width=\columnwidth]{figures/queries_throughput_56_q3_q4}
+  \caption{Query 3 (red), and Query 4 (blue).}
+  \label{fig:q3_q4}
+\end{subfigure}
 \caption{Queries - Throughput - 56 Clients}
 \label{fig:q_throughput_56}
-\end{figure}
+\end{figure*}
 
 Image search based on metadata is very expensive on large databases.
 Because of the large volume of data, the processing of the retrieve images
