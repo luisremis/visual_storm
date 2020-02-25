@@ -20,9 +20,10 @@
 \usepackage{microtype}      % microtypography
 \usepackage{amsmath}
 \usepackage{mathtools}
+\usepackage{minted}
 
 % Include information below and uncomment for camera ready
-\vldbTitle{Using VDMS to Search 100M Images: A Piece of Cake}
+\vldbTitle{Using VDMS to Index and Search 100M Images}
 \vldbAuthors{Luis Remis, Chaunt\'e W. Lacewell}
 \vldbDOI{https://doi.org/10.14778/xxxxxxx.xxxxxxx}
 \vldbVolume{12}
@@ -33,7 +34,7 @@
 
 % ****************** TITLE ****************************************
 
-\title{Using VDMS to Search 100M Images: A Piece of Cake}
+\title{Using Visual Data Management System (VDMS) to\\ Index and Search 100M Images}
 
 
 % possible, but not really needed or used for PVLDB:
@@ -114,12 +115,12 @@ Chaunt\'e W. Lacewell\\
 Data scientists spend most of their time dealing with data preparation,
 rather than doing what they know best:
 build machine learning models and algorithms to solve problems.
-The problem grows as the scale of the data that is used for analysis or training
+The problem grows as the scale of the data used for analysis or training
 grows. In this paper, we demonstrate how VDMS (the Visual Data Management System)
-can be used to simplify the data preparation process and we show how we gain
-in efficiency just because we are using a tool that was design for the job.
+can be used to simplify the data preparation process and how we gain
+in efficiency simply because we are using a system designed for the job.
 To demonstrate this, we use one of the largest available
-public dataset (YFCC100M),
+public datasets (YFCC100M),
 with 99+ million images, 800+ thousand videos, plus add-ons that include
 machine-generated tags and 4K dimensional feature vectors,
 for a total of $\sim$13TB of data.
@@ -128,32 +129,19 @@ serving, video streaming, and textual big-data management systems due to
 its primary focus on supporting machine learning and
 data analytics pipelines that use visual data
 (images, videos, and feature vectors), treating these as first class citizens.
-We demonstrate how VDMS outperforms well-know and widely used tools for
-data access by a $\sim$10x factor on this dataset most of the queries we
-used for our internal use-cases, and particularly at scale,
-while simplifying the process of data preparation and data access,
-and providing functionalities non-existent in alternative options.
+We demonstrate how VDMS outperforms well-known and widely used 
+systems for data management by up to $\sim$35x, with 
+an average improvement of about 15x for the queries we
+used in our use-cases, and particularly at scale.
+At the same time, VDMS simplifies the process of data preparation and data access,
+and provides functionalities non-existent in alternative options.
 \end{abstract}
 
 \input{intro.tex}
 \input{design.tex}
 \input{eval.tex}
 \input{conclusion.tex}
-
-\section{Acknowledgments}
-
-We would like to thank the many people that made this project possible and
-helped us through the process, as this work is the results of many efforts.
-We want to thank our managers Nilesh Jain and Ravi Iyer for their
-full support and input during the duration of the project.
-We want to specially acknowledge Philip Lantz and Vishakha Gupta for their help
-with PMGD, key to load large datasets into VDMS.
-We want to acknowledge the Intel Labs VDMS team for their efforts
-open-sourcing and maintaining the system.
-We want to thank Jason Gardner for his helping in setting up many of the servers
-and infrastructure needed to conduct our experiments.
-
-\input{legal.tex}
+\input{acks.tex}
 
 \clearpage
 
@@ -177,11 +165,10 @@ and infrastructure needed to conduct our experiments.
 % Example of an appendix; typically would start on a new page
 %pagebreak
 
-\balance
+\input{legal.tex}
 
-\begin{comment}
-\begin{appendix}
-You can use an appendix for optional proofs or details of your evaluation which are not absolutely necessary to the core understanding of your paper.
+\clearpage
+\input{appendix}
 
 % \section{Final Thoughts on Good Layout}
 % Please use readable font sizes in the figures and graphs. Avoid tempering with the correct border values, and the spacing (and format) of both text and captions of the PVLDB format (e.g. captions are bold).
@@ -189,8 +176,5 @@ You can use an appendix for optional proofs or details of your evaluation which 
 % At the end, please check for an overall pleasant layout, e.g. by ensuring a readable and logical positioning of any floating figures and tables. Please also check for any line overflows, which are only allowed in extraordinary circumstances (such as wide formulas or URLs where a line wrap would be counterintuitive).
 
 % Use the \texttt{balance} package together with a \texttt{\char'134 balance} command at the end of your document to ensure that the last page has balanced (i.e. same length) columns.
-
-\end{appendix}
-\end{comment}
 
 \end{document}

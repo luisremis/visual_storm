@@ -1,17 +1,25 @@
 \section{Conclusion}
 
-We introduced the Visual Data Management System,
-designed to enable efficient access of visual data.
-We presented our rich, JSON-based API, designed to simplify visual data access
-for data scientists and analytics pipelines.
-We compared the performance of our system to a
-baseline of a combination of widely available and used systems.
-Our findings showed that VDMS efficiently deals with complex queries,
-providing a performance improvement
-of up to 2x in the examined medical data search use-case.
-Furthermore, VDMS requires significantly fewer
-lines of code to execute complex queries in complex visual pipelines.
-We intend to continue with the evaluation of
-VDMS performance different use cases, and to identify more
-opportunities to optimize and simplify the access of visual data
-for machine learning and analytics applications.
+In this paper, we show a comprehensive evaluation of VDMS 
+using one of the largest publicly available datasets: 
+The Yahoo Flickr Creative Commons 100M (YFCC100M), 
+together with the expansions packs that include 
+machine-generated labels and feature vectors.
+We compare VDMS against a combination of industry standard systems, 
+all of which are needed to replicate a portion of VDMS' 
+functionality in order to implement an Image Search application. 
+We see improvements up to 35x in certain queries, 
+and an average improvement of about 15x. 
+VDMS also supports video and 
+we provide an analysis of the performance of the video querying
+on a highly concurrent setting. 
+Finally, we analyze the different trade-offs of VDMS' 
+descriptors indexes, a functionality 
+that fully integrates with the rest of VDMS interface, 
+providing a powerful and comprehensive API.
+The design of VDMS, which was conceived as a 
+data management system that treats visual entities 
+as first class citizens, can remove inefficiencies 
+that result from re-purposing and combining solutions
+that were not designed for the job while providing 
+simpler and richer interfaces. 

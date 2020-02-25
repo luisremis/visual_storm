@@ -4,89 +4,78 @@
 Visual computing workloads performing analytics on
 video or image data, either off-line or streaming,
 have become prolific across a wide range of application domains.
-This is in part due to the growing ability of machine learning techniques to
-extract information out of the visual data which can subsequently be used
-for informed decision making and analytics\cite{vdms-nips}.
-Visual data can provide important insights for various applications:
-a retail vendor might be interested in the amount of time
-shoppers spend in front of a specific product, a medical expert might
-want to study the effect of a specific treatment on the size of a tumor by
-looking at brain scans, and a media company would like to leverage
-thousands of hours of produced video material for different uses.
+This is in part due to the growing ability of machine learning (ML) techniques to
+extract information from the visual data which can subsequently be used
+for informed decision making \cite{vdms-nips}.
+The insights this information can provide depend on the
+application: a retail vendor might be interested in the amount of time
+want to see the effect of a specific treatment on the size of a tumor.
 
-Moreover, there are many applications that can be studied through
-the use of large and public available datasets.
-But before getting started, there is usually
-a large effort devoted to cleaning up the data.
-For this work, we use the YFCC100m dataset because of its comprehensive nature,
-and mainly because we have used it for multiple proof of concepts
-and applications within our research lab at Intel.
+Despite this rich and varied usage environment, there has been very little
+research on the management of visual data.
+Most of the current storage solutions for visual data are
+an ad-hoc collection of tools and systems. 
+For example, consider a ML developer constructing a pipeline
+for extracting brain tumor information from existing brain images in a
+classic medical imaging use case. 
+This requires assigning consistent
+identifiers for the scans and adding their metadata in
+some form of relational or key-value database. 
+If the queries require a search over some patient information, 
+then patients have to be associated with their brain scans. 
+Finally, if the ML pipeline needs images that
+are of a size different than the stored ones, there is additional compute
+diverted towards pre-processing after the potentially larger images are fetched. 
+All these steps require investigation of different software
+solutions that provide various functionalities that can then be stitched
+together with a script for this specific use case.
+Moreover, if the pipeline identifies
+new metadata to be added for the tumor images, most databases make it
+hard to evolve the schema on the fly.
+As another example, many applications that can be studied through the use of large
+and publicly available datasets. 
 Applications include basic image search functionality (through the use
 of human-generated tags), advanced image search through the use of
-machine generated tags for each image and feature vectors,
-and video summarization.
-In all cases, it was needed to select a subset of the data before running
-any processing. Selecting subsets of data is by itself a time consuming task,
-as it involves loading all metadata into a solution that enables searches
-based on properties (some of the common tools used for this task are
-relational database, graph database, csv files, etc), and
-building the necessary pipelines and plug-ins
-for querying and retrieving the right data.
+machine-generated tags and feature vectors\cite{imagesearch} 
+for each image, and video summarization.
+For these use-cases, the usual first step consists on selecting a 
+subset of the data before running any processing, and a large effort 
+is devoted to cleaning up and pre-processing the data.
+Selecting subsets of data is by itself a time consuming task,
+as it involves loading all metadata into a solution that enables searching
+based on tags (relational database, graph database, csv files, etc), and
+building the necessary pipelines for querying and retrieving the right data.
 
-Despite the fact that visual data is becoming a primary component in analytics,
-there has been very little research on the management of visual data, even
-less that resulted in fully functioning and available tools.
-Most of the current storage solutions are an ad-hoc collection of
-tools combined with custom scripts to tie them together, unique not only to
-a specific discipline but often to individual researchers.
-For example, consider an ML developer constructing a pipeline
-for extracting brain tumor information from existing brain images in a
-classic medical imaging use case. This task requires assigning consistent
-identifiers for the scans and adding their metadata in
-some form of relational or key-value database.
-If the queries require search over some patient information,
-then patients have to be associated with their brain scans images.
-Finally, if the ML pipeline needs images that are of a size different
-than the stored ones, there is additional compute diverted
-towards preprocessing after the potentially larger images are fetched.
-All these steps require investigation of different software
-solutions that provide various functionalities that have to be adapted,
-re-purposed, and stitched together with scripts for each specific use case.
-Moreover, most databases make it hard to evolve the schema on the fly and
-require a definition of the representation of the data beforehand, which becomes
-a problem when new forms of data becomes available with the advances on ML based
-data extraction techniques.
-Not only do these ad hoc solutions make replicating experiments
-difficult, they do not scale well to real-world applications.
-Addressing the storage and retrieval of visual data necessitates a complete
-overhaul of the storage architecture, preferably using emerging breakthroughs in
-heterogeneous memory and storage for efficiency, and with a focus to recognizing
-types of data that becoming the center of analytics (i.e., images and videos).
+More generally, data scientists and machine learning developers 
+usually end up building an ad-hoc solution that results in a 
+combination of databases and file systems to store 
+metadata and visual data (images, videos), respectively. 
+This is integrated with a set of custom scripts that tie multiple systems together, 
+unique not only to a specific application/discipline but often to individual researchers.
+These ad-hoc solutions make replicating experiments difficult, 
+and more importantly, they do not scale well when deployed in the real-world.
+The reason behind such complexity is the lack of a one-system 
+that can be used to store and access all the data the application needs.
 
-In this paper, we show how a new approach for visual data management can
-a very complex task become simple and productive.
-We also show how, buy using a tool that was design for the job,
-inefficiencies that emerge from the re-purpose of multiple system disappear
-and there are important gains in overall data access performance.
-We put a particular emphasis on the scalability and concurrenct aspect of the
-performance evaluation given that large datasets are processed in parallel
-using distributed computing.
-
-We also expand on the Video and Feature Vector capabilities of
+In this paper, we show how VDMS~\cite{vdms-nips} provides a comprehensive solutions 
+to the data management for applications that heavily rely on visual data. 
+VDMS is an Open Source project designed to enable efficient access of visual data.
+We also expand on the video and feature vector capabilities of
 VDMS, which are part of the latest additions to the system.
 We analyze different functionalities and trade-offs for this type of data,
-in combination with metadata filtering.
-To the best of our knowledge, this set of functionalities are unique to
-VDMS and we were not able to find a system with similar functionality.
-
+in combination with metadata filtering. 
+To the best of our knowledge, this set of functionalities, 
+provided behind an integrated API, are unique to VDMS and 
+we were unable to find a system with similar functionality.
 We show how VDMS can be used as the single and centralize point for data
 management and data access even when having multiple modalities of data:
-Metadata, Image, Videos, and Feature Vectors, all part of a comprehensive
-dataset that is used for multiple use-cases.
+Metadata, Image, Videos, and Feature Vectors.
 
-We start by briefly describing VDMS design principles and implementation
-in Section \ref{arch}.
-We then describe the dataset we used for our experiments and explain
-why this is a comprehensive use-case for visual data analytics, as well as
-describe our evaluation methodology in Section \ref{eval}.
-Finally, we show the results of our evaluation in Section \ref{eval}.
+For this work, we use the YFCC100M dataset\cite{Thomee_2016}. 
+The YFCC100M is the largest publicly multimedia collection. 
+It contains the metadata of around 99.2 million photos 
+and 0.8 million videos from Flickr,
+plus expansion packs that include a variety of multidimensional data,
+all of which were shared under one of the various Creative Commons licenses.
+We have used this dataset
+for multiple proof of concepts and applications within our research lab. 
