@@ -20,7 +20,7 @@ Handling video in a general way is a complex task.
 Some of this complexity comes from the existence of a variety of open and
 proprietary implementations, different encoding techniques and container
 formats, and different parameters of the video itself that are
-application-dependent, like frames per second, lossy compression, etc).
+application-dependent, like frames per second, lossy compression, etc.
 When it comes to video, ad-hoc solutions have a large number of parameters that
 can be tuned.
 Together with that, there is no system that enables transactional
@@ -131,7 +131,7 @@ For this experiment, in the case of VDMS we simply use a similar
 attached SSD disk to store metadata.
 Even if PMGD, the graph database used by VDMS, is designed for persistent memory,
 it can deliver good performance when using SSDs directly, while still
-providing ACID-compliant  transactions.
+providing ACID-compliant transactions.
 
 For the metadata, we built VDMS and MySQL databases
 using the YFCC100M dataset with incremental database sizes.
@@ -180,7 +180,7 @@ with it (some of which are listed in Section \ref{dataset}).
 % being present in that image is stored as a property in that \textit{connection}.
 The number of nodes (representing images and \textit{autotags}) 
 are dependent on the database size and the \textit{connections} are responsible for
-90\% of the elements in each database instances,  
+90\% of the elements in each database instance,  
 as shown in Table~\ref{table:vdmsnodes}.
 
 It is important to note that we create indexes for the image identifier,
@@ -222,7 +222,7 @@ DB Name & \# Images & \# Connections & \# TagList\\
 \textbf{MySQL/Baseline:}
 Each MySQL database is created in a similar manner as VDMS 
 but the data is represented as three tables, following the relational model:
-1) \textit{images} table, contains one row per image,
+1) \textit{images} table: contains one row per image,
 and a column for each property
 associated with the images (some of which are listed in Section \ref{dataset});
 2) \textit{taglist} table: contains one row per autotag element
@@ -247,7 +247,7 @@ identifier and \textit{tagid} as foreign keys.
 
 In an attempt to have the best MySQL configuration possible for this use case, 
 we explore several parameters to increase the performance of both loading the data, 
-as well executing the queries.
+as well as executing the queries.
 In particular, MySQL optimizes threads and transactions out-of-box, 
 but it cannot handle the entire YFCC100M dataset without configuring 
 specific parameters.
@@ -703,7 +703,8 @@ frames-per-second (FPS) versions of the video.
 \begin{figure*}[ht!]
 \centering
 \includegraphics[width=\textwidth]{figures/video_overhead}
-\caption{Concurrency (left) and Overhead (right)}
+\caption{Analysis of video operations. The left figure shows the video throughput (videos per sec) as the number of concurrent clients increase and the right figure breaks down the different components of the
+queries using 32 clients.}
 \label{fig:video}
 \end{figure*}
 

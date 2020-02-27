@@ -1,10 +1,10 @@
-FILE = vdms-vldb2020
+FILE = main
 COMM = pdflatex
 
 all: ${FILE}.tex
 			make clean
 			${COMM} ${FILE}.tex
-			bibtex ${FILE}
+			bibtex vdms-vldb2020
 			${COMM} ${FILE}.tex
 			${COMM} ${FILE}.tex
 			# ${COMM} ${FILE}.tex
