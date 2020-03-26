@@ -170,7 +170,7 @@ class VDMSQuery(object):
 
         return results
 
-    def get_metadata_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0, return_response=True):
+    def get_metadata_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0, return_response=True, comptype='and'):
 
         all_cmds = []
 
@@ -221,7 +221,8 @@ class VDMSQuery(object):
 
         # Find intersections by ID
         try:
-            if (len(tags) > 1):
+	    #TODO: Add 'or'
+            if (len(tags) > 1) and comptype == 'and':
                 results = self.intersect_by_key(responses, "ID")
             else:
                 results = responses[1]["FindImage"]["entities"]
@@ -243,12 +244,12 @@ class VDMSQuery(object):
 
 
     def get_images_by_tags(self, tags, probs, operations = [],
-                           lat=-1, long=-1, range_dist=0, return_images=True):
+                           lat=-1, long=-1, range_dist=0, return_images=True, comptype='and'):
 
         if len(tags) > 1:
             start = time.time()
             results = self.get_metadata_by_tags(tags, probs,
-                                                lat, long, range_dist)
+                                                lat, long, range_dist, comptype=comptype)
 
             all_cmds = []
 

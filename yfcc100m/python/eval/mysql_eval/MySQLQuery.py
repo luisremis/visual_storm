@@ -37,7 +37,7 @@ class MySQL(object):
     def get_connection(self, params):
         return mysql.connector.connect(host=params.db_host, user=params.db_user, passwd=params.db_pswd, port=params.db_port, database="yfcc_" + params.db_name)
 
-    def get_metadata_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0, return_response=True):
+    def get_metadata_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0, return_response=True, comptype='and'):
         
         if lat != -1:
             location_qstr = '''(latitude >= {} AND latitude <= {} ) AND (longitude >= {} AND longitude <= {})'''.format(lat-range_dist*1.0,lat+range_dist*1.0,long-range_dist*1.0,long+range_dist*1.0)
@@ -45,7 +45,7 @@ class MySQL(object):
         else:
             qstr = ['''id IN (select id from (test_metadata INNER JOIN test_autotags a on test_metadata.id=a.metadataid and a.probability >={} and a.tagid=(select test_taglist.tagid from test_taglist where test_taglist.tag='{}' limit 1)))'''.format(prob, tag) for prob,tag in zip(probs, tags)]
         
-        query = '''SELECT line_number, download_url, id, latitude, longitude, license_name FROM test_metadata WHERE {}'''.format(''' AND '''.join(qstr))
+        query = '''SELECT line_number, download_url, id, latitude, longitude, license_name FROM test_metadata WHERE {}'''.format(''' {} '''.format(comptype.upper()).join(qstr))
 
         start_t = time.time()
         self.db_cursor.execute(query)
@@ -72,9 +72,9 @@ class MySQL(object):
         return out_dict
 
     def get_images_by_tags(self, tags, probs, operations = [],
-                           lat=-1, long=-1, range_dist=0, return_images=True):
+                           lat=-1, long=-1, range_dist=0, return_images=True, comptype='and'):
         start = time.time()
-        metadata = self.get_metadata_by_tags(tags, probs, lat, long, range_dist)
+        metadata = self.get_metadata_by_tags(tags, probs, lat, long, range_dist, comptype=comptype)
 
         height = operations[0]["height"]
         width = operations[0]["width"]

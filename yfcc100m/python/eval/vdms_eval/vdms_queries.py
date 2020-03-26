@@ -19,28 +19,34 @@ resize = {
     "height": 224
 }
 
+get_imgs = False
+
 qh = VDMSQuery.VDMSQuery("sky4.local", 55500)
 
-print('Query metadata with autotags: alligator>=0.2 AND lake>=0.2')
-qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2])
-print('Query images with autotags: alligator>=0.2 AND lake>=0.2')
-qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize])
+print('\nQuery metadata with autotags: alligator>=0.2 AND lake>=0.2')
+print('Num IDs: ', len(qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2])))
+if get_imgs:
+    print('Query images with autotags: alligator>=0.2 AND lake>=0.2')
+    qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize])
 
-print('Query metadata with autotags: alligator>=0.2 AND lake>=0.2 within 20 of lat -14.354356, long -39.002567')
-qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2], -14.354356, -39.002567, 20)
-print('Query images with autotags: alligator>=0.2 AND lake>=0.2 within 20 of lat -14.354356, long -39.002567')
-qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize], -14.354356, -39.002567, 20)
+print('\nQuery metadata with autotags: alligator>=0.2 AND lake>=0.2 within 20 of lat -14.354356, long -39.002567')
+print('Num IDs: ', len(qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2], -14.354356, -39.002567, 20)))
+if get_imgs:
+    print('Query images with autotags: alligator>=0.2 AND lake>=0.2 within 20 of lat -14.354356, long -39.002567')
+    qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize], -14.354356, -39.002567, 20)
 
-print('Query metadata with autotags: alligator>=0.2')
-qh.get_metadata_by_tags(["alligator"], [0.2] )
-print('Query images with autotags: alligator>=0.2')
-qh.get_images_by_tags(["alligator"], [0.2], [resize])
-# display_images([img for img in blobs if img])
+print('\nQuery metadata with autotags: alligator>=0.2')
+print('Num IDs: ', len(qh.get_metadata_by_tags(["alligator"], [0.2] )))
+if get_imgs:
+    print('Query images with autotags: alligator>=0.2')
+    qh.get_images_by_tags(["alligator"], [0.2], [resize])
+    # display_images([img for img in blobs if img])
 
-print('Query metadata with autotags: pizza>=0.5 AND wine>=0.5')
-qh.get_metadata_by_tags(["pizza", "wine"], [0.5, 0.5] )
-print('Query images with autotags: pizza>=0.5 AND wine>=0.5')
-qh.get_images_by_tags(["pizza", "wine"], [0.5, 0.5], [resize])
+print('\nQuery metadata with autotags: pizza>=0.5 AND wine>=0.5')
+print('Num IDs: ', len(qh.get_metadata_by_tags(["pizza", "wine"], [0.5, 0.5] )))
+if get_imgs:
+    print('Query images with autotags: pizza>=0.5 AND wine>=0.5')
+    qh.get_images_by_tags(["pizza", "wine"], [0.5, 0.5], [resize])
 
 # print("Query Images:")
 # display_images(imgs)
