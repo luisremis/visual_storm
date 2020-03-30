@@ -7,6 +7,8 @@ import random
 
 import vdms
 
+OR_OPERATION = True
+
 def create_dir(folder):
     if not os.path.isdir(folder):
         os.mkdir(folder)
@@ -246,38 +248,83 @@ class VDMSQuery(object):
                            lat=-1, long=-1, range_dist=0, return_images=True):
 
         if len(tags) > 1:
-            start = time.time()
-            results = self.get_metadata_by_tags(tags, probs,
-                                                lat, long, range_dist)
 
-            all_cmds = []
+            if OR_OPERATION:
+                all_cmds = []
 
-            for ele in results:
-                fI = {
-                    "FindImage": {
-                        "constraints": {
-                            "ID":  ["==", ele['ID']]
-                        },
-                        # "results": {
-                        #     "list": ["ID"]
-                        # }
+                ref = 1
+                for (tag, prob) in zip(tags,probs):
+                    fE = {
+                        "FindEntity": {
+                            "_ref": ref,
+                            "class": "autotags",
+                            "constraints": {
+                                "name": ["==", tag]
+                            }
+                        }
                     }
-                }
 
-                if len(operations) >= 0:
-                    fI["FindImage"]["operations"] = operations
+                    fI = {
+                        "FindImage": {
+                            "link": {
+                                "ref": ref,
+                                "constraints": {
+                                    "tag_prob": [">=", prob]
+                                }
+                            }
+                        }
+                    }
 
-                all_cmds.append(fI)
+                    if (lat != -1):
+                        fI["FindImage"]["constraints"] = {
+                            "Latitude":  [">=", lat  - range_dist*1.0,
+                                          "<=", lat  + range_dist*1.0  ],
+                            "Longitude": [">=", long - range_dist*1.0,
+                                          "<=", long + range_dist*1.0  ]
+                        }
 
-            # start = time.time()
-            responses, blobs = self.db.query(all_cmds)
-            end_time = time.time() - start
+                    all_cmds.append(fE)
+                    all_cmds.append(fI)
 
-            # if lat == -1:
-            #     out_file = open("perf_results/vdms_img_list.txt", 'w')
-            #     for ent in responses:
-            #         out_file.write(str(ent["FindImage"]["entities"][0]["ID"]))
-            #         out_file.write("\n")
+                    ref += 1
+
+                start = time.time()
+                responses, blobs = self.db.query(all_cmds)
+                end_time = time.time() - start
+
+            else: # AND OPERATION
+                start = time.time()
+                results = self.get_metadata_by_tags(tags, probs,
+                                                    lat, long, range_dist)
+
+                all_cmds = []
+
+                for ele in results:
+                    fI = {
+                        "FindImage": {
+                            "constraints": {
+                                "ID":  ["==", ele['ID']]
+                            },
+                            # "results": {
+                            #     "list": ["ID"]
+                            # }
+                        }
+                    }
+
+                    if len(operations) > 0:
+                        fI["FindImage"]["operations"] = operations
+
+                    all_cmds.append(fI)
+
+                # start = time.time()
+                responses, blobs = self.db.query(all_cmds)
+                end_time = time.time() - start
+
+                # if lat == -1:
+                #     out_file = open("perf_results/vdms_img_list.txt", 'w')
+                #     for ent in responses:
+                #         out_file.write(str(ent["FindImage"]["entities"][0]["ID"]))
+                #         out_file.write("\n")
 
         else:
 
@@ -309,13 +356,13 @@ class VDMSQuery(object):
 
             if (lat != -1):
                 fI["FindImage"]["constraints"] = {
-                    "Latitude": [">=", lat-range_dist*1.0,
-                                 "<=", lat + range_dist*1.0  ],
-                    "Longitude": [">=", long-range_dist*1.0,
-                                 "<=", long + range_dist*1.0  ]
+                    "Latitude":  [">=", lat  - range_dist*1.0,
+                                  "<=", lat  + range_dist*1.0  ],
+                    "Longitude": [">=", long - range_dist*1.0,
+                                  "<=", long + range_dist*1.0  ]
                 }
 
-            if len(operations) >= 0:
+            if len(operations) > 0:
                 fI["FindImage"]["operations"] = operations
 
             all_cmds.append(fE)
