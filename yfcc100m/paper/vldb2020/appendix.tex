@@ -1,0 +1,133 @@
+\begin{appendix}
+
+\begin{comment}
+You can use an appendix for optional proofs or details of your evaluation which are not absolutely 
+necessary to the core understanding of your paper.
+\end{comment}
+
+\begin{listing}[ht!]
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               tabsize=4]{js}
+"FindEntity"{     
+    "class": "autotag",
+    "constraints": { 
+        "name": ["==", "alligator"]
+    }
+    "_ref" : 1
+},
+"FindImage":{
+    "format": "png",
+    "link": {
+        "ref":1,
+        "constraints": {
+            "prob": [">=", 0.66]
+        }
+    }
+    "operations": [{
+        "type": "resize",
+        "height": 224,
+        "width":  224,
+    }]
+}
+
+\end{minted}
+\caption{Sample Query for Images - 
+The query expresses the following: 
+Find all the images connected to the autotag \textit{alligator} 
+with probability higher than 0.66, apply a resize operation
+to make the images 224x224, and convert to "png".} 
+\label{findimage}
+\end{listing}
+
+\begin{listing}[ht!]
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               tabsize=4]{js}
+"FindEntity"{     
+    "class": "autotag",
+    "constraints": { 
+        "name": ["==", "lake"]
+    }
+    "_ref" : 1
+},
+"FindVideo":{
+    "container": "mp4",
+    "codec": "h.264",
+    "link": {
+        "ref":1,
+        "constraints": {
+            "prob": [">=", 0.86]
+        }
+    }
+    "operations": [{
+        "type": "resize",
+        "height": 1080,
+        "width":  1920,
+    }]
+}
+
+\end{minted}
+\caption{Sample Query for Video - 
+The query expresses the following: 
+Find all videos connected to the autotag \textit{lake} 
+with probability higher than 0.86, apply a resize operation
+to make the video 1920×1080, and convert to "mp4" file, 
+using H.264 enconding.} 
+\label{findvideo}
+\end{listing}
+
+\begin{listing}[t!]
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               tabsize=4]{js}
+"FindEntity"{     
+    "class": "autotag",
+    "constraints": { 
+        "name": ["==", "alligator"]
+    }
+    "_ref" : 1
+},
+"FindImage":{
+    "format": "png",
+    "link": {
+        "ref":1,
+        "constraints": {
+            "prob": [">=", 0.66]
+        }
+    }, 
+    "constraints": {
+        "latitude": [">=", 36.23433, 
+                     "<=", 38.23433]
+        "longitude":[">=", -114.80666, 
+                     "<=", -116.80666]
+    },
+    "operations": [{
+        "type": "resize",
+        "height": 224,
+        "width":  224,
+    }, {
+        "type": "rotate",
+        "angle": 45.34
+    }]
+}
+
+\end{minted}
+\caption{Sample Query for Images - 
+The query expresses the following: 
+Find all the images connected to the autotag \textit{alligator} 
+with probability higher than 0.66, 
+filter by latitude and longitude within 1 degree, 
+apply a resize operation to make the images 224x224
+and rotate the image 45.34 degrees, 
+and return the images as "png" files.} 
+\label{findimagegeo}
+\end{listing}
+
+\end{appendix}

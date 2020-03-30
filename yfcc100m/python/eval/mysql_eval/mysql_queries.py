@@ -38,13 +38,14 @@ def drop_database(params):
     db_cursor.close()
     conn.close()
 
-args = {'db_name':'yfcc_1M',
+args = {'db_name':'100k',
         'db_host':"127.0.0.1", #'sky3.jf.intel.com',
         'db_port': 3360,
         'db_user': 'root',
         'db_pswd': '',
         'build_db': False,
-        'cleanup': False}
+        'cleanup': False,
+        'get_imgs': False}
 
 resize = {
     "type": "resize",
@@ -66,26 +67,38 @@ except:
     print('\n')
     qh = MySQLQuery.MySQL(params)
 
-print('Query metadata with autotags: alligator>=0.2 AND lake>=0.2')
-qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2])
-print('Query images with autotags: alligator>=0.2 AND lake>=0.2')
-qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize])
 
-print('Query metadata with autotags: alligator>=0.2 AND lake>=0.2 within 20 of lat -14.354356, long -39.002567')
-qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2], -14.354356, -39.002567, 20)
-print('Query images with autotags: alligator>=0.2 AND lake>=0.2 within 20 of lat -14.354356, long -39.002567')
-qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize], -14.354356, -39.002567, 20)
+print('\nQuery metadata with autotags: alligator>=0.2 OR lake>=0.2')
+print('Num IDs: ',len(qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2], comptype='or')))
+if args['get_imgs']:
+    print('Query images with autotags: alligator>=0.2 OR lake>=0.2')
+    qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize], comptype='or')
 
-print('Query metadata with autotags: alligator>=0.2')
-qh.get_metadata_by_tags(["alligator"], [0.2] )
-print('Query images with autotags: alligator>=0.2')
-qh.get_images_by_tags(["alligator"], [0.2], [resize])
-# display_images([img for img in blobs if img])
+print('\nQuery metadata with autotags: alligator>=0.2 AND lake>=0.2')
+print('Num IDs: ',len(qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2])))
+if args['get_imgs']:
+    print('Query images with autotags: alligator>=0.2 AND lake>=0.2')
+    qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize])
 
-print('Query metadata with autotags: pizza>=0.5 AND wine>=0.5')
-qh.get_metadata_by_tags(["pizza", "wine"], [0.5, 0.5] )
-print('Query images with autotags: pizza>=0.5 AND wine>=0.5')
-qh.get_images_by_tags(["pizza", "wine"], [0.5, 0.5], [resize])
+print('\nQuery metadata with autotags: alligator>=0.2 AND lake>=0.2 within 20 of lat -14.354356, long -39.002567')
+print('Num IDs: ',len(qh.get_metadata_by_tags(["alligator", "lake"], [0.2, 0.2], -14.354356, -39.002567, 20)))
+if args['get_imgs']:
+    print('Query images with autotags: alligator>=0.2 AND lake>=0.2 within 20 of lat -14.354356, long -39.002567')
+    qh.get_images_by_tags(["alligator", "lake"], [0.2, 0.2], [resize], -14.354356, -39.002567, 20)
+
+print('\nQuery metadata with autotags: alligator>=0.2')
+print('Num IDs: ',len(qh.get_metadata_by_tags(["alligator"], [0.2] )))
+if args['get_imgs']:
+    print('Query images with autotags: alligator>=0.2')
+    qh.get_images_by_tags(["alligator"], [0.2], [resize])
+    # display_images([img for img in blobs if img])
+
+print('\nQuery metadata with autotags: pizza>=0.5 AND wine>=0.5')
+print('Num IDs: ', len(qh.get_metadata_by_tags(["pizza", "wine"], [0.5, 0.5] )))
+if args['get_imgs']:
+    print('Query images with autotags: pizza>=0.5 AND wine>=0.5')
+    qh.get_images_by_tags(["pizza", "wine"], [0.5, 0.5], [resize])
+
 
 qh.close_connection()
 
