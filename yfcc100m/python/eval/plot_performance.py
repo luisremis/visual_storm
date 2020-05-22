@@ -60,9 +60,9 @@ newpath = str(params.outfile.parents[0])
 if not os.path.exists(newpath):
     os.makedirs(newpath)
 
-color = ['red', 'blue', 'orange', 'red', 'blue', 'orange']
-linestyles = ['-', '-', '-', '--', '--', '--', ]
-markers = ['o', 'o', 'o', '*', '*', '*']
+# color = ['red', 'blue', 'red', 'blue', 'orange', 'orange']
+# linestyles = ['-', '-', '--', '--', '-', '--', ]
+# markers = ['o', 'o', '*', '*', 'o', '*']
 plot = "all"
 line_counter = 0
 
@@ -139,6 +139,28 @@ imgs_std = imgs_std.transpose()
 
 x_pos = [value_to_float(i) for i in db_sizes]
 
+if len(imgs_[0, :]) == 2:
+    color = ['orange', 'black']
+    linestyles = ['-', '--']
+    markers = ['o', '*']
+elif len(imgs_[0, :]) == 4:
+    color = ['red', 'blue', 'red', 'blue']
+    # color = ['orange', 'black', 'orange', 'black']
+    linestyles = ['-', '-', '--', '--']
+    markers = ['o', 'o', '*', '*']
+elif len(imgs_[0, :]) == 6:
+    color = ['red', 'blue', 'orange', 'red', 'blue', 'orange']
+    linestyles = ['-', '-', '-', '--', '--', '--', ]
+    markers = ['o', 'o', 'o', '*', '*', '*']
+elif len(imgs_[0, :]) == 8:
+    color = ['red', 'blue', 'orange', 'black', 'red', 'blue', 'orange', 'black']
+    linestyles = ['-', '-', '-', '-', '--', '--', '--', '--',]
+    markers = ['o', 'o', 'o', 'o', '*', '*', '*', '*']
+
+color      = ['red', 'blue', 'orange', 'black', 'pink', 'brown', 'violet', 'green']
+linestyles = ['-', '--']
+markers    = ['o', '*']
+
 """
 Plot Tx/sec
 """
@@ -152,23 +174,27 @@ else:
 
 plt.rc('lines', linewidth=1)
 
+total_queries = int(len(imgs_sec[0, :]) / 2)
 for i in range(0, len(tx_sec[0, :])):
     ax0.errorbar(x_pos, tx_sec[:, i],
                  yerr=tx_sec_std[:, i],
                  label=query_name[i],
-                 color=color[i], linestyle=linestyles[i], marker=markers[i])
+                 color=color[i % len(color)],
+                 linestyle=linestyles[int(i / total_queries)],
+                 marker=markers[int(i / total_queries)])
 
+ax0.set_xscale('log')
 if params.log:
     ax0.set_yscale('log')
-    ax0.set_xscale('log')
+# ax0.set_ylim(1,10**4)
 
 plt.xticks(x_pos, db_sizes)
 
 ax0.set_title(title)
-plt.xlabel('Number of Images', fontsize=12)
-plt.ylabel('Tx/sec', fontsize=12)
+plt.xlabel('Database Size (# of Images)', fontsize=12)
+plt.ylabel('Transactions/s', fontsize=12)
 
-plt.legend(loc="best", ncol=1, shadow=True, fancybox=True)
+plt.legend(loc="lower left", ncol=2, shadow=True, fancybox=True)
 
 if not params.single_page_plot:
     plt.savefig(plotfilename + "_metadata.pdf", format="pdf", bbox_inches='tight')
@@ -189,16 +215,19 @@ for i in range(0, len(imgs_sec[0, :])):
     ax0.errorbar(x_pos, imgs_sec[:, i],
                  yerr=imgs_sec_std[:, i],
                  label=query_name[i],
-                 color=color[i], linestyle=linestyles[i], marker=markers[i])
+                 color=color[i % len(color)],
+                 linestyle=linestyles[int(i / total_queries)],
+                 marker=markers[int(i / total_queries)])
 
+ax0.set_xscale('log')
 if params.log:
     ax0.set_yscale('log')
-    ax0.set_xscale('log')
+# ax0.set_ylim(10**1,10**4)
 
 plt.xticks(x_pos, db_sizes)
 
-plt.xlabel('Number of Images', fontsize=12)
-plt.ylabel('images/sec', fontsize=12)
+plt.xlabel('Database Size (# of Images)', fontsize=12)
+plt.ylabel('Images/s', fontsize=12)
 
 if not params.single_page_plot:
     ax0.set_title(title)
@@ -219,15 +248,20 @@ for i in range(0, len(imgs_[0, :])):
     ax0.errorbar(x_pos, imgs_[:, i],
                  yerr=imgs_std[:, i],
                  label=query_name[i],
-                 color=color[i], linestyle=linestyles[i], marker=markers[i])
+                 color=color[i % len(color)],
+                 linestyle=linestyles[int(i / total_queries)],
+                 marker=markers[int(i / total_queries)])
 
+ax0.set_xscale('log')
 if params.log:
     ax0.set_yscale('log')
-    ax0.set_xscale('log')
 
 plt.xticks(x_pos, db_sizes)
 
-plt.xlabel('Number of Images', fontsize=12)
+plt.xlabel('Database Size (# of Images)', fontsize=12)
 plt.ylabel('Avg. # images', fontsize=12)
+plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2),
+          ncol=2, shadow=True, fancybox=True)
+
 
 plt.savefig(plotfilename + "_numimages.pdf", format="pdf", bbox_inches='tight')
