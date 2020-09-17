@@ -131,7 +131,7 @@ class VDMSQuery(object):
         return imgs
 
 
-    def intersect_by_key(self, responses, key):
+    def intersect_by_key(self, responses, key, comptype='and'):
 
         for i in range (int(len(responses) / 2)):
             curr = len(responses[i*2 + 1]["FindImage"]["entities"])
@@ -162,11 +162,15 @@ class VDMSQuery(object):
                 id_to_check = int(ent[key])
                 pos = binarySearch(set, 0, len(set) - 1, id_to_check)
 
-                if (pos != -1):
+                if (pos != -1 and comptype == 'and'):
                     aux_set.append(id_to_check)
 
                     if (i == int(len(responses)/2) - 1): # last findImage
                         results.append(ent)
+
+                elif (pos == -1 and comptype == 'or'):
+                    aux_set.append(id_to_check)
+                    results.append(ent)
 
             set = aux_set
 
@@ -224,8 +228,9 @@ class VDMSQuery(object):
         # Find intersections by ID
         try:
 	    #TODO: Add 'or'
-            if (len(tags) > 1) and comptype == 'and':
-                results = self.intersect_by_key(responses, "ID")
+            if (len(tags) > 1):
+                results = self.intersect_by_key(responses, "ID",
+                                                comptype=comptype)
             else:
                 results = responses[1]["FindImage"]["entities"]
         except:
@@ -245,8 +250,12 @@ class VDMSQuery(object):
         return out_dict
 
 
-    def get_images_by_tags(self, tags, probs, operations = [],
-                           lat=-1, long=-1, range_dist=0, return_images=True, comptype='and'):
+    def get_images_by_tags(self, tags, probs,
+                           operations = [],
+                           lat=-1, long=-1,
+                           range_dist=0,
+                           return_images=True,
+                           comptype='and'):
 
         if len(tags) > 1:
 
