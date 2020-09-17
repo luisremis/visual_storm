@@ -5,35 +5,84 @@ from threading import Thread
 import pandas as pd
 import numpy as np
 
-from mysql_eval import MySQLQuery
+from mysql_eval  import MySQLQuery
 from memsql_eval import MemSQLQuery
-from vdms_eval import VDMSQuery
+from vdms_eval   import VDMSQuery
 
 VDMS_PORT_MAPPING = {'100k': 55500, '500k': 55405,
-                     '1M': 55501, '5M': 55450,
-                     '10M': 55510, '50M': 55000,
+                     '1M':   55501, '5M':   55450,
+                     '10M':  55510, '50M':  55000,
                      '100M': 50000}
 
-SIZE_PROB_MAPPING = {'100k': 0.21, '500k': 0.21,
-                     '1M':   0.41, '5M':   0.60,
-                     '10M':  0.70, '50M':  0.98,
-                     '100M': 0.95}
+# SIZE_PROB_MAPPING = {'100k': 0.21, '500k': 0.41,
+#                      '1M':   0.55, '5M':   0.65,
+#                      '10M':  0.70, '50M':  0.75,
+#                      '100M': 0.82}
 
-RESIZE = {"type": "resize", "width": 224, "height": 224}
-QUERY_PARAMS = [{'key': '_1tag_resize',
+SIZE_PROB_MAPPING = {'100k': 0.60, '500k': 0.06,
+                     '1M':   0.92175, '5M':   0.955,
+                     '10M':  0.972499, '50M':  0.99375,
+                     '100M': 0.997656249}
+
+OP_RESIZE_DOWN = {"type": "resize", "width": 224,  "height": 224}
+OP_ROTATE      = {"type": "rotate", "angle": 45.0, "resize": False}
+
+QUERY_PARAMS = [
+                {'key': '_1tag',
                  'tags': ["alligator"],
-                 'probs': [0.2],
-                 'operations': [RESIZE] },
-                {'key': '_2tag_resize',
+                 'probs': [1.1],
+                 'operations': [],
+                 'comptype': "or" },
+                {'key': '_1tag_loc20',
+                 'tags': ["alligator"],
+                 'probs': [0.4],
+                 'lat': -14.354356, 'long': -39.002567,
+                 'range_dist': 20,
+                 'operations': [],
+                 'comptype': "or"  },
+                {'key': '_1tag_resize',
+                 'tags': ["alligator"],
+                 'probs': [1.1],
+                 'operations': [OP_RESIZE_DOWN],
+                 'comptype': "or" },
+                {'key': '_1tag_loc20_resize',
+                 'tags': ["alligator"],
+                 'probs': [0.4],
+                 'lat': -14.354356, 'long': -39.002567,
+                 'range_dist': 20,
+                 'operations': [OP_RESIZE_DOWN],
+                 'comptype': "or" },
+                {'key': '_2tag_resize_and',
                  'tags': ["alligator", "lake"],
-                 'probs': [0.2, 0.2],
-                 'operations': [RESIZE] },
-                {'key': '_2tag_loc20_resize',
+                 'probs': [0.95, 0.95],
+                 'operations': [OP_RESIZE_DOWN],
+                 'comptype': "and" },
+                {'key': '_2tag_loc20_resize_and',
                  'tags': ["alligator", "lake"],
-                  'probs': [0.3, 0.3],
-                  'lat': -14.354356, 'long': -39.002567,
-                  'range_dist': 20,
-                  'operations': [RESIZE] }]
+                 'probs': [0.95, 0.95],
+                 'lat': -14.354356, 'long': -39.002567,
+                 'range_dist': 20,
+                 'operations': [OP_RESIZE_DOWN],
+                 'comptype': "and" },
+                {'key': '_2tag_resize_or',
+                 'tags': ["alligator", "lake"],
+                 'probs': [0.95, 0.95],
+                 'operations': [OP_RESIZE_DOWN],
+                 'comptype': "or" },
+                {'key': '_2tag_loc20_resize_or',
+                 'tags': ["alligator", "lake"],
+                 'probs': [0.95, 0.95],
+                 'lat': -14.354356, 'long': -39.002567,
+                 'range_dist': 20,
+                 'operations': [OP_RESIZE_DOWN],
+                 'comptype': "or" },
+                  ]
+
+def reject_outliers(data, m = 2.):
+    d = np.abs(data - np.median(data))
+    mdev = np.median(d)
+    s = d/mdev if mdev else 0.
+    return data[s<m]
 
 def get_args():
     obj = argparse.ArgumentParser()
@@ -95,14 +144,15 @@ def get_thread_metadata(obj, params, index, results, query_arguments):
         # print('\nTAG:{}\tLAT:{}\tLON:{}'.format(query_arguments['tags'], query_arguments['lat'] if 'lat' in query_arguments else '', query_arguments['long'] if 'long' in query_arguments else ''))
         tag   = query_arguments['tags']
         probs = query_arguments['probs']
-        lat   = query_arguments['lat'] if 'lat' in query_arguments else -1
+        lat   = query_arguments['lat']  if 'lat'  in query_arguments else -1
         long  = query_arguments['long'] if 'long' in query_arguments else -1
         range_dist = query_arguments['range_dist'] if 'range_dist' in query_arguments else 0
         operations = query_arguments['operations'] if 'operations' in query_arguments else []
 
         data_dict = obj.get_metadata_by_tags(tag, probs, lat,
                                              long, range_dist,
-                                             return_response=False)
+                                             return_response=False,
+                                             comptype=query_arguments["comptype"])
         results[index + ix].update(data_dict)
 
     if params.numthreads == 1:
@@ -122,7 +172,8 @@ def get_thread_images(obj, params, index, results, query_arguments):
         data_dict = obj.get_images_by_tags(tag, probs,
                                            operations, lat, long,
                                            range_dist,
-                                           return_images=False)
+                                           return_images=False,
+                                           comptype=query_arguments["comptype"])
         results[index + ix].update(data_dict)
 
     if params.numthreads == 1:
@@ -223,13 +274,34 @@ def main(params):
 
     for query_args in QUERY_PARAMS:
 
-        for i in range(len(query_args["probs"])):
-            query_args["probs"][i] = SIZE_PROB_MAPPING[params.db_name]
+        if query_args["key"] == "_1tag":
+            for i in range(len(query_args["probs"])):
+                query_args["probs"][i] = SIZE_PROB_MAPPING[params.db_name]
+        elif query_args["key"] == "_1tag_resize":
+            for i in range(len(query_args["probs"])):
+                query_args["probs"][i] = SIZE_PROB_MAPPING[params.db_name]
+        elif query_args["key"] == "_1tag_loc20_resize":
+            for i in range(len(query_args["probs"])):
+                query_args["probs"][i] = SIZE_PROB_MAPPING[params.db_name] * (0.3)
+        elif query_args["key"] == "_2tag_resize":
+            for i in range(len(query_args["probs"])):
+                query_args["probs"][i] = SIZE_PROB_MAPPING[params.db_name] * (0.8)
+        elif query_args["key"] == "_2tag_loc20_resize":
+            for i in range(len(query_args["probs"])):
+                query_args["probs"][i] = SIZE_PROB_MAPPING[params.db_name] * (0.3)
+        else:
+            for i in range(len(query_args["probs"])):
+                query_args["probs"][i] = SIZE_PROB_MAPPING[params.db_name]
+
+
+        if query_args["comptype"] == "and":
+            for i in range(len(query_args["probs"])):
+                query_args["probs"][i] = query_args["probs"][i] * 0.6
 
         print('Query:{}'.format(query_args))
         print('DATABASE: {}'.format(params.db_name))
 
-        all_tx_per_sec = []
+        all_tx_per_sec  = []
         all_img_per_sec = []
         for iteration in range(params.numiters):  # Number of times to average
             print('====== ITERATION: {} ======'.format(iteration), flush=True)
@@ -237,11 +309,12 @@ def main(params):
             # Get Metadata
             start_t = time.time()
             results = get_metadata(params, query_args)
-            end_time_metadata = time.time() - start_t
+            end_time_iteration = time.time() - start_t
 
             # Metadata transactions per sec
             all_times = [res['response_time'] for res in results if res]
             tx_per_sec = (params.numthreads) / np.mean(all_times)
+            # tx_per_sec = np.mean(all_times)
             all_tx_per_sec.append(tx_per_sec)
             print('Queries metadata TIME: {:0.4f}s ({:0.4f} mins)'.format(
                                     np.sum(all_times),
@@ -249,8 +322,9 @@ def main(params):
 
             # Images per sec
             num_images = np.sum([res['images_len'] for res in results if res])
-            all_times = [res['images_time'] for res in results if res]
+            all_times  = [res['images_time'] for res in results if res]
             img_per_sec = num_images / (np.mean(all_times) * params.numtags)
+            # img_per_sec = (np.mean(all_times))
             all_img_per_sec.append(img_per_sec)
             print('Queries images TIME: {:0.4f}s ({:0.4f} mins)'.format(
                                     np.sum(all_times),
@@ -259,13 +333,17 @@ def main(params):
             print('# responses: {}'.format(len(all_times)))
             print('# images: {}'.format(num_images))
             print('ITERATION TIME: {:0.4f}s ({:0.4f} mins)'.format(
-                                    end_time_metadata,
-                                    end_time_metadata / 60.), flush=True)
+                                    end_time_iteration,
+                                    end_time_iteration / 60.), flush=True)
+
+        # Reject outliers outside 2 std on measurements.
+        all_tx_per_sec  = reject_outliers(np.array(all_tx_per_sec))
+        all_img_per_sec = reject_outliers(np.array(all_img_per_sec))
 
         avg_tx_per_sec  = np.mean(all_tx_per_sec)
-        std_tx_per_sec  = np.std(all_tx_per_sec)
+        std_tx_per_sec  = np.std (all_tx_per_sec)
         avg_img_per_sec = np.mean(all_img_per_sec)
-        std_img_per_sec = np.std(all_img_per_sec)
+        std_img_per_sec = np.std (all_img_per_sec)
 
         # Print info
         print('[!] Avg. Metadata Transactions per sec: {:0.4f} - std:{:0.4f}'.format(avg_tx_per_sec, std_tx_per_sec))
