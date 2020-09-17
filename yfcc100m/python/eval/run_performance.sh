@@ -1,7 +1,7 @@
 #!/bin/bash
-nthreads=32
+nthreads=56
 niter=4
-ntags=4
+ntags=2
 
 result_folder=perf_results
 outfile=${result_folder}/perf_ntags${ntags}_nthread${nthreads}_niter${niter}.csv
@@ -9,16 +9,19 @@ result_log=${result_folder}/perf_results.log
 result_pdf_prefix=${result_folder}/plots/res
 
 # Force remove temporary storage for images
-
 rm -rf $result_folder
 mkdir -p $result_folder
+
 append=-out # The first need to be create and not append
 
-db_sizes="100k,500k,1M,5M,10M"
+flag="first"
+db_sizes=""
 
-for db in vdms mysql
+# for size in 1M 5M 10M 50M 100M
+for size in 1M 5M
 do
-    for size in 100k 500k 1M 5M 10M
+    # for size in 100k 500k 1M 5M 10M 50M 100M
+    for db in vdms mysql
     do
         # Run VDMS Queries
         echo "Running $db ${size}..."
@@ -34,6 +37,15 @@ do
 
         append=-append_out
     done
+
+    # This will automatically create the db_sizes string.
+    if [ "$flag" = "first" ]; then
+        flag="no"
+    else
+        db_sizes=${db_sizes},
+    fi
+    db_sizes=${db_sizes}${size}
+
 done
 
 # Read number of images returned from logs
