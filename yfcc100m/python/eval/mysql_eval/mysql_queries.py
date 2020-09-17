@@ -55,17 +55,19 @@ resize = {
 PORT_MAPPING = {'yfcc_100k': '100k', 'yfcc_1M': '1M', 'yfcc_10M': '10M'}
 params = namedtuple("Arguments", args.keys())(*args.values())
 
-# Build database
-if args['build_db']:
-    build_db(params)
-    print('\n')
+# # Build database
+# if args['build_db']:
+#     build_db(params)
+#     print('\n')
 
-try:
-    qh = MySQLQuery.MySQL(params)
-except:
-    build_db(params)
-    print('\n')
-    qh = MySQLQuery.MySQL(params)
+# try:
+#     qh = MySQLQuery.MySQL(params)
+# except:
+#     build_db(params)
+#     print('\n')
+#     qh = MySQLQuery.MySQL(params)
+
+qh = MySQLQuery.MySQL(params)
 
 probability = 0.9
 latitude  = -14.354356
