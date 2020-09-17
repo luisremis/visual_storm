@@ -31,7 +31,17 @@ def main(params):
         prev_results[c] = np.nan
     summary = prev_results[new_cols]
 
-    queries = ['_1tag_resize', '_2tag_resize', '_2tag_loc20_resize']
+    queries = [
+                '_1tag',
+                '_1tag_resize',
+                '_1tag_loc20_resize',
+                '_2tag_loc20_resize',
+                '_2tag_resize_and',
+                '_2tag_loc20_resize_and',
+                '_2tag_resize_or',
+                '_2tag_loc20_resize_or',
+              ]
+
     outfile = params.out
     query_name = []
 
