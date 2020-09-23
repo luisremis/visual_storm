@@ -14,8 +14,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 color      = ['red', 'blue', 'orange', 'black', 'pink', 'brown', 'violet', 'green']
-linestyles = ['-', '--', '-.-']
-markers    = ['o', '*', '#']
+linestyles = ['-', '--', '-.']
+markers    = ['o', '*', 'd']
 
 class Plotting(object):
 
@@ -56,7 +56,7 @@ class Plotting(object):
     # values is in the format:
     #   query0_dbsize0_time,query0_dbsize0_std, ... , query0_dbsizeN_time,query0_dbsizeN_std
     def plot_lines_all(self, queries, db_sizes, engines, values,
-                        log=False,
+                        log="y",
                         title="Query Time",
                         filename="plot_unnamed.pdf",
                         xlabel="Database Size",
@@ -107,8 +107,9 @@ class Plotting(object):
                              marker=markers[j],
                              )
 
-        ax0.set_xscale('log')
-        if log:
+        if log == "x" or log == "both":
+            ax0.set_xscale('log')
+        if log == "y" or log == "both":
             ax0.set_yscale('log')
         # ax0.set_ylim(1,10**4)
 
@@ -118,12 +119,13 @@ class Plotting(object):
         plt.xlabel(xlabel, fontsize=12)
         plt.ylabel(ylabel, fontsize=12)
 
-        plt.legend(loc="best", ncol=2, shadow=True, fancybox=True)
+        plt.legend(loc="best", ncol=len(engines), shadow=True, fancybox=True)
 
         plt.savefig(filename, format="pdf", bbox_inches='tight')
+        plt.close()
 
     def plot_lines_all_mosaic(self, queries, db_sizes, engines, values,
-                        log=False,
+                        log="y",
                         title="Query Time",
                         filename="plot_unnamed.pdf",
                         xlabel="Database Size",
@@ -180,12 +182,13 @@ class Plotting(object):
                              marker=markers[j % len(markers)],
                              )
 
-            ax0.set_xscale('log')
-            if log:
+            if log == "x" or log == "both":
+                ax0.set_xscale('log')
+            if log == "y" or log == "both":
                 ax0.set_yscale('log')
             # ax0.set_ylim(1,10**4)
 
-            plt.xticks(x_pos, db_sizes)
+            plt.xticks(x_pos, db_sizes, fontsize=10)
 
             plt.legend(loc="best", ncol=1, shadow=True, fancybox=True)
 
@@ -195,3 +198,4 @@ class Plotting(object):
             # plt.xlabel(xlabel, fontsize=12)
 
         plt.savefig(filename, format="pdf", bbox_inches='tight')
+        plt.close()
