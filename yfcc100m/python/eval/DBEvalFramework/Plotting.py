@@ -16,6 +16,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 color      = ['red', 'blue', 'orange', 'black', 'pink', 'brown', 'violet', 'green']
 linestyles = ['-', '--', '-.']
 markers    = ['o', '*', 'd']
+patterns = [ "" ,"" , "", "", "\\", ".", "*",  "\\" , "|" , "-" ]
 
 class Plotting(object):
 
@@ -37,8 +38,9 @@ class Plotting(object):
             return False
 
     def value_to_float(self, x):
-        if type(x) == float or type(x) == int:
+        if type(x) == float or type(x) == int or type(x) == np.int64:
             return x
+
         if 'k' in x:
             if len(x) > 1:
                 return float(x.replace('k', '')) * 1000
@@ -101,7 +103,7 @@ class Plotting(object):
                 ax0.errorbar(x_pos,
                              values[j*len(engines) + i,0:len(db_sizes)],
                              yerr=values[j*len(engines) + i,len(db_sizes):],
-                             label=engines[j] + queries[i],
+                             label=engines[j] + "_" + queries[i],
                              color=color[i],
                              linestyle=linestyles[j],
                              marker=markers[j],
@@ -126,7 +128,7 @@ class Plotting(object):
 
     def plot_lines_all_mosaic(self, queries, db_sizes, engines, values,
                         log="y",
-                        title="Query Time",
+                        title="",
                         filename="plot_unnamed.pdf",
                         xlabel="Database Size",
                         ylabel="None"):
@@ -162,8 +164,12 @@ class Plotting(object):
         import math
         side = math.ceil(math.sqrt(n_queries))
 
-        fig = plt.figure(figsize=(12,12))
         # fig = plt.figure()
+        fig = plt.figure(figsize=(12,12))
+
+        if title != "":
+            fig.suptitle(title, fontsize=16)
+
         for i in range(len(queries)):
 
             ax0 = plt.subplot(side,side,i+1)
@@ -196,6 +202,59 @@ class Plotting(object):
                 plt.ylabel(ylabel, fontsize=12)
 
             # plt.xlabel(xlabel, fontsize=12)
+
+        plt.savefig(filename, format="pdf", bbox_inches='tight')
+        plt.close()
+
+    def plot_bars(self, queries, db_sizes, values,
+                  title="Generic (but Awesome) Bar Plot",
+                  filename="plot_summary.pdf",
+                  xlabel="Database Size",
+                  ylabel="Speedup ?"):
+
+        fig, ax0 = plt.subplots(nrows=1)
+        fig.set_size_inches(12, 3)
+
+        bar_width = 1 / (len(queries) + 1) # 0.15
+        n_groups = len(db_sizes)
+        index = np.arange(n_groups)
+        opacity = 0.7
+
+        for i in range(len(queries)):
+
+            vals = values[i,0:len(db_sizes)]
+
+            if queries[i] == "avg":
+                local_color = "cyan"
+                local_pattern = "\\"
+            else:
+                local_color = color[i]
+                local_pattern = ""
+
+            plt.bar(index + i*bar_width,
+                    vals,
+                    bar_width,
+                    alpha=opacity,
+                    color=local_color,
+                    hatch=local_pattern,
+                    # yerr=err,
+                    # error_kw=error_config,
+                    label=queries[i])
+
+        ax0.set_title(title)
+
+        ax0.set_xticks(index)
+        ax0.set_xticklabels(db_sizes, fontsize=10)
+        ax0.tick_params(axis='y', labelsize=10)
+
+        ax0.set_ylim(0,30)
+
+        plt.ylabel('Speedup', fontsize=12)
+
+        plt.axhline(y=1)
+
+        plt.legend(ncol=7, shadow=True, fancybox=True,
+                   fontsize=9.5, loc="upper left")
 
         plt.savefig(filename, format="pdf", bbox_inches='tight')
         plt.close()
