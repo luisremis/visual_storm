@@ -1,76 +1,50 @@
 #!/bin/bash
-nthreads=56
-niter=4
-ntags=2
 
-result_folder=perf_results
-outfile=${result_folder}/perf_ntags${ntags}_nthread${nthreads}_niter${niter}.csv
-result_log=${result_folder}/perf_results.log
-result_pdf_prefix=${result_folder}/plots/res
+experiment_name=perf_metadata_8_50M
+
+running_folder=running_experiment
+info=${running_folder}/info.txt
 
 # Force remove temporary storage for images
-rm -rf $result_folder
-mkdir -p $result_folder
+rm -rf $running_folder
+mkdir -p $running_folder
 
-append=-out # The first need to be create and not append
+echo "running" $experiment_name "..."
+echo $experiment_name "started..." >> $info
 
-flag="first"
-db_sizes=""
+date >> $info
 
-# for size in 1M 5M 10M 50M 100M
-for size in 1M 5M
+# for th in 2 4 8 16 32 56 64 112
+for th in 8
 do
-    # for size in 100k 500k 1M 5M 10M 50M 100M
-    for db in vdms mysql
+    # for size in 5M 10M
+    for size in 1M 5M 10M 50M
     do
-        # Run VDMS Queries
-        echo "Running $db ${size}..."
-        python3 performance.py \
-                -db_type=$db \
-                -db_name=$size \
-                -numtags=$ntags \
-                -numthreads=$nthreads \
-                -numiters=$niter \
-                ${append}=$outfile \
-                > $result_folder/${db}_${size}.log
-                2> $result_folder/${db}_${size}_error.log
-
-        append=-append_out
+        for db in vdms mysql
+        do
+            # Run VDMS Queries
+            echo "Running $th $db ${size}..." >> $info
+            python3 performance.py \
+                    -db_type=$db \
+                    -db_name=$size \
+                    -numthreads=$th \
+                    -out_folder=$running_folder \
+                    >> $running_folder/log.log
+                    2>> $running_folder/log_error.log
+        done
     done
-
-    # This will automatically create the db_sizes string.
-    if [ "$flag" = "first" ]; then
-        flag="no"
-    else
-        db_sizes=${db_sizes},
-    fi
-    db_sizes=${db_sizes}${size}
-
 done
 
-# Read number of images returned from logs
-python3 parse_logs.py \
-        -dir=$result_folder \
-        -perf_csv=$outfile \
-        -db_sizes=$db_sizes \
-        -out=${result_folder}/perf_run_summary.csv \
-        -dbs='vdms,mysql'
+date >> $info
 
-# Convert performance results to format for plotting
-python3 convert_perf_results.py \
-        -cols=$db_sizes \
-        -numtags=$ntags \
-        -numthreads=$nthreads \
-        -numiters=$niter \
-        -results=${result_folder}/perf_run_summary.csv \
-        -out=$result_log
+data_file=${running_folder}/data
+python3 plot_all.py -in_file=$data_file -out_folder=${running_folder}/plots
 
-# Plot results
-python3 plot_performance.py \
-        -infile=$result_log \
-        -outfile=${result_pdf_prefix}
-
-results_folder_copy=perf_results-${ntags}-${nthreads}-${niter}
+results_folder_copy=$experiment_name
 
 rm -r $results_folder_copy
-cp -r $result_folder $results_folder_copy
+cp -r $running_folder $results_folder_copy
+
+date >> $info
+
+echo "Experiment Done" >> $info
