@@ -4,6 +4,7 @@ import numpy as np
 import itertools
 import time
 import random
+import cv2
 
 import vdms
 
@@ -81,6 +82,104 @@ class VDMSQuery(object):
         print(self.db.get_last_response_str())
 
         return blobs[0], blobs[1]
+
+        # Runs a query, described in the "query" object param
+    def run_query(self, query):
+
+        key   = query['key']
+        tags  = query['tags']
+        probs = query['probs']
+        lat   = query['lat']  if 'lat'  in query else -1
+        long  = query['long'] if 'long' in query else -1
+        range_dist = query['range_dist'] if 'range_dist' in query else 0
+        operations = query['operations'] if 'operations' in query else []
+        comptype   = query["comptype"]   if 'comptype'   in query else "or"
+
+        # Metadata only queries
+
+        if key == "1tag":
+            return self.get_metadata(tags, probs,
+                                     comptype=comptype)
+
+        if key == "1tag_loc20":
+            return self.get_metadata(tags, probs,
+                                     lat=lat,
+                                     long=long,
+                                     range_dist=range_dist,
+                                     comptype=comptype,
+                                     )
+
+        if key == "2tag_and":
+            return self.get_metadata(tags, probs, comptype=comptype, )
+
+        if key == "2tag_or":
+            return self.get_metadata(tags, probs, comptype=comptype, )
+
+        if key == "2tag_loc20_and":
+            return self.get_metadata(tags, probs,
+                                     lat=lat,
+                                     long=long,
+                                     range_dist=range_dist,
+                                     comptype=comptype,
+                                     )
+
+        if key == "2tag_loc20_or":
+            return self.get_metadata(tags, probs,
+                                     lat=lat,
+                                     long=long,
+                                     range_dist=range_dist,
+                                     comptype=comptype,
+                                     )
+
+        # Image queries
+
+        if key == "1tag_resize":
+            return self.get_images(tags, probs,
+                                     operations=operations,
+                                     comptype=comptype,
+                                     )
+
+        if key == "1tag_loc20_resize":
+            return self.get_images(tags, probs,
+                                     lat=lat,
+                                     long=long,
+                                     range_dist=range_dist,
+                                     operations=operations,
+                                     comptype=comptype,
+                                     )
+
+        if key == "2tag_resize_and":
+            return self.get_images(tags, probs,
+                                     operations=operations,
+                                     comptype=comptype,
+                                     )
+
+        if key == "2tag_resize_or":
+            return self.get_images(tags, probs,
+                                     operations=operations,
+                                     comptype=comptype,
+                                     )
+
+        if key == "2tag_loc20_resize_and":
+            return self.get_images(tags, probs,
+                                     lat=lat,
+                                     long=long,
+                                     range_dist=range_dist,
+                                     operations=operations,
+                                     comptype=comptype,
+                                     )
+
+        if key == "2tag_loc20_resize_or":
+            return self.get_images(tags, probs,
+                                     lat=lat,
+                                     long=long,
+                                     range_dist=range_dist,
+                                     operations=operations,
+                                     comptype=comptype,
+                                     )
+
+        print("Error - MySQLQueries - Query nor found:", key)
+        exit()
 
 
     def get_image(self, image_id):
@@ -176,7 +275,7 @@ class VDMSQuery(object):
 
         return results
 
-    def get_metadata_by_tags(self, tags, probs, lat=-1, long=-1, range_dist=0, return_response=True, comptype='and'):
+    def get_metadata(self, tags, probs, lat=-1, long=-1, range_dist=0, return_response=False, comptype='and'):
 
         all_cmds = []
 
@@ -235,26 +334,26 @@ class VDMSQuery(object):
                 results = responses[1]["FindImage"]["entities"]
         except:
                 results = []
-                print("Error processing results in get_metadata_by_tags")
+                print("Error processing results in get_metadata")
 
         endtime = time.time() - start
 
-        # print("Total results:", len(results))
-        # print("Time for metadata (ms):", endtime * 1000.0)
-
-        # print(results)
+        # This is for the case of internal call from within this calss
         if return_response:
             return results
+
+        # print("Total results:", len(results))
+        # print("Time for metadata (ms):", endtime * 1000.0)
 
         out_dict = {'response_len':len(results),'response_time':endtime}
         return out_dict
 
 
-    def get_images_by_tags(self, tags, probs,
+    def get_images(self, tags, probs,
                            operations = [],
                            lat=-1, long=-1,
                            range_dist=0,
-                           return_images=True,
+                           return_images=False,
                            comptype='and'):
 
         if len(tags) > 1:
@@ -300,12 +399,11 @@ class VDMSQuery(object):
 
                 start = time.time()
                 responses, blobs = self.db.query(all_cmds)
-                end_time = time.time() - start
+                total_time = time.time() - start
 
             elif comptype == 'and':
                 start = time.time()
-                results = self.get_metadata_by_tags(tags, probs,
-                                                    lat, long, range_dist)
+                results = self.get_metadata(tags, probs, lat, long, range_dist, return_response=True)
 
                 all_cmds = []
 
@@ -328,7 +426,7 @@ class VDMSQuery(object):
 
                 # start = time.time()
                 responses, blobs = self.db.query(all_cmds)
-                end_time = time.time() - start
+                total_time = time.time() - start
 
                 # if lat == -1:
                 #     out_file = open("perf_results/vdms_img_list.txt", 'w')
@@ -380,31 +478,30 @@ class VDMSQuery(object):
 
             start = time.time()
             responses, blobs = self.db.query(all_cmds)
-            end_time = time.time() - start
+            total_time = time.time() - start
 
-            # print(responses[len(responses)-1])
-            # out_file = open("perf_results/vdms_img_list.txt", 'w')
-            # for ent in responses[len(responses)-1]["FindImage"]["entities"]:
-            #     out_file.write(str(ent["ID"]))
-            #     out_file.write("\n")
+        decoded_images = []
+        try:
+            for im in blobs:
+                if len(im) == 0:
+                    print("WARNING - Returned blob of size 0")
+                    dec_img = None
+                else:
+                    img = np.frombuffer(im, dtype='uint8')
+                    dec_img = cv2.imdecode(img, cv2.IMREAD_COLOR)
 
+                decoded_images.append(dec_img)
+        except:
+            print("ERROR: Error decoding image result from VDMS")
+            raise
+            decoded_images = []
 
-        # print("Time for images (ms):", end_time * 1000.0)
-        # print(self.db.get_last_response_str())
-
-        # create_dir('tmp')
-        # create_dir('tmp/vdms')
-        # for im in blobs:
-        #         name = random.randint(0,90000000)
-        #         tmp_file = 'tmp/vdms/img_' + str(name) + ".jpg"
-        #         f = open(tmp_file, 'wb')
-        #         f.write(im)
-
-        # print("Total valid images:", len(blobs))
+        out_dict = {
+            'response_len':  len(decoded_images),
+            'response_time': total_time
+        }
 
         if return_images:
-            return blobs
-
-        out_dict = {'images_len':len(blobs),'images_time':end_time}
+            out_dict["decoded_images"] = decoded_images
 
         return out_dict
