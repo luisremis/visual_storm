@@ -1,4 +1,4 @@
-FILE = vdms-vldb2020
+FILE = vdms-vldb2021
 COMM = pdflatex
 
 all: ${FILE}.tex
