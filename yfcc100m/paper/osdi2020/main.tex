@@ -54,7 +54,7 @@
 
 % to be able to draw some self-contained figs
 \usepackage{graphicx}
-\usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
+\usepackage{balance}        % for  \balance command ON LAST PAGE  (only there!)
 \usepackage{hyperref}       % hyperlinks
 \usepackage{graphicx}
 \usepackage{comment}
@@ -69,10 +69,10 @@
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{minted}
+\usepackage{todonotes}
 
 % inlined bib file
 \usepackage{filecontents}
-
 
 %-------------------------------------------------------------------------------
 \begin{document}
@@ -85,17 +85,17 @@
 \title{\Large \bf Using VDMS to Index and Search 100M Images}
 
 %for single author (just remove % characters)
-\author{
-{\rm Luis Remis}\\
-ApertureData Inc
-\and
-{\rm Chaunt\'e W. Lacewel}\\
-Intel Labs
-% copy the following lines to add more authors
+% \author{
+% {\rm Luis Remis}\\
+% ApertureData Inc
 % \and
-% {\rm Name}\\
-%Name Institution
-} % end author
+% {\rm Chaunt\'e W. Lacewel}\\
+% Intel Labs
+% % copy the following lines to add more authors
+% % \and
+% % {\rm Name}\\
+% %Name Institution
+% } % end author
 
 \maketitle
 
@@ -104,35 +104,33 @@ Intel Labs
 %-------------------------------------------------------------------------------
 Data scientists spend most of their time dealing with data preparation,
 rather than doing what they know best:
-build machine learning models and algorithms to solve problems.
-The problem grows as the scale of the data used for analysis or training
-grows. In this paper, we demonstrate how VDMS (the Visual Data Management System)
-can be used to simplify the data preparation process and how we gain
-in efficiency simply because we are using a system designed for the job.
+build machine learning models and algorithms to solve previously unsolvable problems.
+In this paper, we describe the Visual Data Management System (VDMS),
+and demonstrate how it can be used to simplify the data preparation process 
+and consequently gain in efficiency simply because 
+we are using a system designed for the job.
 To demonstrate this, we use one of the largest available
 public datasets (YFCC100M),
-with 99+ million images, 800+ thousand videos, plus add-ons that include
+with 99+ million images and videos, plus add-ons that include
 machine-generated tags and 4K dimensional feature vectors,
 for a total of $\sim$13TB of data.
-VDMS differs from existing large scale photo
-serving, video streaming, and textual big-data management systems due to
-its primary focus on supporting machine learning and
-data analytics pipelines that use visual data
-(images, videos, and feature vectors), treating these as first class citizens.
+VDMS differs from existing data management systems
+due to its focus on supporting machine learning and
+data analytics pipelines that rely on images, videos, and feature vectors, 
+treating these as first class citizens.
 We demonstrate how VDMS outperforms well-known and widely used
 systems for data management by up to $\sim$35x, with
-an average improvement of about 15x for the queries we
-used in our use-cases, and particularly at scale.
+an average improvement of about 15x for our use-cases, and particularly at scale.
 At the same time, VDMS simplifies the process of data preparation and data access,
 and provides functionalities non-existent in alternative options.
 \end{abstract}
-
 
 \input{intro.tex}
 \input{design.tex}
 \input{eval.tex}
 \input{conclusion.tex}
 \input{acks.tex}
+
 
 \clearpage
 
@@ -141,23 +139,19 @@ and provides functionalities non-existent in alternative options.
 % produce the bibliography for the citations in your paper.
 \bibliographystyle{plain}
 \bibliography{main}
-
-
 \input{legal.tex}
 
 \clearpage
 \input{appendix}
 
-
 %-------------------------------------------------------------------------------
-\section*{Availability}
-%-------------------------------------------------------------------------------
+% \section*{Availability}
+% %-------------------------------------------------------------------------------
 
-USENIX program committees give extra points to submissions that are
-backed by artifacts that are publicly available. If you made your code
-or data available, it's worth mentioning this fact in a dedicated
-section.
-
+% USENIX program committees give extra points to submissions that are
+% backed by artifacts that are publicly available. If you made your code
+% or data available, it's worth mentioning this fact in a dedicated
+% section.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}

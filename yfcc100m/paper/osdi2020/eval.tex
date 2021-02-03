@@ -5,37 +5,18 @@ We have used the YFCC100M dataset to evaluate different aspects of our system.
 We use the images in the dataset and its associated metadata to implement
 an image-search engine based on properties associated with those images.
 This is a very common use-case we have encountered when building
-applications such as smart-retail, sports applications, and video summarization,
-where the starting point is a large set of data that must be curated
+applications such as smart-retail, sports applications, and video summarization.
+For these type of applications, the starting point is usually 
+a large set of data that must be curated
 before proceeding with the data processing (such as neural network training).
 In order to evaluate the different aspects of the performance on the
 image search, we have built a baseline following the methodology
 used in the industry, and following what we have done in the past
 in order to solve the data search problem,
 which we describe in Section \ref{images}.
-
-We also evaluate the performance and scalability of the video management
-capabilities offered by VDMS.
-Handling video in a general way is a complex task.
-Some of this complexity comes from the existence of a variety of open and
-proprietary implementations, different encoding techniques and container
-formats, and different parameters of the video itself that are
-application-dependent, like frames per second, lossy compression, etc.
-When it comes to video, ad-hoc solutions have a large number of parameters that
-can be tuned.
-Together with that, there is no system that enables transactional
-operations over videos files in the way VDMS does.
-Because of this, we focus our efforts on understanding variations in the
-performance of VDMS and its scalability, rather than comparing
-it to a baseline that would not represent a fair
-comparison for either of the systems.
-We describe the results in Section \ref{videos}.
-
-Similarly, we explore the behavior of the feature vector functionality in VDMS,
-and an evaluation of the different trade-offs that the systems offers for
-application developers. For this, we implemented an image-search application
-based on \textit{similarity} search, which we describe in Section \ref{features}.
-
+We have also included performance evaluation on the Video and Feature Vectors 
+functionality in the appendix for further reference, together with a 
+description of the key aspects of those functionalities.
 
 \begin{figure*}
 \centering
@@ -49,7 +30,7 @@ based on \textit{similarity} search, which we describe in Section \ref{features}
 
 The Yahoo! Flickr Creative Commons 100m (YFCC100M) dataset is a large
 collection of 100 million public Flickr media objects created to provide free,
-sharable multimedia data for research. This dataset contains approximately
+shareable multimedia data for research. This dataset contains approximately
 99.2 million images and 0.8 million videos with metadata characterized by
 25 fields such as the unique identifier, userid,
 date the media was taken/uploaded, location in longitude/latitude coordinates,
@@ -74,17 +55,25 @@ with.
 \label{setup}
 
 Given that there are no other open-source systems
-that implement similar functionality and interfaces as VDMS, as a baseline,
-we have implemented an equivalent visual data management system comprised of a
-combination of widely available, off-the-shelf components:
+that provides similar functionality and interfaces as VDMS,
+we have implemented an equivalent visual data management system as a baseline, 
+comprised of a combination of widely available, off-the-shelf components:
 MySQL Server 5.7 (for storing metadata),
 Apache Web Server 2.4.18 (as interface for image access), and
 OpenCV 3.3 (to provide pre-processing operations on images).
-Note that this implementation only partially replicates the functionalities
+We decided to use a relational database instead of a non-relational 
+database because~\cite{Jatana2012, li_2019}: 
+\begin{itemize}
+    \item Relational databases support atomicity, consistency, isolation, 
+    and durability (ACID) while non-relational may compromise some ACID properties. 
+    \item The YFCC100m data is clearly structured.
+    \item We need to efficiently collate and return metadata records.
+\end{itemize}
+The baseline implementation only partially replicates the functionalities
 that VDMS offers when it comes to image and metadata handling, built for the
 purpose of an ad-hoc image search implementation.
 This implementation is based upon internal tools used for
-that particular task in the past.
+ML-based pipelines for media.
 We have implemented a set of client-side applications that take care
 of retrieving the components from the different systems, and applies
 pre-processing operations when needed.
@@ -108,8 +97,7 @@ Other than the difference in DRAM space, machines are identical.
 Both servers run Ubuntu 16.04.
 The client application running the queries and measuring round-trip time
 is connected to the server through a 1GB wired link through
-a 10GB back-plane switch, same as both servers.
-
+a 10GB back-plane switch, same as both servers. 
 Figure~\ref{fig:systems} shows a logical view of the difference between the
 interaction of the client application (retrieves metadata and
 images) with VDMS (left) and the baseline (right).
@@ -119,14 +107,18 @@ the baseline.
 It is worth noting that the images are stored in a shared repository
 (ext4 filesystem on a RAID 6 configuration of 16TB) that both 
 Apache WebServer and VDMS have direct access. 
+In the case of Videos, only the first frame is used for the image search.
+More information and evaluation on video-specific functionalities can be found
+in the appendix of this work.
 In the case of the baseline, metadata is
 stored in MySQL using an attached SSD disk.
 Even if VDMS has native support for Optane Persistent Memory,
 we do not use it in this experiment because of fairness of
 comparison with respect to MySQL, which was not designed for
 Persistent Memory type of storage.
-The benefits of Persistent Memory on metadata operations is left
-for another paper, and outside the scope of this evaluation.
+The benefits of Persistent Memory for metadata and a full evaluation of 
+the PMGD subsystem is material for another paper, 
+and outside the scope of this evaluation.
 For this experiment, in the case of VDMS we simply use a similar
 attached SSD disk to store metadata.
 Even if PMGD, the graph database used by VDMS, is designed for persistent memory,
@@ -154,7 +146,7 @@ the machine-generated \textit{autotags} associated with
 each image/video identifier, and the list of 1,570 \textit{autotags}.
 Internally, that information is represented as a property graph,
 where we have one node for each image, one node for each tag
-(always 1,570 tags), and connections between images.
+(always 1,570 tags), and a connection between each image and its respective tag(s).
 For instance, if an image has four \textit{autotags} assigned,
 there will be four connections between that image and
 the different nodes for those \textit{autotags}.
@@ -181,9 +173,8 @@ with it (some of which are listed in Section \ref{dataset}).
 The number of nodes (representing images and \textit{autotags}) 
 are dependent on the database size and the \textit{connections} are responsible for
 90\% of the elements in each database instance,  
-as shown in Table~\ref{table:vdmsnodes}.
-
-It is important to note that we create indexes for the image identifier,
+as shown in Table~\ref{table:vdmsnodes}. 
+It is also important to note that we create indexes for the image identifier,
 \textit{autotags} properties, and longitude/latitude coordinates 
 to enable faster retrieval.
 
@@ -273,11 +264,11 @@ We ran a few experiments investigating the effects of setting a limitation on th
 number of concurrent and background threads.
 We concluded that the default settings perform better for large databases instead of
 setting a limit.
-Therefore, we let MySQL to automatically handle the concurrency.
+Therefore, we let MySQL automatically handle the concurrency.
 
 In the case of VDMS, we did not attempt to tune any
 parameter to avoid unfairness in the comparison against the baseline.
-We use the default parameters provided by the implementation.
+Unlike the baseline, VDMS can handle the entire YFCC100m dataset using the default parameters provided by the implementation.
 For both VDMS and the baseline, we created indexes over the 
 properties we used for search, such as name of 
 \textit{autotag}, and geo-location values.
@@ -307,24 +298,24 @@ DB Name & images & autotags & taglist\\
 \label{table:mysqltables}
 \end{table}
 
-\begin{figure}
+\begin{figure}[ht]
 \centering
 \includegraphics[width=\columnwidth]{figures/db_time_size}
 \caption{Time to build and size (in GB) of MySQL and VDMS databases.}
 \label{fig:db_time_size}
 \end{figure}
 
-\subsubsection{Database Loading Time}
+\subsubsection{Database Building Time}
 
-One of the first things we noticed is the difference in loading times,
-where VDMS outperforms MySQL by a large margin.
-This analysis includes the metadata, as the images are stored in a shared filesystem. 
+One of the first things we noticed is the difference in the time needed to 
+build each database, where VDMS outperforms MySQL by a large margin.
+This analysis includes only the metadata, as the images are stored in a shared filesystem. 
 Figure~\ref{fig:db_time_size} illustrates how VDMS can build databases
 faster than MySQL, and how the speedup is sustained as the database size grows.
 Key difference in the build times are attributed to the low-level
-implementation of how MySQL reads and stores data from the files and the
+implementation of how MySQL reads and stores data from the files, the
 optimizations (increased InnoDB pool size, etc.) needed
-to handle large datasets such as YFCC100M.
+to handle large datasets such as YFCC100M, and the efficiency of PMGD.  
 On average, it took MySQL around 3.72x longer to build each database than VDMS.
 
 \subsubsection{Database Storage Footprint}
@@ -355,7 +346,7 @@ metadata of intensive use-cases\cite{IntelXPoint15}.
 \label{images}
 
 In order to evaluate VDMS and the baseline on our use-case queries,
-we implemented 4 queries that filter and retrieve a specific set of images.
+we implemented 5 queries that filter and retrieve a specific set of images.
 We chose these queries because they represent typical use-cases where a
 cohort of images is to be retrieved and processed from a large corpus of data.
 As we mentioned before, we took this approach due to the lack of standard
@@ -375,12 +366,13 @@ For this, we resize the images to 224x224, which is the input layer size for
 popular variations of neural networks for object detection on images~\cite{resnet}.
 
 To evaluate the access to metadata and images,
-we use the following four queries, modeled after our internal use cases:
+we use the following queries, modeled after our internal use cases:
 \begin{itemize}
 \item \textit{q1} - {\bf {\em 1tag}}: Find metadata/images with one specific autotag (i.e. alligator, lake, etc).
 \item \textit{q2} - {\bf {\em 1tag\_resize}}: Find metadata/images with one specific autotag and resize to 224x224.
 \item \textit{q3} - {\bf {\em 1tag\_resize\_geo}}: Find metadata/images with one specific autotag, resize to 224x224, and in a particular geo-location (with a 20 degrees radius in latitude and longitude).
-\item \textit{q4} - {\bf {\em 2tag\_resize\_geo}}: Find metadata/images with two specific autotags (i.e. alligator AND lake), resize to 224x224, and in a particular geo-location (with a 20 degrees radius in latitude and longitude).
+\item \textit{q4} - {\bf {\em 2tag\_resize\_geo\_and}}: Find metadata/images with two specific autotags (i.e. alligator AND lake), resize to 224x224, and in a particular geo-location (with a 20 degrees radius in latitude and longitude).
+\item \textit{q5} - {\bf {\em 2tag\_resize\_geo\_or}}: Find metadata/images with either of two specific autotags (i.e. alligator OR lake), resize to 224x224, and in a particular geo-location (with a 20 degrees radius in latitude and longitude).
 \end{itemize}
 
 It is important to note that when querying for images with certain
@@ -398,7 +390,8 @@ In the case of the baseline implementation,
 the query involves JOIN operations between the 3 tables.
 The implementation of this evaluation, as well as all the queries, are available
 under the benchmarks branch of the VDMS project
-\footnote{https://github.com/IntelLabs/vdms/ under benchmark/benckmarks/visual\_storm/yfcc100m},
+\footnote{https://github.com/\{Not shown during submission\}}
+% \footnote{https://github.com/IntelLabs/vdms/ under benchmark/benckmarks/visual\_storm/yfcc100m},
 and some examples of the queries can be found in the appendix of this
 paper.
 
@@ -433,24 +426,24 @@ otherwise over-complicate the understanding of the results.
 \begin{subfigure}{.5\linewidth}
   \centering
   % include first image
-  \includegraphics[width=\columnwidth]{figures/queries_throughput_56_q1_q2}
-  \caption{\textit{q1}(red), and \textit{q2}(blue).}
+  \includegraphics[width=\columnwidth]{figures/queries_throughput_56_q1_q2_q3}
+  \caption{\textit{q1}(red), \textit{q2}(blue),and \textit{q3}(orange).}
   \label{fig:q1_q2}
 \end{subfigure}
 \begin{subfigure}{.5\linewidth}
   \centering
   % include second image
-  \includegraphics[width=\columnwidth]{figures/queries_throughput_56_q3_q4}
-  \caption{\textit{q3}(orange), and \textit{q4}(black).}
+  \includegraphics[width=\columnwidth]{figures/queries_throughput_56_q4_q5}
+  \caption{\textit{q4}(black), and \textit{q5}(pink).}
   \label{fig:q3_q4}
 \end{subfigure}
-\caption{Performance Analysis using 4 queries from our use-case
+\caption{Performance Analysis using 5 queries from our use-case
 described in the Experimental Setup Section.
-We show 2 queries in each figure for readability reasons.
-Top figures show the throughput of the 4 queries,
+We show queries in different figures for readability reasons.
+Top figures show the throughput of the queries for
 just retrieving metadata associated with the images.
 Bottom figures show the throughput when retrieving both metadata and images,
-plus operations applied to images when applicable (queries 2, 3 and 4).
+plus operations applied to images when applicable (queries 2, 3, 4 and 5).
 The experiments show the performance of both systems (VDMS and baseline) as the
 database size increases.
 These queries were run using 56 simultaneous clients (nthr = 56),
@@ -493,7 +486,6 @@ both systems show similar performance, except in the 100M case of the baseline.
 Note that, for this particular experiment,
 baseline translates directly to MySQL performance,
 as the metadata-only queries only involve running a query to MySQL.
-
 For the baseline system, in the case of 100M, the increase in the
 size of data seems to have a larger impact in performance.
 This result can be attributed to the increase in the complexity of the JOIN
@@ -529,7 +521,7 @@ figure when it comes to low concurrency. The baseline does as good and even bett
 However, as concurrency increases beyond 4 concurrent clients, the difference
 in throughput becomes clear, with VDMS reaching its peak performance at
 56 concurrent clients.
-This query (as well as \textit{q3} and 4) runs a resize operation on the image,
+This query (as well as \textit{q3}, \textit{q4} and \textit{q5}) runs a resize operation on the image,
 an operation that requires decoding, resizing, and encoding the image
 before sending it back to the client.
 These operations are mainly compute bound, and that is the reason for
@@ -571,12 +563,12 @@ practice when it comes to image processing through CNNs \cite{cnn,resnet}.
 The next step in our analysis involved running a different set of queries
 (described above in this section),
 to better understand the performance of the systems under different query conditions.
-Figure~\ref{fig:q_throughput_56} shows the evaluation of the 4 representative
+Figure~\ref{fig:q_throughput_56} shows the evaluation of the 
 queries we analysed for our use case.
-Top figures show the throughput of the 4 queries
+Top figures show the throughput of these queries
 retrieving metadata associated with the images.
 Bottom figures show the throughput when retrieving both metadata and images,
-plus operations applied to images when applicable  (queries 2, 3 and 4).
+plus operations applied to images when applicable (queries 2, 3, 4,and 5).
 The experiments show the performance of both systems (VDMS and baseline) as the
 database size increases in terms of number of images.
 These queries were run using 56 simultaneous clients (nthr = 56),
@@ -618,13 +610,18 @@ as the size of the database increase.
 For \textit{q3}, we see that MySQL performs best when the database size
 is small (1M images), with VDMS outperforming MySQL as the database increases in size.
 For \textit{q4}, we see MySQL also outperforming VDMS on small size databases, and as
-the database size increase, the gap between the two narrows.
+the database size increase, the gap between the two narrows, 
+similar to what we see for \textit{q5}.
 It is interesting to note that adding filtering by geo-location
-(\textit{q3} and \textit{q4}) slightly increases the performance of MySQL
-for small databases, and decreases it as the database sizes scales.
+(\textit{q3}, and \textit{q4}) slightly increases the performance of MySQL
+for small databases, and decreases it as the database sizes scales. 
+The behaviour is different in the case of \textit{q5}, 
+which also filters by geo-location. 
+This is attributed to the fact that OR queries involves processing larger results, 
+and thus does not benefit from the filtering of the AND operation as \textit{q4}.
 In the case of VDMS, we see \textit{q3} performance is comparable to \textit{q1}
-and \textit{q2}, but \textit{q4} suffers significantly when the scale of the database
-increases.
+and \textit{q2}, but \textit{q4} suffers significantly 
+when the scale of the database increases.
 The reason for that lack of scalability lies on the query implementation: given that
 VDMS does not yet support operators that enable querying images 
 that have both connections to a \textit{tagA} and a \textit{tagB}; 
@@ -635,8 +632,11 @@ to bring the right metadata and/or images.
 The reason for this is a lack of operations that would enable this query to be
 run entirely on the server is not an inherent limitation to VDMS but rather
 just a missing implementation.
-Future release will add more such operators in order to prevent 
-unnecessary retrievals.
+In the case of \textit{q5}, we see a similar effect, although it is worth noting 
+that for the OR operation there is no need for 2 retrievals. 
+Rather, a single retrieval is performed and the result filtered on the client.
+Future release will add more of such operators (AND, OR, etc) in order to prevent 
+unnecessary retrievals and extra filtering on the client side.
 
 \subsubsection{Image Retrieval}
 
@@ -647,8 +647,9 @@ than \textit{q2} (full-blue-line) (bottom left figure).
 This is expected as \textit{q1} returns a full size version of the image,
 whereas \textit{q2} returns a resized (smaller) version of the image,
 thus transferring less data over the network.
-In the case of the baseline, both \textit{q1} and \textit{q2} transfer the full size
-version of the image, and as part of \textit{q2}, the resize is performed in the client.
+In the case of the baseline, both \textit{q1} and \textit{q2} transfer 
+the full size version of the image, and as part of \textit{q2}, 
+the resize is performed in the client.
 This is why, contrary to the VDMS case, \textit{q1} performs better (even if slightly)
 when compared with \textit{q2}.
 We can also see that, for VDMS, \textit{q3} perform worst than \textit{q2} because
@@ -657,7 +658,8 @@ Moreover, we see a great performance degradation in the case of \textit{q4} as t
 database size increases.
 This is entirely attributed to the 2-round process needed for this query,
 as we explained before.
-From the first 3 queries, we clearly see that VDMS outperforms the baseline 
+From the first 3 queries, as well as \textit{q5}, 
+we clearly see that VDMS outperforms the baseline 
 when retrieving visual data and applying operations.
 This is one of the most important finding, as it validates the design principles
 of VDMS, which aims to provide scalability and performance acceleration
@@ -670,244 +672,30 @@ at the type of queries that require visual data access and transformations.
 Finally, Figure~\ref{fig:summary_images} summarizes the results.
 We see up to 35x speedup (for the case of \textit{q2}),
 and an average improvement in throughput of about 15x.
-More importantly, we see that the speedup increase as the database size grows,
+More importantly, we see that the speedup increases as the database size grows,
 showing that VDMS scales better than the baseline.
 We also see how \textit{q4} shows poor performances and scalability 
 when compared to the baseline, and this evaluation served the 
 purpose of understanding the importance of VDMS server side operators 
 that enable more complex queries for our use cases.
 The team will address the missing implementation as part of future work.
+Most of the performance improvements can be attributed to the design 
+principles of VDMS, which aims to eliminate the need of combining and 
+re-purposing systems that were designed to handle types of date other than visual. 
+VDMS, by design, eliminates all the inefficiencies that result 
+from a forced integration of components designed for a 
+different range of applications.
 
 %% ========= Summary Analysis - END
 
+%% ========= Video Eval
 
-%=========================================
+% \include{eval-video}
 
-\subsection{Video Search}
-\label{videos}
+%% ========= Video Eval - END
 
-VDMS provides full support for video storage and operations,
-in a similar way it does for images.
-This includes support for encoding, decoding, and transcoding of
-\textit{mp4}, \textit{avi}, and \textit{mov} containers,
-as well as support for \textit{xvid}, \textit{H.263} and \textit{H.264} encoders.
-This is supported through the Visual Compute Module that provides an abstraction
-layer on top of OpenCV~\cite{opencv} and \textit{libffmpeg}\cite{ffmpeg}.
-All operations supported for images in VDMS are also supported at the
-video and frame level of the API.
-On top of that, there are a number of video-specific operations that
-are supported, such as the interval operations,
-enabling users to retrieve clips at different
-frames-per-second (FPS) versions of the video.
+%% ========= Descriptors Eval
 
-\begin{figure*}[ht!]
-\centering
-\includegraphics[width=\textwidth]{figures/video_overhead}
-\caption{Analysis of video operations. The left figure shows the video throughput (videos per sec) as the number of concurrent clients increase and the right figure breaks down the different components of the
-queries using 32 clients.}
-\label{fig:video}
-\end{figure*}
+% \include{eval-descriptors}
 
-All this functionality is provided and integrated with the rest of the
-metadata API as part of the comprehensive VDMS interface.
-This makes it possible for users to interact with metadata and video in 
-a transactional manner, enabling users to run queries like: 
-"Retrieve all the videos where there is a \textit{lake} with 
-probability higher than 0.86, converting all videos to \textit{H.264} 
-\textit{mp4} of size 224x224".
-Appendix shows a sample of how this query would be implemented using the VDMS API
-\footnote{https://github.com/IntelLabs/vdms/wiki/FindVideo}.
-In particular, this functionality was used internally to select a subset
-of videos with the right licenses for a video summarization application.
-
-To the best of our knowledge, there is no solution that can provide
-all the functionality mentioned above, behind a single interface
-that also allows users to interact with images and metadata.
-Implementing a baseline, like we did for images, is significantly more complex
-due to the parametrization of video encondings and containers, 
-as explained at the beginning of this section.
-For this reason, we chose to make a study using VDMS in various scenarios,
-and analysis of scalability and the impact of having the overhead of VDMS' Request
-Server in the overall access time and throughput.
-
-Figure~\ref{fig:video} shows the analysis of different queries aimed
-at retrieving a video using the VDMS interface.
-We show how VDMS throughput increases when serving
-a video object as the number of simultaneous clients increases, as well as the
-overhead operations introduced in the overall query execution time.
-The figure on the left compares the number of video transaction per second
-(i.e., number of videos returned per second) when different operations
-are executed as part of the transaction. The upper-bound of this would be
-simply returning the video as-is (without running any encoding/decoding or
-operation), represented by the red line. This query is the upper-limit because
-it essentially translates to reading the video from the file-system and sending
-it over a TCP/IP socket, without any other overhead or operations.
-
-We also run a set of other queries that involve, showed in Figure~\ref{fig:video}:
-(a) running a resize operation on the video and, consequently,
-decoding and encoding operations as well (blue line),
-(b) transcoding, meaning the use of a different container and encoder
-than the one originally used (yellow line), and
-(c) both resize and transcoding.
-Note that the resize operation (blue and green lines) performs a downsize,
-which translates in less data being sent over the wire.
-This is specially noticeable when supporting 32 simultaneous clients, 
-where the system provides more videos per second due to sending less data to 
-the client, when compared to just transcoding and not resizing (yellow line).
-We can see that the system performs best when using all the physical cores,
-and this can be attributed to the compute-bound nature of video
-encoding, decoding, and processing.
-
-\begin{figure*}[ht!]
-\centering
-\includegraphics[width=\textwidth]{figures/feature_img_results}
-\caption{Sample Results of Similarity Search}
-\label{fig:similarity}
-\end{figure*}
-
-It is important to note an almost 3 orders of magnitude drop in performance
-when including operations as part of the query.
-We wanted to understand where most of the time was spent on the queries,
-and optimize the Request Server and Visual Compute Module
-if necessary. For this, we run the experiment shown at
-Figure~\ref{fig:video} (right) which breaks down the different components of the
-queries. This figure shows that more than 97\% of the query execution is spent
-on encoding/decoding operations, which is well-known to be a
-compute intensive operation\cite{videosgoogle}.
-On the one hand, this result shows that VDMS barely introduces any overhead. 
-On the other hand, this result means a limit on the opportunities 
-for optimization for video queries given that biggest time factors 
-are accounted by encoding/decoding, which is outside the scope of VDMS.
-This result was the call to action for one optimization we will include
-in future releases of VDMS, which involves using \textit{ffmpeg} C++ API to
-limit the number of frames being encoded/decoded when possible.
-This functionality will prevent encoding/decoding to happen on all frames
-when users only need to retrieve a subset of the frames in the video.
-
-%=========================================
-
-\subsection{Similarity Search}
-\label{features}
-
-Another key differentiating factor of VDMS is that it allows the creation of
-indexes for high-dimensional feature vectors and the insertion of
-these feature vectors associated with entities, images, and/or videos.
-Feature vectors are intermediate results of various machine
-learning or computer vision algorithms when run on visual data.
-Feature vectors are also known as \textit{descriptors}
-or \textit{visual descriptors}. We use these terms interchangeably.
-These descriptors can be classified, labeled, and used to build search
-indexes. There are many in-memory libraries that are designed for
-this task~\cite{flann, faiss}.
-Using the VDMS API, users can manage feature vector indexes,
-query previously inserted elements,
-run a k-nearest neighbor search (\textit{knn}), and express relationships
-between existing images or descriptors and
-the newly inserted descriptors.
-By natively supporting descriptors and \textit{knn},
-VDMS allows out-of-the-box classification functionalities for many applications
-\footnote{https://github.com/IntelLabs/vdms/wiki/ClassifyDescriptor}.
-
-For this work, and as part of a comprehensive image search implementation,
-we have used 4096-dimensional descriptors extracted from every image
-(and first frame of every video) from the YFCC100M dataset
-and created a collection of these feature vectors in VDMS to
-perform similarity search (i.e., find images that are
-\textit{similar} to an query (input) image).
-\textit{Similarity} in this particular case is defined as closeness
-in a 4096-dimensional space using euclidean distance as the metric.
-
-The process of loading descriptors in VDMS is simple.
-First, the user has to create a DescriptorSet, using a single command.
-At creation of the DescriptorSet, the dimensionality of the descriptors
-is specified, together with the desired indexing method and the desired metric
-for computing distances (Euclidean Distance, \textit{L2},
-or Inner Product, \textit{IP}).
-Once the DescriptorSet is created, descriptors can be inserted to the set.
-After the descriptors are inserted, a similarity search can be performed.
-
-Figure~\ref{fig:similarity} shows 3 examples of a query image (on the left),
-and images returned as \textit{similar} by VDMS.
-The input is a descriptor generated after a query image.
-The \textit{query input} descriptor is sent to VDMS as part of the query,
-VDMS uses that descriptor to find similar ones,
-and retrieves the images associated with those \textit{similar} descriptors.
-We show this as an example of the functionality and to depict
-how the feature vectors provided by the dataset can be used,
-but we also provide an analytical approach to
-the trade-off between accuracy and execution time in our system.
-It is important to note that the accuracy of the results is entirely tied
-to the quality of the descriptors chosen by the applications.
-The quality of the similarity result will be tied to the quality
-of the descriptor extraction that the application is using.
-
-\begin{figure*}
-\centering
-\includegraphics[width=\textwidth]{figures/features_alternatives}
-\caption{Feature Vector Evaluation: Trade-off between query execution speed
-and accuracy of the results, using ground-truth data for computing accuracy.
-For this evaluation, we query the 10 closest neighbors (k = 10), and compute
-accuracy using recall at 4 (r\_k = 4) (i.e. percentage of the top 4 ground-truth
-results that is present within the top 10 computed neighbors).
-We average the query execution time and accuracy for 100 queries (nq = 100).}
-\label{fig:features_eval}
-\end{figure*}
-
-\begin{figure*}[ht]
-\centering
-\includegraphics[width=\textwidth]{figures/features_disksize}
-\caption{Feature Collection Size in Disk}
-\label{fig:features_size_does_matter}
-\end{figure*}
-
-As mentioned before, VDMS provides different levels of customization of the
-indexes created for a descriptor set, that includes the indexing techniques
-and the metric for similarity.
-These different indexing techniques come with different trade-offs in terms
-of speed of search and accuracy of the computation.
-VDMS aims to provide functionality that is agnostics to application-specific
-techniques, enabling features that are generic to visual data processing
-applications.
-Figure~\ref{fig:features_eval} shows an analysis at the different indexing
-techniques provided by VDMS and its trades-off between accuracy and query
-execution speed, for a single threaded client.
-For this evaluation, we query the 10 closest neighbors (k = 10), and compute
-accuracy using recall at 4 (r\_k = 4) (i.e. percentage of the top 4 ground-truth
-results that is present within the top 10 computed neighbors).
-We average the query execution time and accuracy for 100 queries (nq = 100).
-The \textit{flat} index (red line) implements exact search and
-represents ground-truth, which explain why the
-accuracy is always 100\% in the plot on the right.
-The other indexes implement \textit{approximate search},
-which trades-off between accuracy and speed of search~\cite{flann, faiss}.
-We have also tried the \textit{ivfflat} index (inverted file index), as well as
-\textit{LSH}-based indexes using a different number of bits per descriptor
-\footnote{https://github.com/facebookresearch/faiss/wiki/Faiss-indexes}.
-Results show how \textit{ivfflat} is the fastest option but it comes with a trade-off
-of about 30\% loss in accuracy, while simple brute-force search
-is among the slowest options at the expenses of 100\% accuracy,
-meaning exact search.
-
-Another important trade-off to be made is with respect to space efficiency:
-The DescriptorSet can grow very large and expensive to load and manage.
-In this particular case, 4096-dimensional descriptors for 100M elements
-translates into 1TB of data, only in raw floating-point data alone
-(without accounting for any metadata or indexes associated with it).
-This component is very important for the overall analysis on which
-index structure to use because a large set of descriptors may not fit in memory
-and thus cause a pressure on the IO system while retrieving descriptors
-for computing distance.
-This can severely impact the overall query execution time.
-When the DescriptorSet grows significantly large,
-it may be worth trading off accuracy for speed and space.
-Figure~\ref{fig:features_size_does_matter} shows the different indexes and
-their size in disk. These indexes already contain all the descriptors (or
-a quantized version of them in the case of LSH~\cite{lsh}),
-and can be loaded in memory directly when it fits.
-Note how, because of quantization of the descriptors, \textit{LSH} provides a
-significantly lower space foot print, which can be a great option for
-large collections of descriptors when accuracy is not a main factor.
-It is not uncommon to sacrifice accuracy as images and videos are captured
-using a noise sensor (i.e., the camera), and an approximate search
-in many cases can provide the necessary accuracy for applications
-to achieve their goals.
+%% ========= Descriptors Eval - END
