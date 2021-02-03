@@ -137,6 +137,7 @@ class EvalFramework(object):
             self.plot_query_time_speedup(i)
             self.plot_n_results(i)
 
+
     def plot_results_throughput_parallelism_dbsizes(self, q,
                                             result_type="results"):
 
@@ -324,6 +325,7 @@ class EvalFramework(object):
                           filename=filename,
                           ylabel=result_type + "/s")
 
+
     def plot_query_throughput(self, n_threads):
 
         # Plot query times:
@@ -372,6 +374,7 @@ class EvalFramework(object):
                           filename=filename,
                           ylabel="Queries per second")
 
+
     def plot_query_time(self, n_threads):
 
         # Plot query times:
@@ -415,6 +418,7 @@ class EvalFramework(object):
 
         return
 
+
     def plot_n_results(self, n_threads):
 
         # Plot query times:
@@ -451,12 +455,13 @@ class EvalFramework(object):
         filename += "plot_" + str(n_threads) + "_n_results_mosaic.pdf"
 
         title = "Returned Results for different queries"
-        p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="both",
+        p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="x",
                           title=title,
                           filename=filename,
                           ylabel="Number of Results")
 
         return
+
 
     # Bar plot
     def plot_query_time_speedup(self, n_threads):

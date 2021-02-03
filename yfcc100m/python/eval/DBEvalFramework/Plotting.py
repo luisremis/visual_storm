@@ -243,11 +243,13 @@ class Plotting(object):
 
         ax0.set_title(title)
 
-        ax0.set_xticks(index)
+        ax0.set_xticks(index + (len(db_sizes) / 2 + 1) * bar_width)
         ax0.set_xticklabels(db_sizes, fontsize=10)
         ax0.tick_params(axis='y', labelsize=10)
 
-        ax0.set_ylim(0,30)
+        limit = values[:,0:len(db_sizes)].max() * 1.5
+
+        ax0.set_ylim(0, limit)
 
         plt.ylabel('Speedup', fontsize=12)
 
