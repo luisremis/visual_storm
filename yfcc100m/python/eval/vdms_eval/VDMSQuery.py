@@ -338,6 +338,8 @@ class VDMSQuery(object):
 
         endtime = time.time() - start
 
+        # print("GetMetadataVDMS Query:", endtime)
+
         # This is for the case of internal call from within this calss
         if return_response:
             return results
@@ -481,11 +483,13 @@ class VDMSQuery(object):
             total_time = time.time() - start
 
         decoded_images = []
+        counter_bad_img = 0
         try:
             for im in blobs:
                 if len(im) == 0:
-                    print("WARNING - Returned blob of size 0")
+                    # print("WARNING - Returned blob of size 0")
                     dec_img = None
+                    counter_bad_img += 1
                 else:
                     img = np.frombuffer(im, dtype='uint8')
                     dec_img = cv2.imdecode(img, cv2.IMREAD_COLOR)
@@ -495,6 +499,10 @@ class VDMSQuery(object):
             print("ERROR: Error decoding image result from VDMS")
             raise
             decoded_images = []
+
+        if counter_bad_img > 1:
+            print("WARNING:", counter_bad_img * 100 / len(decoded_images),
+                  "% of the images are empty")
 
         out_dict = {
             'response_len':  len(decoded_images),

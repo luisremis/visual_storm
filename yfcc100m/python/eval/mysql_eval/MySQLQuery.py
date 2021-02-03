@@ -140,7 +140,8 @@ class MySQL(object):
     def get_metadata(self, tags, probs,
                              lat=-1, long=-1,
                              range_dist=0,
-                             comptype='and'):
+                             comptype='and',
+                             return_responses=False):
 
         if lat != -1:
             location_qstr = '''(latitude >= {} AND latitude <= {} ) AND (longitude >= {} AND longitude <= {})'''.format(lat-range_dist*1.0,lat+range_dist*1.0,long-range_dist*1.0,long+range_dist*1.0)
@@ -168,6 +169,9 @@ class MySQL(object):
         #         out_file.write(str(res[cols.index('id')]))
         #         out_file.write("\n")
 
+        if return_responses:
+            return response
+
         out_dict = {'response_len':len(response),'response_time':endtime}
 
         return out_dict
@@ -181,11 +185,16 @@ class MySQL(object):
     def get_images(self, tags, probs, operations = [],
                            lat=-1, long=-1, range_dist=0, return_images=False, comptype='and'):
         start = time.time()
-        metadata = self.get_metadata(tags, probs, lat, long, range_dist, comptype=comptype)
+        metadata = self.get_metadata(tags, probs,
+                                     lat, long, range_dist,
+                                     comptype=comptype,
+                                     return_responses=True)
 
         img_array = []
         cols = ['line_number', 'download_url', 'id',
                 'latitude', 'longitude', 'license_name']
+
+        # print(metadata)
 
         for res in metadata:
 
@@ -193,10 +202,10 @@ class MySQL(object):
             # # imgPath = FOLDER_CHOICES[quotient] + urlparse(res[cols.index('download_url')]).path
             # imgPath = "http://"+IMG_HOST+FOLDER_CHOICES[quotient] + urlparse(res[cols.index('download_url')]).path
 
-            # print(imgPath)
             # print(res[cols.index('id')])
 
             imgPath = "http://"+IMG_HOST+"/images/" + urlparse(res[cols.index('download_url')]).path
+            # print(imgPath)
 
             try:
                 imgdata = requests.get(imgPath)
@@ -239,11 +248,9 @@ class MySQL(object):
 
         total_time = time.time() - start
 
-        decoded_images = [img for img in img_array if img]
-
         out_dict = {
-            'images_len':len(decoded_images),
-            'images_time':total_time
+            'response_len':  len(img_array),
+            'response_time': total_time
         }
 
         if return_images:
