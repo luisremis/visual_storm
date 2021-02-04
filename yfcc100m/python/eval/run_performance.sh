@@ -20,7 +20,7 @@ do
     # for size in 1M 5M 10M 50M
     for size in 1M 5M 10M 50M 100M
     do
-        for db in vdms mysql
+        for db in vdms postgresql
         do
             # Run VDMS Queries
             echo "Running $th $db ${size}..." >> $info

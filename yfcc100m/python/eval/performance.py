@@ -5,6 +5,7 @@ from threading import Thread
 import pandas as pd
 import numpy as np
 
+from postgresql_eval  import PostgreSQLQuery
 from mysql_eval  import MySQLQuery
 from memsql_eval import MemSQLQuery
 from vdms_eval   import VDMSQuery
@@ -15,11 +16,6 @@ VDMS_PORT_MAPPING = {'100k': 55500, '500k': 55405,
                      '1M':   55501, '5M':   55450,
                      '10M':  55510, '50M':  55000,
                      '100M': 50000}
-
-# SIZE_PROB_MAPPING = {'100k': 0.60,       '500k': 0.06,
-#                      '1M':   0.92175,    '5M':   0.955,
-#                      '10M':  0.952499,   '50M':  0.95375,
-#                      '100M': 0.967656249}
 
 # These are pre-computed probabilities so that queries returned
 # a controlled number of results, to prevent the throughput to be
@@ -145,8 +141,8 @@ def get_args():
 
     # Database Info
     obj.add_argument('-db_type', type=str, default='vdms',
-                     choices=["vdms", "memsql", "mysql"],
-                     help='Database names: vdms, memsql, mysql')
+                     choices=["vdms", "memsql", "mysql", "postgresql"],
+                     help='Database names: vdms, memsql, mysql, postgresql')
     obj.add_argument('-db_name', type=str, default='100k',
                      choices=VDMS_PORT_MAPPING.keys(),
                      help='Database names: 100k, 1M, 10M')
@@ -177,13 +173,20 @@ def get_args():
     elif params.db_type == "mysql":
         params.db_host = "127.0.0.1" #TODO: Get to work with hostname
         params.db_port = 3360
+    elif params.db_type == "postgresql":
+        if params.db_name == '50M':
+            params.db_host = "sky4.local"
+        else:
+            params.db_host = "127.0.0.1"
+        params.db_port = 5432
+        params.db_user = "root"
+        params.db_pswd = "password"
     else:
         # VDMS needs port mapping
         params.db_host = "sky4.local"
         params.db_port = VDMS_PORT_MAPPING[params.db_name]
 
     return params
-
 
 def run_query_thread(obj, params, index, results, query_arguments):
 
@@ -205,6 +208,9 @@ def run_query(params, query_arguments):
         for i in range(params.numthreads):
             list_of_objs.append(
                         VDMSQuery.VDMSQuery(params.db_host, params.db_port))
+    elif (params.db_type == 'postgresql'):
+        for i in range(params.numthreads):
+            list_of_objs.append(PostgreSQLQuery.PostgreSQL(params))
     elif (params.db_type == "mysql"):
         for i in range(params.numthreads):
             list_of_objs.append(MySQLQuery.MySQL(params))
