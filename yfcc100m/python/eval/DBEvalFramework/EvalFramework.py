@@ -155,12 +155,12 @@ class EvalFramework(object):
 
                 times     = self.get_arr_for_eng_q_dbsize(eng, q, db_size,
                                                             "query_time_avg")
+                times_std = self.get_arr_for_eng_q_dbsize(eng, q, db_size,
+                                                            "query_time_std")
                 threads   = self.get_arr_for_eng_q_dbsize(eng, q, db_size,
                                                             "n_threads")
                 n_results = self.get_arr_for_eng_q_dbsize(eng, q, db_size,
                                                             "n_results")
-                stds      = self.get_arr_for_eng_q_dbsize(eng, q, db_size,
-                                                            "n_results_std")
 
                 from numpy import inf
                 from numpy import nan
@@ -168,13 +168,8 @@ class EvalFramework(object):
                 # Compute Results per second
                 rps   = 1/times * threads * n_results
                 rps[rps == inf] = 0
-                # where_are_NaNs = np.isnan(rps)
-                # rps[where_are_NaNs] = 0
 
-                stds  = 1/stds  * threads * n_results
-                stds[stds == inf] = 0
-                # where_are_NaNs = np.isnan(stds)
-                # stds[where_are_NaNs] = 0
+                stds  = rps * (times_std / times)
 
                 values = np.vstack((values, np.append(rps, stds)))
 
@@ -193,7 +188,7 @@ class EvalFramework(object):
                           ylabel=result_type + "/s")
 
         filename  = self.plot_folder + "plot_conc_"
-        filename += str(q) + "_results_throughput_db_size_mosaic.pdf"
+        filename += str(q) + "_mosaic_results_throughput_db_size.pdf"
 
         title = "Throughput as " + result_type + " per second for different queries"
         p.plot_lines_all_mosaic(db_sizes, threads, engines, values,
@@ -219,6 +214,8 @@ class EvalFramework(object):
 
                 times     = self.get_arr_for_eng_q_dbsize(eng, q, db_size,
                                                             "query_time_avg")
+                times_std = self.get_arr_for_eng_q_dbsize(eng, q, db_size,
+                                                            "query_time_std")
                 threads   = self.get_arr_for_eng_q_dbsize(eng, q, db_size,
                                                             "n_threads")
                 n_results = self.get_arr_for_eng_q_dbsize(eng, q, db_size,
@@ -232,13 +229,8 @@ class EvalFramework(object):
                 # Compute Results per second
                 rps   = 1/times * threads * n_results
                 rps[rps == inf] = 0
-                # where_are_NaNs = np.isnan(rps)
-                # rps[where_are_NaNs] = 0
 
-                stds  = 1/stds  * threads * n_results
-                stds[stds == inf] = 0
-                # where_are_NaNs = np.isnan(stds)
-                # stds[where_are_NaNs] = 0
+                stds  = rps * (times_std / times)
 
                 values = np.vstack((values, np.append(rps, stds)))
 
@@ -257,7 +249,7 @@ class EvalFramework(object):
                           ylabel=result_type + "/s")
 
         filename  = self.plot_folder + "plot_conc_"
-        filename += str(db_size) + "_results_throughput_mosaic.pdf"
+        filename += str(db_size) + "_mosaic_results_throughput.pdf"
 
         title = "Throughput as " + result_type + " per second for different DB Sizes"
         p.plot_lines_all_mosaic(queries, threads, engines, values,
@@ -282,10 +274,10 @@ class EvalFramework(object):
 
                 times     = self.get_arr_for_eng_q_threads(eng, q, n_threads,
                                                             "query_time_avg")
+                times_std = self.get_arr_for_eng_q_threads(eng, q, n_threads,
+                                                            "query_time_std")
                 n_results = self.get_arr_for_eng_q_threads(eng, q, n_threads,
                                                             "n_results")
-                stds      = self.get_arr_for_eng_q_threads(eng, q, n_threads,
-                                                            "n_results_std")
 
                 from numpy import inf
                 from numpy import nan
@@ -293,13 +285,8 @@ class EvalFramework(object):
                 # Compute Results per second
                 rps   = 1/times * n_threads * n_results
                 rps[rps == inf] = 0
-                # where_are_NaNs = np.isnan(rps)
-                # rps[where_are_NaNs] = 0
 
-                stds  = 1/stds  * n_threads * n_results
-                stds[stds == inf] = 0
-                # where_are_NaNs = np.isnan(stds)
-                # stds[where_are_NaNs] = 0
+                stds  = rps * (times_std / times)
 
                 values = np.vstack((values, np.append(rps, stds)))
 
@@ -317,7 +304,7 @@ class EvalFramework(object):
                           ylabel=result_type + "/s")
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_results_throughput_mosaic.pdf"
+        filename += "plot_" + str(n_threads) + "_mosaic_results_throughput.pdf"
 
         title = "Throughput as " + result_type + " per second for different queries"
         p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="both",
@@ -339,7 +326,7 @@ class EvalFramework(object):
             for q in queries:
 
                 times   = self.get_arr_for_eng_q_threads(eng, q, n_threads,
-                                                                "query_time_avg")
+                                                            "query_time_avg")
                 stds    = self.get_arr_for_eng_q_threads(eng, q, n_threads,
                                                             "query_time_std")
 
@@ -347,8 +334,7 @@ class EvalFramework(object):
                 qps = 1/times * n_threads
                 qps[qps == inf] = 0
 
-                stds  = 1/stds  * n_threads
-                stds[stds == inf] = 0
+                stds  = qps * (stds / times)
 
                 values = np.vstack((values, np.append(qps, stds)))
 
@@ -366,7 +352,7 @@ class EvalFramework(object):
                           ylabel="Queries per second")
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_query_throughput_mosaic.pdf"
+        filename += "plot_" + str(n_threads) + "_mosaic_query_throughput.pdf"
 
         title = "Query Throughput (q/s) for different queries"
         p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="both",
@@ -408,7 +394,7 @@ class EvalFramework(object):
                           ylabel="Average Query Time(s)")
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_query_times_mosaic.pdf"
+        filename += "plot_" + str(n_threads) + "_mosaic_query_times.pdf"
 
         title = "Query Execution Time(s) for different queries"
         p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="both",
@@ -452,7 +438,7 @@ class EvalFramework(object):
                           ylabel="Number of Results")
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_n_results_mosaic.pdf"
+        filename += "plot_" + str(n_threads) + "_mosaic_n_results.pdf"
 
         title = "Returned Results for different queries"
         p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="x",
