@@ -277,9 +277,14 @@ def main(params):
 
         print("\n")
 
+        len_all_times = len(all_times)
+        len_all_len   = len(all_len)
         # Reject outliers outside 2 std on measurements.
         all_times = reject_outliers(np.array(all_times))
         all_len   = reject_outliers(np.array(all_len))
+
+        if (len(all_times) / len_all_times) < 0.4:
+            print("WARNING: Rejecting too many samples!")
 
         evfw.add_row(query_args["key"],
                      params.db_type,
