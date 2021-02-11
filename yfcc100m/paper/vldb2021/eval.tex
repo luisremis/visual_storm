@@ -6,7 +6,7 @@ We use the images in the dataset and its associated metadata to implement
 an image-search engine based on properties associated with those images.
 This is a very common use-case we have encountered when building
 applications such as smart-retail, sports applications, and video summarization.
-For these type of applications, the starting point is usually 
+For these type of applications, the starting point is usually
 a large set of data that must be curated
 before proceeding with the data processing (such as neural network training).
 In order to evaluate the different aspects of the performance on the
@@ -14,8 +14,8 @@ image search, we have built a baseline following the methodology
 used in the industry, and following what we have done in the past
 in order to solve the data search problem,
 which we describe in Section \ref{images}.
-We have also included performance evaluation on the Video and Feature Vectors 
-functionality in the appendix for further reference, together with a 
+We have also included performance evaluation on the Video and Feature Vectors
+functionality in the appendix for further reference, together with a
 description of the key aspects of those functionalities.
 
 \begin{figure*}
@@ -56,16 +56,16 @@ with.
 
 Given that there are no other open-source systems
 that provides similar functionality and interfaces as VDMS,
-we have implemented an equivalent visual data management system as a baseline, 
+we have implemented an equivalent visual data management system as a baseline,
 comprised of a combination of widely available, off-the-shelf components:
 MySQL Server 5.7 (for storing metadata),
 Apache Web Server 2.4.18 (as interface for image access), and
 OpenCV 3.3 (to provide pre-processing operations on images).
-We decided to use a relational database instead of a non-relational 
-database because~\cite{Jatana2012, li_2019}: 
+We decided to use a relational database instead of a non-relational
+database because~\cite{Jatana2012, li_2019}:
 \begin{itemize}
-    \item Relational databases support atomicity, consistency, isolation, 
-    and durability (ACID) while non-relational may compromise some ACID properties. 
+    \item Relational databases support atomicity, consistency, isolation,
+    and durability (ACID) while non-relational may compromise some ACID properties.
     \item The YFCC100m data is clearly structured.
     \item We need to efficiently collate and return metadata records.
 \end{itemize}
@@ -97,7 +97,7 @@ Other than the difference in DRAM space, machines are identical.
 Both servers run Ubuntu 16.04.
 The client application running the queries and measuring round-trip time
 is connected to the server through a 1GB wired link through
-a 10GB back-plane switch, same as both servers. 
+a 10GB back-plane switch, same as both servers.
 Figure~\ref{fig:systems} shows a logical view of the difference between the
 interaction of the client application (retrieves metadata and
 images) with VDMS (left) and the baseline (right).
@@ -105,8 +105,8 @@ The client application was implemented using Python 3 for both VDMS and
 the baseline.
 
 It is worth noting that the images are stored in a shared repository
-(ext4 filesystem on a RAID 6 configuration of 16TB) that both 
-Apache WebServer and VDMS have direct access. 
+(ext4 filesystem on a RAID 6 configuration of 16TB) that both
+Apache WebServer and VDMS have direct access.
 In the case of Videos, only the first frame is used for the image search.
 More information and evaluation on video-specific functionalities can be found
 in the appendix of this work.
@@ -116,8 +116,8 @@ Even if VDMS has native support for Optane Persistent Memory,
 we do not use it in this experiment because of fairness of
 comparison with respect to MySQL, which was not designed for
 Persistent Memory type of storage.
-The benefits of Persistent Memory for metadata and a full evaluation of 
-the PMGD subsystem is material for another paper, 
+The benefits of Persistent Memory for metadata and a full evaluation of
+the PMGD subsystem is material for another paper,
 and outside the scope of this evaluation.
 For this experiment, in the case of VDMS we simply use a similar
 attached SSD disk to store metadata.
@@ -129,13 +129,13 @@ For the metadata, we built VDMS and MySQL databases
 using the YFCC100M dataset with incremental database sizes.
 For simplicity, we named the database based on the approximate number of images
 it contains, as follows: 1M, 5M, 10M, 50M, 100M.
-The VDMS and MySQL databases have comparable number of elements. 
+The VDMS and MySQL databases have comparable number of elements.
 The exact number of images/elements in each database are shown in
 Table~\ref{table:vdmsnodes} and ~\ref{table:mysqltables}.
-The differences can be attributed to failures in data 
-preparation/loading because of incomplete/inconsistent formatting, 
+The differences can be attributed to failures in data
+preparation/loading because of incomplete/inconsistent formatting,
 which is common in large datasets \cite{failures}.
-In our set up, that difference is very small: 
+In our set up, that difference is very small:
 less than 0.1\% in terms of number of elements (images and/or metadata information).
 
 \subsubsection{Data Representation}
@@ -163,19 +163,19 @@ On average there are 8 tags assigned to each image so
 there will be around 8 times more connections than images, as shown
 in Table~\ref{table:vdmsnodes}.
 Also, each image node will contain multiple properties associated
-with it (some of which are listed in Section \ref{dataset}). 
+with it (some of which are listed in Section \ref{dataset}).
 % Using the Python Client Module, we insert 1,570 nodes for the \textit{autotags},
 % and then insert nodes for the YFCC media objects (images or videos)
 % with the associated metadata (as properties of the image/video).
-% Then, for each image, we add a \textit{connection} between the image node 
+% Then, for each image, we add a \textit{connection} between the image node
 % and the \textit{autotag} node. The probability of that \textit{autotag}
 % being present in that image is stored as a property in that \textit{connection}.
-The number of nodes (representing images and \textit{autotags}) 
+The number of nodes (representing images and \textit{autotags})
 are dependent on the database size and the \textit{connections} are responsible for
-90\% of the elements in each database instance,  
-as shown in Table~\ref{table:vdmsnodes}. 
+90\% of the elements in each database instance,
+as shown in Table~\ref{table:vdmsnodes}.
 It is also important to note that we create indexes for the image identifier,
-\textit{autotags} properties, and longitude/latitude coordinates 
+\textit{autotags} properties, and longitude/latitude coordinates
 to enable faster retrieval.
 
 \begin{figure}[ht]
@@ -211,7 +211,7 @@ DB Name & \# Images & \# Connections & \# TagList\\
 \end{table}
 
 \textbf{MySQL/Baseline:}
-Each MySQL database is created in a similar manner as VDMS 
+Each MySQL database is created in a similar manner as VDMS
 but the data is represented as three tables, following the relational model:
 1) \textit{images} table: contains one row per image,
 and a column for each property
@@ -236,11 +236,11 @@ by the image identifier and autotag into new files.
 The new files are read into the \textit{autotags} table with the image
 identifier and \textit{tagid} as foreign keys.
 
-In an attempt to have the best MySQL configuration possible for this use case, 
-we explore several parameters to increase the performance of both loading the data, 
-as well as executing the queries.
-In particular, MySQL optimizes threads and transactions out-of-box, 
-but it cannot handle the entire YFCC100M dataset without configuring 
+In an attempt to have the best MySQL configuration possible for this use case,
+we explore several parameters to increase the performance
+of both loading the data, as well as executing the queries.
+In particular, MySQL optimizes threads and transactions out-of-box,
+but it cannot handle the entire YFCC100M dataset without configuring
 specific parameters.
 When creating large databases, a data lock may occur to protect the
 data from concurrent updates~\cite{mysql_blog}.
@@ -248,12 +248,12 @@ To avoid this mechanism, we increased the buffer pool size to
 increase the amount of memory allocated to internal data structures.
 It is recommended to set the buffer pool size to 60-80\% of the physical
 memory size ~\cite{mysql,mysql_blog}.
-However, the time to build a database increased. 
+However, the time to build a database increased.
 We later changed  the buffer pool size to a multiple of the default value, i.e. 16x,
 which produced the best results for loading time.
 
-By default, MySQL uses the available operating system threads to  
-execute \textit{n} requests in parallel where \textit{n} is 
+By default, MySQL uses the available operating system threads to
+execute \textit{n} requests in parallel where \textit{n} is
 the number of background read/write I/O threads.
 Setting the respective parameters in the MySQL configuration file can limit the
 number of concurrent threads and the number of background threads.
@@ -269,8 +269,8 @@ Therefore, we let MySQL automatically handle the concurrency.
 In the case of VDMS, we did not attempt to tune any
 parameter to avoid unfairness in the comparison against the baseline.
 Unlike the baseline, VDMS can handle the entire YFCC100m dataset using the default parameters provided by the implementation.
-For both VDMS and the baseline, we created indexes over the 
-properties we used for search, such as name of 
+For both VDMS and the baseline, we created indexes over the
+properties we used for search, such as name of
 \textit{autotag}, and geo-location values.
 Building indexes for the right properties and objects
 is basic operation that would be present in any real-world deployment,
@@ -307,15 +307,15 @@ DB Name & images & autotags & taglist\\
 
 \subsubsection{Database Building Time}
 
-One of the first things we noticed is the difference in the time needed to 
+One of the first things we noticed is the difference in the time needed to
 build each database, where VDMS outperforms MySQL by a large margin.
-This analysis includes only the metadata, as the images are stored in a shared filesystem. 
+This analysis includes only the metadata, as the images are stored in a shared filesystem.
 Figure~\ref{fig:db_time_size} illustrates how VDMS can build databases
 faster than MySQL, and how the speedup is sustained as the database size grows.
 Key difference in the build times are attributed to the low-level
 implementation of how MySQL reads and stores data from the files, the
 optimizations (increased InnoDB pool size, etc.) needed
-to handle large datasets such as YFCC100M, and the efficiency of PMGD.  
+to handle large datasets such as YFCC100M, and the efficiency of PMGD.
 On average, it took MySQL around 3.72x longer to build each database than VDMS.
 
 \subsubsection{Database Storage Footprint}
@@ -336,8 +336,8 @@ For example, the largest database (both metadata and images) we built
 (100M) has around 230GB of metadata and 12TB of images.
 In systems where persistent memory is a scarce resource,
 the increased storage foot print of PMGD may represent a challenge.
-On the other hand, persistent memory is expected to be available 
-in the order of TBs per server, which should fit the 
+On the other hand, persistent memory is expected to be available
+in the order of TBs per server, which should fit the
 metadata of intensive use-cases\cite{IntelXPoint15}.
 
 %=========================================
@@ -353,11 +353,11 @@ As we mentioned before, we took this approach due to the lack of standard
 benchmarks that are oriented towards visual data retrieval.
 We use the metadata associated with the images to filter said images.
 
-We use the \textit{autotags} (as they contain information about the content 
-of the image), and geo-location information (latitude/longitude) 
+We use the \textit{autotags} (as they contain information about the content
+of the image), and geo-location information (latitude/longitude)
 of the images for search and filtering.
-Note that, even if we use geo-location for our study, any other property 
-assigned to the images can be used to refine the search 
+Note that, even if we use geo-location for our study, any other property
+assigned to the images can be used to refine the search
 in both VDMS and baseline implementations.
 On top of that, and for our use cases, we would like to extract more information
 about the content of the image through the use of ML,
@@ -390,14 +390,13 @@ In the case of the baseline implementation,
 the query involves JOIN operations between the 3 tables.
 The implementation of this evaluation, as well as all the queries, are available
 under the benchmarks branch of the VDMS project
-\footnote{https://github.com/\{Not shown during submission\}}
-% \footnote{https://github.com/IntelLabs/vdms/ under benchmark/benckmarks/visual\_storm/yfcc100m},
+\footnote{https://github.com/IntelLabs/vdms/ under benchmark/benckmarks/visual\_storm/yfcc100m},
 and some examples of the queries can be found in the appendix of this
 paper.
 
-\begin{figure}[ht]
-\includegraphics[width=\columnwidth]{figures/concurrency_comparison}
-\caption{Concurrency Analysis on \textit{q2} (\textit{1tag\_resize}).
+\begin{figure*}[ht]
+\includegraphics[width=\textwidth]{figures/plot_conc_1tag_loc20_resize_mosaic_results_throughput_db_size}
+\caption{Concurrency Analysis on \textit{q3} (\textit{1tag\_resize\_geo}).
 Hardware concurrency (number of physical cores in each system)
 is shown with a blue vertical line (hw-concurrency = 56).
 Top figure shows aggregated throughput (transactions per second)
@@ -406,7 +405,20 @@ concurrent clients increase.
 Bottom figure shows aggregated throughput (images per second) when retrieving
 resized versions of the images, as the number of concurrent clients increases.}
 \label{fig:concurrency_comparison}
-\end{figure}
+\end{figure*}
+
+\begin{figure*}[ht]
+\includegraphics[width=\textwidth]{figures/plot_conc_10M_mosaic_results_throughput}
+\caption{Concurrency Analysis for all the queries on the 10M database).
+Hardware concurrency (number of physical cores in each system)
+is shown with a blue vertical line (hw-concurrency = 56).
+Top figure shows aggregated throughput (transactions per second)
+when retrieving only metadata associated with the images, as the number of
+concurrent clients increase.
+Bottom figure shows aggregated throughput (images per second) when retrieving
+resized versions of the images, as the number of concurrent clients increases.}
+\label{fig:concurrency_comparison_10M}
+\end{figure*}
 
 Also, note that the size of the result (number of images retrieved)
 is linear with the size of the database. This is, if a query returns 100 images
@@ -414,30 +426,17 @@ for the 1M database, it will return around 1000 images for the 10M database.
 This poses a problem when evaluating performance as the size of the database increase,
 and clearly understanding the measurements.
 Because of this reason, we control the number of returned images for all the
-databases using the probability of the \textit{autotags} 
-(higher probabilities returns less images), so that the queries in 
+databases using the probability of the \textit{autotags}
+(higher probabilities returns less images), so that the queries in
 this experiment return a similar number of images for all database sizes.
 In other words, as the size of the database increase, we increase the probability
 threshold for the queries. We do this for both VDMS and the baseline, of course.
 This way, we remove bottleneck introduced by network bandwidth that would
 otherwise over-complicate the understanding of the results.
 
-\begin{figure*}[ht!]
-\begin{subfigure}{.5\linewidth}
-  \centering
-  % include first image
-  \includegraphics[width=\columnwidth]{figures/queries_throughput_56_q1_q2_q3}
-  \caption{\textit{q1}(red), \textit{q2}(blue),and \textit{q3}(orange).}
-  \label{fig:q1_q2}
-\end{subfigure}
-\begin{subfigure}{.5\linewidth}
-  \centering
-  % include second image
-  \includegraphics[width=\columnwidth]{figures/queries_throughput_56_q4_q5}
-  \caption{\textit{q4}(black), and \textit{q5}(pink).}
-  \label{fig:q3_q4}
-\end{subfigure}
-\caption{Performance Analysis using 5 queries from our use-case
+\begin{figure*}[ht]
+\includegraphics[width=\textwidth]{figures/plot_56_mosaic_query_times}
+\caption{Performance Analysis using all queries from our use-case
 described in the Experimental Setup Section.
 We show queries in different figures for readability reasons.
 Top figures show the throughput of the queries for
@@ -447,8 +446,24 @@ plus operations applied to images when applicable (queries 2, 3, 4 and 5).
 The experiments show the performance of both systems (VDMS and baseline) as the
 database size increases.
 These queries were run using 56 simultaneous clients (nthr = 56),
-and averaged out of 10 runs (niter = 10),
-each client running 2 transactions (ntags = 2).}
+and averaged out of 10 runs.}
+\label{fig:q_performance_56}
+\end{figure*}
+
+
+\begin{figure*}[ht]
+\includegraphics[width=\textwidth]{figures/plot_56_mosaic_results_throughput}
+\caption{Throughput Analysis using all queries from our use-case
+described in the Experimental Setup Section.
+We show queries in different figures for readability reasons.
+Top figures show the throughput of the queries for
+just retrieving metadata associated with the images.
+Bottom figures show the throughput when retrieving both metadata and images,
+plus operations applied to images when applicable (queries 2, 3, 4 and 5).
+The experiments show the performance of both systems (VDMS and baseline) as the
+database size increases.
+These queries were run using 56 simultaneous clients (nthr = 56),
+and averaged out of 10 runs.}
 \label{fig:q_throughput_56}
 \end{figure*}
 
@@ -563,7 +578,7 @@ practice when it comes to image processing through CNNs \cite{cnn,resnet}.
 The next step in our analysis involved running a different set of queries
 (described above in this section),
 to better understand the performance of the systems under different query conditions.
-Figure~\ref{fig:q_throughput_56} shows the evaluation of the 
+Figure~\ref{fig:q_throughput_56} shows the evaluation of the
 queries we analysed for our use case.
 Top figures show the throughput of these queries
 retrieving metadata associated with the images.
@@ -585,7 +600,7 @@ the full-red line (VDMS) and the dotted-red line (baseline).
 
 \begin{figure*}[ht!]
 \centering
-\includegraphics[width=\textwidth]{figures/summary_images}
+\includegraphics[width=\textwidth]{figures/plot_56_query_times_speedup}
 \caption{Summary of performance gains for all queries.
 We see up to 35x speedup (\textit{q2}), and an average of about 15x.
 More importantly, we see that the speedup grow as the database size increases,
@@ -610,32 +625,32 @@ as the size of the database increase.
 For \textit{q3}, we see that MySQL performs best when the database size
 is small (1M images), with VDMS outperforming MySQL as the database increases in size.
 For \textit{q4}, we see MySQL also outperforming VDMS on small size databases, and as
-the database size increase, the gap between the two narrows, 
+the database size increase, the gap between the two narrows,
 similar to what we see for \textit{q5}.
 It is interesting to note that adding filtering by geo-location
 (\textit{q3}, and \textit{q4}) slightly increases the performance of MySQL
-for small databases, and decreases it as the database sizes scales. 
-The behaviour is different in the case of \textit{q5}, 
-which also filters by geo-location. 
-This is attributed to the fact that OR queries involves processing larger results, 
+for small databases, and decreases it as the database sizes scales.
+The behaviour is different in the case of \textit{q5},
+which also filters by geo-location.
+This is attributed to the fact that OR queries involves processing larger results,
 and thus does not benefit from the filtering of the AND operation as \textit{q4}.
 In the case of VDMS, we see \textit{q3} performance is comparable to \textit{q1}
-and \textit{q2}, but \textit{q4} suffers significantly 
+and \textit{q2}, but \textit{q4} suffers significantly
 when the scale of the database increases.
 The reason for that lack of scalability lies on the query implementation: given that
-VDMS does not yet support operators that enable querying images 
-that have both connections to a \textit{tagA} and a \textit{tagB}; 
+VDMS does not yet support operators that enable querying images
+that have both connections to a \textit{tagA} and a \textit{tagB};
 we have to implement this transaction by doing 2 retrievals.
-This involves retrieving partial information in the first retrieval, 
+This involves retrieving partial information in the first retrieval,
 applying an INTERSECTION operation in the client, and doing a second retrieval
 to bring the right metadata and/or images.
 The reason for this is a lack of operations that would enable this query to be
 run entirely on the server is not an inherent limitation to VDMS but rather
 just a missing implementation.
-In the case of \textit{q5}, we see a similar effect, although it is worth noting 
-that for the OR operation there is no need for 2 retrievals. 
+In the case of \textit{q5}, we see a similar effect, although it is worth noting
+that for the OR operation there is no need for 2 retrievals.
 Rather, a single retrieval is performed and the result filtered on the client.
-Future release will add more of such operators (AND, OR, etc) in order to prevent 
+Future release will add more of such operators (AND, OR, etc) in order to prevent
 unnecessary retrievals and extra filtering on the client side.
 
 \subsubsection{Image Retrieval}
@@ -647,8 +662,8 @@ than \textit{q2} (full-blue-line) (bottom left figure).
 This is expected as \textit{q1} returns a full size version of the image,
 whereas \textit{q2} returns a resized (smaller) version of the image,
 thus transferring less data over the network.
-In the case of the baseline, both \textit{q1} and \textit{q2} transfer 
-the full size version of the image, and as part of \textit{q2}, 
+In the case of the baseline, both \textit{q1} and \textit{q2} transfer
+the full size version of the image, and as part of \textit{q2},
 the resize is performed in the client.
 This is why, contrary to the VDMS case, \textit{q1} performs better (even if slightly)
 when compared with \textit{q2}.
@@ -658,8 +673,8 @@ Moreover, we see a great performance degradation in the case of \textit{q4} as t
 database size increases.
 This is entirely attributed to the 2-round process needed for this query,
 as we explained before.
-From the first 3 queries, as well as \textit{q5}, 
-we clearly see that VDMS outperforms the baseline 
+From the first 3 queries, as well as \textit{q5},
+we clearly see that VDMS outperforms the baseline
 when retrieving visual data and applying operations.
 This is one of the most important finding, as it validates the design principles
 of VDMS, which aims to provide scalability and performance acceleration
@@ -674,16 +689,16 @@ We see up to 35x speedup (for the case of \textit{q2}),
 and an average improvement in throughput of about 15x.
 More importantly, we see that the speedup increases as the database size grows,
 showing that VDMS scales better than the baseline.
-We also see how \textit{q4} shows poor performances and scalability 
-when compared to the baseline, and this evaluation served the 
-purpose of understanding the importance of VDMS server side operators 
+We also see how \textit{q4} shows poor performances and scalability
+when compared to the baseline, and this evaluation served the
+purpose of understanding the importance of VDMS server side operators
 that enable more complex queries for our use cases.
 The team will address the missing implementation as part of future work.
-Most of the performance improvements can be attributed to the design 
-principles of VDMS, which aims to eliminate the need of combining and 
-re-purposing systems that were designed to handle types of date other than visual. 
-VDMS, by design, eliminates all the inefficiencies that result 
-from a forced integration of components designed for a 
+Most of the performance improvements can be attributed to the design
+principles of VDMS, which aims to eliminate the need of combining and
+re-purposing systems that were designed to handle types of date other than visual.
+VDMS, by design, eliminates all the inefficiencies that result
+from a forced integration of components designed for a
 different range of applications.
 
 %% ========= Summary Analysis - END
