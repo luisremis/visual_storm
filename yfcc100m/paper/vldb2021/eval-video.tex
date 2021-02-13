@@ -42,14 +42,13 @@ queries using 32 clients.}
 
 All this functionality is provided and integrated with the rest of the
 metadata API as part of the comprehensive VDMS interface.
-This makes it possible for users to interact with metadata and video in 
-a transactional manner, enabling users to run queries like: 
-"Retrieve all the videos where there is a \textit{lake} with 
-probability higher than 0.86, converting all videos to \textit{H.264} 
+This makes it possible for users to interact with metadata and video in
+a transactional manner, enabling users to run queries like:
+"Retrieve all the videos where there is a \textit{lake} with
+probability higher than 0.86, converting all videos to \textit{H.264}
 \textit{mp4} of size 224x224".
 Appendix shows a sample of how this query would be implemented using the VDMS API
-\footnote{https://github.com/\{Not shown during submission\}}.
-% \footnote{https://github.com/IntelLabs/vdms/wiki/FindVideo}.
+\footnote{https://github.com/IntelLabs/vdms/wiki/FindVideo}.
 In particular, this functionality was used internally to select a subset
 of videos with the right licenses for a video summarization application.
 
@@ -57,7 +56,7 @@ To the best of our knowledge, there is no solution that can provide
 all the functionality mentioned above, behind a single interface
 that also allows users to interact with images and metadata.
 Implementing a baseline, like we did for images, is significantly more complex
-due to the parametrization of video encodings and containers, 
+due to the parametrization of video encodings and containers,
 as explained at the beginning of this section.
 For this reason, we chose to make a study using VDMS in various scenarios,
 and analysis of scalability and the impact of having the overhead of VDMS' Request
@@ -82,9 +81,9 @@ it over a TCP/IP socket, without any other overhead or operations.
                linenos=true,
                xleftmargin=21pt,
                tabsize=4]{js}
-"FindEntity"{     
+"FindEntity"{
     "class": "autotag",
-    "constraints": { 
+    "constraints": {
         "name": ["==", "lake"]
     }
     "_ref" : 1
@@ -106,12 +105,12 @@ it over a TCP/IP socket, without any other overhead or operations.
 }
 
 \end{minted}
-\caption{Sample Query for Video - 
-The query expresses the following: 
-Find all videos connected to the autotag \textit{lake} 
+\caption{Sample Query for Video -
+The query expresses the following:
+Find all videos connected to the autotag \textit{lake}
 with probability higher than 0.86, apply a resize operation
-to make the video 1920×1080, and convert to "mp4" file, 
-using H.264 encoding.} 
+to make the video 1920×1080, and convert to "mp4" file,
+using H.264 encoding.}
 \label{findvideo}
 \end{listing}
 
@@ -123,8 +122,8 @@ than the one originally used (yellow line), and
 (c) both resize and transcoding.
 Note that the resize operation (blue and green lines) performs a downsize,
 which translates in less data being sent over the wire.
-This is specially noticeable when supporting 32 simultaneous clients, 
-where the system provides more videos per second due to sending less data to 
+This is specially noticeable when supporting 32 simultaneous clients,
+where the system provides more videos per second due to sending less data to
 the client, when compared to just transcoding and not resizing (yellow line).
 We can see that the system performs best when using all the physical cores,
 and this can be attributed to the compute-bound nature of video
@@ -139,9 +138,9 @@ Figure~\ref{fig:video} (right) which breaks down the different components of the
 queries. This figure shows that more than 97\% of the query execution is spent
 on encoding/decoding operations, which is well-known to be a
 compute intensive operation\cite{videosgoogle}.
-On the one hand, this result shows that VDMS barely introduces any overhead. 
-On the other hand, this result means a limit on the opportunities 
-for optimization for video queries given that biggest time factors 
+On the one hand, this result shows that VDMS barely introduces any overhead.
+On the other hand, this result means a limit on the opportunities
+for optimization for video queries given that biggest time factors
 are accounted by encoding/decoding, which is outside the scope of VDMS.
 This result was the call to action for one optimization we will include
 in future releases of VDMS, which involves using \textit{ffmpeg} C++ API to
