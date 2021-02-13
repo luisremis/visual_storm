@@ -222,7 +222,8 @@ class Plotting(object):
                   title="Generic (but Awesome) Bar Plot",
                   filename="plot_summary.pdf",
                   xlabel="Database Size",
-                  ylabel="Speedup ?"):
+                  ylabel="Speedup ?",
+                  log="none"):
 
         fig, ax0 = plt.subplots(nrows=1)
         fig.set_size_inches(12, 3)
@@ -261,9 +262,14 @@ class Plotting(object):
 
         limit = values[:,0:len(db_sizes)].max() * 1.5
 
-        ax0.set_ylim(0, limit)
+        # ax0.set_ylim(0.1, limit)
 
         plt.ylabel('Speedup', fontsize=12)
+
+        if log == "x" or log == "both":
+            ax0.set_xscale('log')
+        if log == "y" or log == "both":
+            ax0.set_yscale('log')
 
         plt.axhline(y=1)
 

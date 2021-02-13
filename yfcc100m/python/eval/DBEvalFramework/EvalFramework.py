@@ -109,9 +109,9 @@ class EvalFramework(object):
             os.makedirs(self.plot_folder)
 
         # print(self.data)
-        self.plot_all_for_all_queries()
         self.plot_all_for_db_size()
         self.plot_all_for_n_clients()
+        self.plot_all_for_all_queries()
 
     def plot_all_for_all_queries(self):
 
@@ -532,50 +532,56 @@ class EvalFramework(object):
 
         # Plot query times:
         db_sizes = self.get_unique("db_size")
-        queries  = self.get_unique("query")
         engines  = self.get_unique("engine")
 
         if len(engines) < 2:
             print("Single engine, no speedup plot generated")
             return
 
-        values = np.zeros(len(db_sizes) * 2)
+        # This will only compute speedup of eng[0] vs eng[i > 0].
 
-        # This will only compute speedup of eng[0] vs eng[1].
-        # TODO: Iterate through engines here to generate
-        # eng[0] vs all others. Should be easy.
+        for sub_eng in range(1,len(engines)):
 
-        for eng in engines:
-            for q in queries:
+            # We need to get queries every times because we append "avg"
+            queries  = self.get_unique("query")
 
-                times = self.get_arr_for_eng_q_threads(eng,q, n_threads,
+            s_engines = [engines[0], engines[sub_eng]]
+            values = np.zeros(len(db_sizes) * 2)
+
+            for eng in s_engines:
+                for q in queries:
+
+                    times = self.get_arr_for_eng_q_threads(eng, q, n_threads,
                                                             "query_time_avg")
-                stds  = self.get_arr_for_eng_q_threads(eng, q, n_threads,
+                    stds  = self.get_arr_for_eng_q_threads(eng, q, n_threads,
                                                             "query_time_std")
 
-                values = np.vstack((values, np.append(times, stds)))
+                    values = np.vstack((values, np.append(times, stds)))
 
-        values = values[1:,:] # remove initial row of zeros
+            values = values[1:,:] # remove initial row of zeros
 
-        # Compute speedup
-        for i in range(len(queries)):
-            values[i,:] = values[len(queries)+i, :] / values[i, :]
+            # Compute speedup
+            for i in range(len(queries)):
+                values[i,:] = values[len(queries)+i, :] / values[i, :]
 
-        values = values[0:len(queries),:]
+            values = values[0:len(queries),:]
 
-        # computer average and add "avg" row to queries
-        avgs = np.mean(values, axis=0)
-        values = np.vstack((values, avgs))
-        queries.append("avg")
+            # compute average and add "avg" row to queries
+            avgs = np.mean(values, axis=0)
+            values = np.vstack((values, avgs))
+            queries.append("avg")
 
-        p = Plotting.Plotting()
+            p = Plotting.Plotting()
 
-        filename  = self.plot_folder
-        filename += "plot_th_" + str(n_threads) + "_query_times_speedup.pdf"
+            filename  = self.plot_folder
+            filename += "plot_th_" + str(n_threads) + "_query_times_speedup_"
+            filename += s_engines[1] + ".pdf"
 
-        title = "Speedup of " + engines[0] + " over baseline for all queries"
-        p.plot_bars(queries, db_sizes, values,
-                    filename=filename,
-                    title=title)
+            title  = "Speedup of " + s_engines[0] + " over " + s_engines[1]
+            title += " for all queries"
+            p.plot_bars(queries, db_sizes, values,
+                        filename=filename,
+                        title=title,
+                        log="y")
 
         return
