@@ -367,12 +367,20 @@ popular variations of neural networks for object detection on images~\cite{resne
 
 To evaluate the access to metadata and images,
 we use the following queries, modeled after our internal use cases:
+
 \begin{itemize}
-\item \textit{q1} - {\bf {\em 1tag}}: Find metadata/images with one specific autotag (i.e. alligator, lake, etc).
-\item \textit{q2} - {\bf {\em 1tag\_resize}}: Find metadata/images with one specific autotag and resize to 224x224.
-\item \textit{q3} - {\bf {\em 1tag\_resize\_geo}}: Find metadata/images with one specific autotag, resize to 224x224, and in a particular geo-location (with a 20 degrees radius in latitude and longitude).
-\item \textit{q4} - {\bf {\em 2tag\_resize\_geo\_and}}: Find metadata/images with two specific autotags (i.e. alligator AND lake), resize to 224x224, and in a particular geo-location (with a 20 degrees radius in latitude and longitude).
-\item \textit{q5} - {\bf {\em 2tag\_resize\_geo\_or}}: Find metadata/images with either of two specific autotags (i.e. alligator OR lake), resize to 224x224, and in a particular geo-location (with a 20 degrees radius in latitude and longitude).
+\item \textit{q1} - {\bf {\em 1tag\_resize}}: Retrieve images with one specific autotag and resize to 224x224.
+
+\item \textit{q2} - {\bf {\em 1tag\_geo\_resize}}: Retrieve images with one specific autotag, in a particular geo-location, and resize to 224x224,.
+
+\item \textit{q3} - {\bf {\em 2tag\_and\_resize}}: Retrieve images with two specific autotags (i.e. alligator AND lake), and resize to 224x224.
+
+\item \textit{q4} - {\bf {\em 2tag\_or\_resize}}: Retrieve images with either of two specific autotags (i.e. alligator OR lake), and resize to 224x224.
+
+\item \textit{q5} - {\bf {\em 2tag\_resize\_geo\_and}}: Retrieve images with two specific autotags (i.e. alligator AND lake), in a particular geo-location, and resize to 224x224.
+
+\item \textit{q6} - {\bf {\em 2tag\_resize\_geo\_or}}: Retrieve images with either of two specific autotags (i.e. alligator OR lake), in a particular geo-location, and resize to 224x224.
+
 \end{itemize}
 
 It is important to note that when querying for images with certain
