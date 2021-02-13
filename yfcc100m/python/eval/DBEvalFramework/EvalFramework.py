@@ -1,5 +1,9 @@
 import os
+
 import numpy as np
+from numpy import inf
+from numpy import nan
+
 import pandas as pd
 
 from DBEvalFramework import Plotting
@@ -88,6 +92,15 @@ class EvalFramework(object):
 
         return arr
 
+    def get_arr_for_eng_q_threads(self, engine, query, threads, key):
+
+        arr = self.data[self.data["query"] == query]
+        arr = arr[self.data["engine"]      == engine]
+        arr = arr[self.data["n_threads"]   == threads]
+        arr = arr[key].to_numpy()
+
+        return arr
+
     def plot_all(self, folder="plots"):
         self.plot_folder=folder
         self.plot_folder += "/"
@@ -96,12 +109,27 @@ class EvalFramework(object):
             os.makedirs(self.plot_folder)
 
         # print(self.data)
+        self.plot_all_for_all_queries()
         self.plot_all_for_db_size()
         self.plot_all_for_n_clients()
 
+    def plot_all_for_all_queries(self):
+
+        threads  = self.get_unique("n_threads")
+        queries  = self.get_unique("query")
+
+        if len(queries) == 1:
+            return
+
+        print("Plotting plot_all_for_all_queries...")
+
+        for q in queries:
+            self.plot_results_throughput_parallelism_threads(q, result_type="Images")
+
+
     def plot_all_for_n_clients(self):
 
-        threads = self.get_unique("n_threads")
+        threads  = self.get_unique("n_threads")
         queries  = self.get_unique("query")
 
         if len(threads) == 1:
@@ -137,6 +165,67 @@ class EvalFramework(object):
             self.plot_query_time_speedup(i)
             self.plot_n_results(i)
 
+    def plot_results_throughput_parallelism_threads(self, q,
+                                            result_type="results"):
+
+        # Plot query times:
+        threads  = self.get_unique("n_threads")
+        queries  = self.get_unique("query")
+        engines  = self.get_unique("engine")
+        db_sizes = self.get_unique("db_size")
+
+        # Todo make general for more db_sizes
+        values = np.zeros(len(db_sizes) * 2)
+
+        for eng in engines:
+            for th in threads:
+
+                times     = self.get_arr_for_eng_q_threads(eng, q, th,
+                                                            "query_time_avg")
+                times_std = self.get_arr_for_eng_q_threads(eng, q, th,
+                                                            "query_time_std")
+                n_results = self.get_arr_for_eng_q_threads(eng, q, th,
+                                                            "n_results")
+
+                # Compute Results per second
+                rps   = 1/times * th * n_results
+                rps[rps == inf] = 0
+
+                stds  = rps * (times_std / times)
+
+                # print("values:",len(values, len(values[0])))
+                # print("rps:",len(rps))
+
+                values = np.vstack((values, np.append(rps, stds)))
+
+        values = values[1:,:] # remove initial row of zeros
+
+        p = Plotting.Plotting()
+
+        # filename  = self.plot_folder + "plot_conc_q_"
+        # filename += str(q) + "_results_throughput_threads.pdf"
+
+        # title = "Throughput as " + result_type + " per second Summary"
+        # p.plot_lines_all(str(threads), db_sizes, engines, values,
+        #                   title=title,
+        #                   filename=filename,
+        #                   log="both",
+        #                   xlabel="Database Size",
+        #                   ylabel=result_type + "/s")
+
+        filename  = self.plot_folder + "plot_q_"
+        filename += str(q) + "_mosaic_results_throughput_threads.pdf"
+
+        title = "Throughput as " + result_type + " per second for " + q
+        threads = ["clients: " + str(a) for a in threads]
+        p.plot_lines_all_mosaic(threads, db_sizes, engines, values,
+                          filename=filename,
+                          title=title,
+                          log="both",
+                          xlabel="Database Size",
+                          ylabel=result_type + "/s")
+
+
 
     def plot_results_throughput_parallelism_dbsizes(self, q,
                                             result_type="results"):
@@ -162,9 +251,6 @@ class EvalFramework(object):
                 n_results = self.get_arr_for_eng_q_dbsize(eng, q, db_size,
                                                             "n_results")
 
-                from numpy import inf
-                from numpy import nan
-
                 # Compute Results per second
                 rps   = 1/times * threads * n_results
                 rps[rps == inf] = 0
@@ -177,7 +263,7 @@ class EvalFramework(object):
 
         p = Plotting.Plotting()
 
-        filename  = self.plot_folder + "plot_conc_"
+        filename  = self.plot_folder + "plot_conc_q_"
         filename += str(q) + "_results_throughput_db_size.pdf"
 
         title = "Throughput as " + result_type + " per second Summary"
@@ -187,10 +273,10 @@ class EvalFramework(object):
                           xlabel="# of concurrent clients",
                           ylabel=result_type + "/s")
 
-        filename  = self.plot_folder + "plot_conc_"
+        filename  = self.plot_folder + "plot_conc_q_"
         filename += str(q) + "_mosaic_results_throughput_db_size.pdf"
 
-        title = "Throughput as " + result_type + " per second for different queries"
+        title = "Throughput as " + result_type + " per second for " + q
         p.plot_lines_all_mosaic(db_sizes, threads, engines, values,
                           filename=filename,
                           title=title,
@@ -223,9 +309,6 @@ class EvalFramework(object):
                 stds      = self.get_arr_for_eng_q_dbsize(eng, q, db_size,
                                                             "n_results_std")
 
-                from numpy import inf
-                from numpy import nan
-
                 # Compute Results per second
                 rps   = 1/times * threads * n_results
                 rps[rps == inf] = 0
@@ -238,7 +321,7 @@ class EvalFramework(object):
 
         p = Plotting.Plotting()
 
-        filename  = self.plot_folder + "plot_conc_"
+        filename  = self.plot_folder + "plot_conc_dbsize_"
         filename += str(db_size) + "_results_throughput.pdf"
 
         title = "Throughput as " + result_type + " per second Summary"
@@ -248,10 +331,10 @@ class EvalFramework(object):
                           xlabel="# of concurrent clients",
                           ylabel=result_type + "/s")
 
-        filename  = self.plot_folder + "plot_conc_"
+        filename  = self.plot_folder + "plot_conc_dbsize_"
         filename += str(db_size) + "_mosaic_results_throughput.pdf"
 
-        title = "Throughput as " + result_type + " per second for different DB Sizes"
+        title = "Throughput as " + result_type + " per second for " + db_size
         p.plot_lines_all_mosaic(queries, threads, engines, values,
                           filename=filename,
                           title=title,
@@ -279,9 +362,6 @@ class EvalFramework(object):
                 n_results = self.get_arr_for_eng_q_threads(eng, q, n_threads,
                                                             "n_results")
 
-                from numpy import inf
-                from numpy import nan
-
                 # Compute Results per second
                 rps   = 1/times * n_threads * n_results
                 rps[rps == inf] = 0
@@ -295,7 +375,7 @@ class EvalFramework(object):
         p = Plotting.Plotting()
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_results_throughput.pdf"
+        filename += "plot_th_" + str(n_threads) + "_results_throughput.pdf"
 
         title = "Throughput as " + result_type + " per second Sumary"
         p.plot_lines_all(queries, db_sizes, engines, values, log="both",
@@ -304,7 +384,7 @@ class EvalFramework(object):
                           ylabel=result_type + "/s")
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_mosaic_results_throughput.pdf"
+        filename += "plot_th_" + str(n_threads) + "_mosaic_results_throughput.pdf"
 
         title = "Throughput as " + result_type + " per second for different queries"
         p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="both",
@@ -330,7 +410,6 @@ class EvalFramework(object):
                 stds    = self.get_arr_for_eng_q_threads(eng, q, n_threads,
                                                             "query_time_std")
 
-                from numpy import inf
                 qps = 1/times * n_threads
                 qps[qps == inf] = 0
 
@@ -343,7 +422,7 @@ class EvalFramework(object):
         p = Plotting.Plotting()
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_queries_throughput.pdf"
+        filename += "plot_th_" + str(n_threads) + "_queries_throughput.pdf"
 
         title = "Query Throughput (q/s) Summary"
         p.plot_lines_all(queries, db_sizes, engines, values, log="both",
@@ -352,7 +431,7 @@ class EvalFramework(object):
                           ylabel="Queries per second")
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_mosaic_query_throughput.pdf"
+        filename += "plot_th_" + str(n_threads) + "_mosaic_query_throughput.pdf"
 
         title = "Query Throughput (q/s) for different queries"
         p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="both",
@@ -385,7 +464,7 @@ class EvalFramework(object):
         p = Plotting.Plotting()
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_query_times.pdf"
+        filename += "plot_th_" + str(n_threads) + "_query_times.pdf"
 
         title = "Query Execution Time(s) Summary"
         p.plot_lines_all(queries, db_sizes, engines, values, log="both",
@@ -394,7 +473,7 @@ class EvalFramework(object):
                           ylabel="Average Query Time(s)")
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_mosaic_query_times.pdf"
+        filename += "plot_th_" + str(n_threads) + "_mosaic_query_times.pdf"
 
         title = "Query Execution Time(s) for different queries"
         p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="both",
@@ -429,7 +508,7 @@ class EvalFramework(object):
         p = Plotting.Plotting()
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_n_results.pdf"
+        filename += "plot_th_" + str(n_threads) + "_n_results.pdf"
 
         title = "Returned Results Summary"
         p.plot_lines_all(queries, db_sizes, engines, values, log="both",
@@ -438,7 +517,7 @@ class EvalFramework(object):
                           ylabel="Number of Results")
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_mosaic_n_results.pdf"
+        filename += "plot_th_" + str(n_threads) + "_mosaic_n_results.pdf"
 
         title = "Returned Results for different queries"
         p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="x",
@@ -447,7 +526,6 @@ class EvalFramework(object):
                           ylabel="Number of Results")
 
         return
-
 
     # Bar plot
     def plot_query_time_speedup(self, n_threads):
@@ -493,7 +571,7 @@ class EvalFramework(object):
         p = Plotting.Plotting()
 
         filename  = self.plot_folder
-        filename += "plot_" + str(n_threads) + "_query_times_speedup.pdf"
+        filename += "plot_th_" + str(n_threads) + "_query_times_speedup.pdf"
 
         title = "Speedup of " + engines[0] + " over baseline for all queries"
         p.plot_bars(queries, db_sizes, values,

@@ -121,7 +121,18 @@ class Plotting(object):
         plt.xlabel(xlabel, fontsize=12)
         plt.ylabel(ylabel, fontsize=12)
 
-        plt.legend(loc="best", ncol=len(engines), shadow=True, fancybox=True)
+        if len(engines) > 2 or len(n_queries > 2):
+            plt.legend(bbox_to_anchor=(0, -0.15),
+                       loc="upper left",
+                       # mode="expand",
+                       borderaxespad=0,
+                       ncol=len(engines),
+                       fancybox=True,
+                       )
+        else:
+            plt.legend(loc="best",
+                       ncol=len(engines),
+                       shadow=True, fancybox=True)
 
         plt.savefig(filename, format="pdf", bbox_inches='tight')
         plt.close()
@@ -196,7 +207,8 @@ class Plotting(object):
 
             plt.xticks(x_pos, db_sizes, fontsize=10)
 
-            plt.legend(loc="best", ncol=1, shadow=True, fancybox=True)
+            if i == 0:
+                plt.legend(loc="best", ncol=1, shadow=True, fancybox=True)
 
             if i % side == 0:
                 plt.ylabel(ylabel, fontsize=12)
@@ -255,8 +267,18 @@ class Plotting(object):
 
         plt.axhline(y=1)
 
-        plt.legend(ncol=7, shadow=True, fancybox=True,
-                   fontsize=9.5, loc="upper left")
+        if len(queries) > 4:
+            plt.legend(bbox_to_anchor=(0, -0.15),
+                       loc="upper left",
+                       # mode="expand",
+                       borderaxespad=0,
+                       ncol=4,
+                       fancybox=True,
+                       fontsize=9.5,
+                       )
+        else:
+            plt.legend(ncol=7, shadow=True, fancybox=True,
+                       fontsize=9.5, loc="upper left")
 
         plt.savefig(filename, format="pdf", bbox_inches='tight')
         plt.close()
