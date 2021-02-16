@@ -377,13 +377,15 @@ metadata of intensive use-cases\cite{IntelXPoint15}.
 \label{images}
 
 In order to evaluate VDMS and the baselines on our use-case queries,
-we implemented 5 queries that filter and retrieve a specific set of images.
+we implemented 6 queries that filter and retrieve a specific set of images.
 We chose these queries because they represent typical use-cases where a
 cohort of images is to be retrieved and processed from a large corpus of data.
-As we mentioned before, we took this approach due to the lack of standard
+As we mentioned before, we took this approach mainly because we wanted to
+replicate systems we have built internally for our use cases,
+and also because of the lack of standard
 benchmarks that are oriented towards visual data retrieval.
-We use the metadata associated with the images to filter said images.
 
+We use the metadata associated with the images to filter said images.
 We use the \textit{autotags} (as they contain information about the content
 of the image), and geo-location information (latitude/longitude)
 of the images for search and filtering.
@@ -395,6 +397,8 @@ about the content of the image through the use of ML,
 such as Convolutional Neural Networks~\cite{cnn}.
 For this, we resize the images to 224x224, which is the input layer size for
 popular variations of neural networks for object detection on images~\cite{resnet}.
+We used both ResNet and Yolov3 for object detection, both of which
+have the requirement of a downsized, lower resolution image as input.
 
 To evaluate the access to metadata and images,
 we use the following queries, modeled after our internal use cases:
@@ -420,8 +424,8 @@ For instance, we only retrieve images with an autotag \textit{alligator}
 and a probability higher than 92\%.
 These probabilities are both present in VDMS (in the form of a property
 of the \textit{connection} between the image and that \textit{autotag}),
-as well as in MySQL and PostgreSQL (in the form of a column in the \textit{autotags} table
-that links images with tags).
+as well as in MySQL and PostgreSQL (in the form of a column in the
+\textit{autotags} table that links images with tags).
 In the case of VDMS, the query involves a graph traversal query that starts
 from the \textit{autotag} node and ends in the images node,
 following \textit{connections} between the image and that \textit{autotag}).
@@ -429,12 +433,11 @@ In the case of the baseline implementations,
 the query involves JOIN operations between the 3 tables.
 The implementation of this evaluation, as well as all the queries, are available
 under the benchmarks branch of the VDMS project
-\footnote{https://github.com/IntelLabs/vdms/ under benchmark/benckmarks/visual\_storm/yfcc100m},
-and some examples of the queries can be found in the appendix of this
-paper.
+\footnote{https://github.com/luisremis/visual\_storm/tree/master/yfcc100m},
+and some examples of the queries can be found in the appendix of this paper.
 
 \begin{figure*}[ht]
-\includegraphics[width=\textwidth]{figures/plot_conc_1tag_loc20_resize_mosaic_results_throughput_db_size}
+\includegraphics[width=\textwidth]{figures/plot_conc_q_1tag_loc20_resize_mosaic_results_throughput_db_size}
 \caption{Concurrency Analysis on \textit{q3} (\textit{1tag\_resize\_geo}).
 Hardware concurrency (number of physical cores in each system)
 is shown with a blue vertical line (hw-concurrency = 56).
@@ -447,7 +450,7 @@ resized versions of the images, as the number of concurrent clients increases.}
 \end{figure*}
 
 \begin{figure*}[ht]
-\includegraphics[width=\textwidth]{figures/plot_conc_10M_mosaic_results_throughput}
+\includegraphics[width=\textwidth]{figures/plot_conc_dbsize_10M_mosaic_results_throughput}
 \caption{Concurrency Analysis for all the queries on the 10M database).
 Hardware concurrency (number of physical cores in each system)
 is shown with a blue vertical line (hw-concurrency = 56).
@@ -474,7 +477,7 @@ This way, we remove bottleneck introduced by network bandwidth that would
 otherwise over-complicate the understanding of the results.
 
 \begin{figure*}[ht]
-\includegraphics[width=\textwidth]{figures/plot_56_mosaic_query_times}
+\includegraphics[width=\textwidth]{figures/plot_th_56_mosaic_query_times}
 \caption{Performance Analysis using all queries from our use-case
 described in the Experimental Setup Section.
 We show queries in different figures for readability reasons.
@@ -491,7 +494,7 @@ and averaged out of 10 runs.}
 
 
 \begin{figure*}[ht]
-\includegraphics[width=\textwidth]{figures/plot_56_mosaic_results_throughput}
+\includegraphics[width=\textwidth]{figures/plot_th_56_mosaic_results_throughput}
 \caption{Throughput Analysis using all queries from our use-case
 described in the Experimental Setup Section.
 We show queries in different figures for readability reasons.
@@ -639,12 +642,22 @@ the full-red line (VDMS) and the dotted-red line (baseline).
 
 \begin{figure*}[ht!]
 \centering
-\includegraphics[width=\textwidth]{figures/plot_56_query_times_speedup}
+\includegraphics[width=\textwidth]{figures/plot_th_56_query_times_speedup_mysql}
 \caption{Summary of performance gains for all queries.
 We see up to 35x speedup (\textit{q2}), and an average of about 15x.
 More importantly, we see that the speedup grow as the database size increases,
-showing that VDMS scales better than the baseline.}
-\label{fig:summary_images}
+showing that VDMS scales better than the MySQL baseline.}
+\label{fig:summary_mysql}
+\end{figure*}
+
+\begin{figure*}[ht!]
+\centering
+\includegraphics[width=\textwidth]{figures/plot_th_56_query_times_speedup_postgresql}
+\caption{Summary of performance gains for all queries.
+We see up to 35x speedup (\textit{q2}), and an average of about 15x.
+More importantly, we see that the speedup grow as the database size increases,
+showing that VDMS scales better than the PostGreSQL baseline.}
+\label{fig:summary_postgresql}
 \end{figure*}
 
 \subsubsection{Metadata Retrieval}
@@ -723,7 +736,8 @@ at the type of queries that require visual data access and transformations.
 
 %% ========= Summary Analysis
 
-Finally, Figure~\ref{fig:summary_images} summarizes the results.
+Finally, Figure~\ref{fig:summary_mysql} and
+Figure~\ref{fig:summary_postgresql}summarizes the results.
 We see up to 35x speedup (for the case of \textit{q2}),
 and an average improvement in throughput of about 15x.
 More importantly, we see that the speedup increases as the database size grows,
