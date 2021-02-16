@@ -10,18 +10,18 @@ For these type of applications, the starting point is usually
 a large set of data that must be curated
 before proceeding with the data processing (such as neural network training).
 In order to evaluate the different aspects of the performance on the
-image search, we have built a baseline following the methodology
+image search, we have built a different baselines following the methodology
 used in the industry, and following what we have done in the past
 in order to solve the data search problem,
 which we describe in Section \ref{images}.
-We have also included performance evaluation on the Video and Feature Vectors
-functionality in the appendix for further reference, together with a
-description of the key aspects of those functionalities.
+% We have also included performance evaluation on the Video and Feature Vectors
+% functionality in the appendix for further reference, together with a
+% description of the key aspects of those functionalities.
 
 \begin{figure*}
 \centering
 \includegraphics[width=\textwidth]{figures/comparison_system}
-\caption{Comparison Systems: Logical view of the interaction between the client application with VDMS (left) and the baseline system (right).}
+\caption{Comparison Systems: Logical view of the interaction between the client application with VDMS (left) and the baseline systems (right). The baseline systems are either based on MySQL or PostgreSQL for operating and querying metadata.}
 \label{fig:systems}
 \end{figure*}
 
@@ -30,17 +30,17 @@ description of the key aspects of those functionalities.
 
 The Yahoo! Flickr Creative Commons 100m (YFCC100M) dataset is a large
 collection of 100 million public Flickr media objects created to provide free,
-shareable multimedia data for research. This dataset contains approximately
-99.2 million images and 0.8 million videos with metadata characterized by
-25 fields such as the unique identifier, userid,
+shareable multimedia data for research.
+This dataset contains approximately 99.2 million images and 0.8 million videos
+with metadata characterized by 25 fields such as the unique identifier, userid,
 date the media was taken/uploaded, location in longitude/latitude coordinates,
 device type the media was captured, URL to download the media object,
 and the Creative Commons license type information.
 The YFCC100M dataset also contains \textit{autotags}
 provided as a set of comma-separated concepts such as people, scenery, objects,
 and animals from 1,570 trained machine learning classifiers ~\cite{Thomee_2016}.
-Together with each \textit{autotags}, there is a
-probability associated with each tag to indicate certainty of the classification.
+Together with each \textit{autotags}, there is a probability associated with
+each tag to indicate certainty of the classification.
 This is, an image can have the \textit{autotags} "people", "person", "party",
 "outdoor", and each \textit{autotag} assigned will be accompanied by a
 probability of that \textit{autotags} being present in that image/frame.
@@ -54,67 +54,69 @@ with.
 \subsection{Experimental Setup}
 \label{setup}
 
-Given that there are no other open-source systems
-that provides similar functionality and interfaces as VDMS,
-we have implemented an equivalent visual data management system as a baseline,
-comprised of a combination of widely available, off-the-shelf components:
-MySQL Server 5.7 (for storing metadata),
+Given that there are no other open-source systems that provides similar
+functionality and interfaces as VDMS, we have implemented two equivalent
+visual data management system as baselines, comprised of a combination of
+widely available, off-the-shelf components.
+The first baseline uses MySQL Server 5.7 (for storing metadata),
 Apache Web Server 2.4.18 (as interface for image access), and
 OpenCV 3.3 (to provide pre-processing operations on images).
-We decided to use a relational database instead of a non-relational
-database because~\cite{Jatana2012, li_2019}:
+The other baseline system replaces the MySQL Server 5.7 with the
+most advanced open source relational database, PostgreSQL 9.5 \cite{postgresql}.
+We decided to use relational databases in the baseline systems instead of
+non-relational databases because~\cite{Jatana2012, li_2019}:
+
 \begin{itemize}
     \item Relational databases support atomicity, consistency, isolation,
     and durability (ACID) while non-relational may compromise some ACID properties.
     \item The YFCC100m data is clearly structured.
     \item We need to efficiently collate and return metadata records.
 \end{itemize}
-The baseline implementation only partially replicates the functionalities
-that VDMS offers when it comes to image and metadata handling, built for the
-purpose of an ad-hoc image search implementation.
-This implementation is based upon internal tools used for
-ML-based pipelines for media.
+
+The baseline implementations only partially replicate the functionalities
+that VDMS offers when it comes to image and metadata handling, and it was
+built for the purpose of an ad-hoc image search implementation.
+The baseline implementations are based upon internal tools used for ML-based
+pipelines for media, is the common practice in the industry \cite{haystack, tao}.
 We have implemented a set of client-side applications that take care
 of retrieving the components from the different systems, and applies
 pre-processing operations when needed.
-For visual data workloads, building an approach like the one
-implemented as a baseline for this work
-is the common practice in the industry \cite{haystack, tao}.
 
-For all our experiments, we use two servers, one hosting a VDMS server and
-another hosting the baseline implementation.
+For all our experiments, we use two servers with Ubuntu 20.04,
+one hosting a VDMS server and another hosting the baseline implementations.
 Both servers have a dual-socket Intel\textsuperscript{\textregistered}
 Xeon\textsuperscript{\textregistered} Platinum 8180 CPU @ 2.50GHz (Skylake),
 each CPU with 28 physical cores with hyper-threading enabled,
 for a total of 112 logical cores per server.
-The server hosting MySQL has 256GB of DDR4 DRAM, while the server hosting VDMS
-has 64GB of DDR4 DRAM.
+The server hosting MySQL and PostgreSQL has 256GB of DDR4 DRAM,
+while the server hosting VDMS has 194GB of DDR4 DRAM.
 We decided to run VDMS server in the machine with less DRAM to make
-sure MySQL had no disadvantage, and because previous evaluation
+sure MySQL and PostgreSQL had no disadvantage, and because previous evaluation
 indicated smaller footprint in the case of VDMS when
 compared to similar baselines based on MySQL.
-Other than the difference in DRAM space, machines are identical.
-Both servers run Ubuntu 16.04.
+To build both MySQL and PostgreSQL on the same machine,
+we stored each relational database on separate SSD drives.
+Other than the difference in DRAM space and storage needed for two baselines,
+the machines are identical.
 The client application running the queries and measuring round-trip time
 is connected to the server through a 1GB wired link through
 a 10GB back-plane switch, same as both servers.
+The client application was implemented using Python 3 for both VDMS and the baselines.
 Figure~\ref{fig:systems} shows a logical view of the difference between the
 interaction of the client application (retrieves metadata and
-images) with VDMS (left) and the baseline (right).
-The client application was implemented using Python 3 for both VDMS and
-the baseline.
+images) with VDMS (left) and the MySQL/PostgreSQL baselines (right).
 
 It is worth noting that the images are stored in a shared repository
 (ext4 filesystem on a RAID 6 configuration of 16TB) that both
 Apache WebServer and VDMS have direct access.
 In the case of Videos, only the first frame is used for the image search.
-More information and evaluation on video-specific functionalities can be found
-in the appendix of this work.
-In the case of the baseline, metadata is
-stored in MySQL using an attached SSD disk.
+% More information and evaluation on video-specific functionalities can be found
+% in the appendix of this work.
+In the case of the baselines, metadata is
+stored in MySQL and PostgreSQL using an attached SSD disk.
 Even if VDMS has native support for Optane Persistent Memory,
 we do not use it in this experiment because of fairness of
-comparison with respect to MySQL, which was not designed for
+comparison with respect to MySQL and PostgreSQL, which were not designed for
 Persistent Memory type of storage.
 The benefits of Persistent Memory for metadata and a full evaluation of
 the PMGD subsystem is material for another paper,
@@ -125,18 +127,18 @@ Even if PMGD, the graph database used by VDMS, is designed for persistent memory
 it can deliver good performance when using SSDs directly, while still
 providing ACID-compliant transactions.
 
-For the metadata, we built VDMS and MySQL databases
+For the metadata, we built VDMS, MySQL, and PostgreSQL databases
 using the YFCC100M dataset with incremental database sizes.
 For simplicity, we named the database based on the approximate number of images
 it contains, as follows: 1M, 5M, 10M, 50M, 100M.
-The VDMS and MySQL databases have comparable number of elements.
+The databases have comparable number of elements.
 The exact number of images/elements in each database are shown in
 Table~\ref{table:vdmsnodes} and ~\ref{table:mysqltables}.
-The differences can be attributed to failures in data
+The differences can be attributed to minor failures in data
 preparation/loading because of incomplete/inconsistent formatting,
 which is common in large datasets \cite{failures}.
-In our set up, that difference is very small:
-less than 0.1\% in terms of number of elements (images and/or metadata information).
+In our set up, that difference is very small: less than 0.253\% in terms of
+number of elements (images and/or metadata information).
 
 \subsubsection{Data Representation}
 
@@ -210,7 +212,7 @@ DB Name & \# Images & \# Connections & \# TagList\\
 \label{table:vdmsnodes}
 \end{table}
 
-\textbf{MySQL/Baseline:}
+\textbf{MySQL/Baseline 1:}
 Each MySQL database is created in a similar manner as VDMS
 but the data is represented as three tables, following the relational model:
 1) \textit{images} table: contains one row per image,
@@ -277,8 +279,34 @@ is basic operation that would be present in any real-world deployment,
 and measuring performance without them would lead to useless analysis in our
 real-world applications and use cases.
 
+\textbf{PostgreSQL/Baseline 2:}
+Each PostgreSQL database is created in the exact same manner as MySQL
+where data is represented as three tables:
+\textit{images}, \textit{taglist}, and \textit{taglist}.
+PostgreSQL works well out-of-box and optimizations were not necessary,
+as in mySQL, to load or execute queries.
+When executing queries for larger databases,
+it is pertinent to have enough disk space for both
+the database and tablespace.
+The tablespace is associated with a database and stores the temporary files
+created within the database object ~\cite{postgresql}.
+When processing the larger databases, additional
+storage may be needed for the tablespace or a diskfull error may occur.
+To avoid this, we allocated a separate SSD disk specifically
+for the tablespace of all databases.
+
+By default, PostgreSQL can manage concurrent access to data well using
+Multiversion Concurrency Control (MVCC) and a Serializable Snapshot Isolation
+(SSI) level of transaction isolation.
+MVCC provides better performance by using SSI to guarantee querying data never
+blocks writing data, and vice versa ~\cite{postgresql}.
+The PostgreSQL configuration file initially limits the maximum
+number of concurrent connections to the database server to 100.
+We increased this limit to 200 to complete the concurrency analysis
+in \label{concurrency analysis}.
+
 \begin{table}[ht]
-\caption{MySQL Database - Number of Rows in each Table}
+\caption{MySQL and PostgreSQL Databases - Number of Rows in each Table}
 \centering
 \begin{tabular}{c c c c}
 \hline\hline
@@ -300,8 +328,8 @@ DB Name & images & autotags & taglist\\
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=\columnwidth]{figures/db_time_size}
-\caption{Time to build and size (in GB) of MySQL and VDMS databases.}
+\includegraphics[width=\columnwidth]{figures/all_build_times_plot}
+\caption{Time to build and size (in GB) of MySQL, PostgreSQL, and VDMS databases.}
 \label{fig:db_time_size}
 \end{figure}
 
@@ -309,9 +337,10 @@ DB Name & images & autotags & taglist\\
 
 One of the first things we noticed is the difference in the time needed to
 build each database, where VDMS outperforms MySQL by a large margin.
-This analysis includes only the metadata, as the images are stored in a shared filesystem.
-Figure~\ref{fig:db_time_size} illustrates how VDMS can build databases
-faster than MySQL, and how the speedup is sustained as the database size grows.
+This analysis includes only the metadata, as the images are stored
+in a shared filesystem. Figure~\ref{fig:db_time_size} illustrates how
+VDMS can build databases faster than MySQL, and how the speedup
+is sustained as the database size grows.
 Key difference in the build times are attributed to the low-level
 implementation of how MySQL reads and stores data from the files, the
 optimizations (increased InnoDB pool size, etc.) needed
@@ -320,9 +349,11 @@ On average, it took MySQL around 3.72x longer to build each database than VDMS.
 
 \subsubsection{Database Storage Footprint}
 
-Another important aspect to note is that
-VDMS requires more storage for metadata, shown in Figure~\ref{fig:db_time_size}.
-This is space used to store information about each node/connection.
+Another important aspect to note is the storage footprint of the databases.
+PostgreSQL and VDMS require the same amount of storage for metadata which
+is more than required by mySQL, shown in Figure~\ref{fig:db_time_size}.
+In the case of VDMS, this is space used to store information about
+each node/connection.
 The Graph Database internal to VDMS (called PMGD) was designed for performance,
 especially in environments where persistent memory is present.
 This design decision comes as a trade-off for storage footprint, which is
@@ -330,8 +361,8 @@ noticeable in our results.
 VDMS required 30-41\% more storage than MySQL for storing the same amount
 of metadata.
 This may become a factor if storage is a limitation, but it should also be noted
-that even if we have a 41\% increase in metadata size,
-metadata accounts for less than 2\% of the overall database size.
+that metadata accounts for less than 2\% of the overall database size
+even if we have a 41\% increase in metadata size.
 For example, the largest database (both metadata and images) we built
 (100M) has around 230GB of metadata and 12TB of images.
 In systems where persistent memory is a scarce resource,
@@ -345,14 +376,16 @@ metadata of intensive use-cases\cite{IntelXPoint15}.
 \subsection{Images Search}
 \label{images}
 
-In order to evaluate VDMS and the baseline on our use-case queries,
-we implemented 5 queries that filter and retrieve a specific set of images.
+In order to evaluate VDMS and the baselines on our use-case queries,
+we implemented 6 queries that filter and retrieve a specific set of images.
 We chose these queries because they represent typical use-cases where a
 cohort of images is to be retrieved and processed from a large corpus of data.
-As we mentioned before, we took this approach due to the lack of standard
+As we mentioned before, we took this approach mainly because we wanted to
+replicate systems we have built internally for our use cases,
+and also because of the lack of standard
 benchmarks that are oriented towards visual data retrieval.
-We use the metadata associated with the images to filter said images.
 
+We use the metadata associated with the images to filter said images.
 We use the \textit{autotags} (as they contain information about the content
 of the image), and geo-location information (latitude/longitude)
 of the images for search and filtering.
@@ -364,15 +397,25 @@ about the content of the image through the use of ML,
 such as Convolutional Neural Networks~\cite{cnn}.
 For this, we resize the images to 224x224, which is the input layer size for
 popular variations of neural networks for object detection on images~\cite{resnet}.
+We used both ResNet and Yolov3 for object detection, both of which
+have the requirement of a downsized, lower resolution image as input.
 
 To evaluate the access to metadata and images,
 we use the following queries, modeled after our internal use cases:
+
 \begin{itemize}
-\item \textit{q1} - {\bf {\em 1tag}}: Find metadata/images with one specific autotag (i.e. alligator, lake, etc).
-\item \textit{q2} - {\bf {\em 1tag\_resize}}: Find metadata/images with one specific autotag and resize to 224x224.
-\item \textit{q3} - {\bf {\em 1tag\_resize\_geo}}: Find metadata/images with one specific autotag, resize to 224x224, and in a particular geo-location (with a 20 degrees radius in latitude and longitude).
-\item \textit{q4} - {\bf {\em 2tag\_resize\_geo\_and}}: Find metadata/images with two specific autotags (i.e. alligator AND lake), resize to 224x224, and in a particular geo-location (with a 20 degrees radius in latitude and longitude).
-\item \textit{q5} - {\bf {\em 2tag\_resize\_geo\_or}}: Find metadata/images with either of two specific autotags (i.e. alligator OR lake), resize to 224x224, and in a particular geo-location (with a 20 degrees radius in latitude and longitude).
+\item \textit{q1} - {\bf {\em 1tag\_resize}}: Retrieve images with one specific autotag and resize to 224x224.
+
+\item \textit{q2} - {\bf {\em 1tag\_geo\_resize}}: Retrieve images with one specific autotag, in a particular geo-location, and resize to 224x224,.
+
+\item \textit{q3} - {\bf {\em 2tag\_and\_resize}}: Retrieve images with two specific autotags (i.e. alligator AND lake), and resize to 224x224.
+
+\item \textit{q4} - {\bf {\em 2tag\_or\_resize}}: Retrieve images with either of two specific autotags (i.e. alligator OR lake), and resize to 224x224.
+
+\item \textit{q5} - {\bf {\em 2tag\_resize\_geo\_and}}: Retrieve images with two specific autotags (i.e. alligator AND lake), in a particular geo-location, and resize to 224x224.
+
+\item \textit{q6} - {\bf {\em 2tag\_resize\_geo\_or}}: Retrieve images with either of two specific autotags (i.e. alligator OR lake), in a particular geo-location, and resize to 224x224.
+
 \end{itemize}
 
 It is important to note that when querying for images with certain
@@ -381,21 +424,20 @@ For instance, we only retrieve images with an autotag \textit{alligator}
 and a probability higher than 92\%.
 These probabilities are both present in VDMS (in the form of a property
 of the \textit{connection} between the image and that \textit{autotag}),
-as well as in MySQL (in the form of a column in the \textit{autotags} table
-that links images with tags).
+as well as in MySQL and PostgreSQL (in the form of a column in the
+\textit{autotags} table that links images with tags).
 In the case of VDMS, the query involves a graph traversal query that starts
 from the \textit{autotag} node and ends in the images node,
 following \textit{connections} between the image and that \textit{autotag}).
-In the case of the baseline implementation,
+In the case of the baseline implementations,
 the query involves JOIN operations between the 3 tables.
 The implementation of this evaluation, as well as all the queries, are available
 under the benchmarks branch of the VDMS project
-\footnote{https://github.com/IntelLabs/vdms/ under benchmark/benckmarks/visual\_storm/yfcc100m},
-and some examples of the queries can be found in the appendix of this
-paper.
+\footnote{https://github.com/luisremis/visual\_storm/tree/master/yfcc100m},
+and some examples of the queries can be found in the appendix of this paper.
 
 \begin{figure*}[ht]
-\includegraphics[width=\textwidth]{figures/plot_conc_1tag_loc20_resize_mosaic_results_throughput_db_size}
+\includegraphics[width=\textwidth]{figures/plot_conc_q_1tag_loc20_resize_mosaic_results_throughput_db_size}
 \caption{Concurrency Analysis on \textit{q3} (\textit{1tag\_resize\_geo}).
 Hardware concurrency (number of physical cores in each system)
 is shown with a blue vertical line (hw-concurrency = 56).
@@ -408,7 +450,7 @@ resized versions of the images, as the number of concurrent clients increases.}
 \end{figure*}
 
 \begin{figure*}[ht]
-\includegraphics[width=\textwidth]{figures/plot_conc_10M_mosaic_results_throughput}
+\includegraphics[width=\textwidth]{figures/plot_conc_dbsize_10M_mosaic_results_throughput}
 \caption{Concurrency Analysis for all the queries on the 10M database).
 Hardware concurrency (number of physical cores in each system)
 is shown with a blue vertical line (hw-concurrency = 56).
@@ -430,12 +472,12 @@ databases using the probability of the \textit{autotags}
 (higher probabilities returns less images), so that the queries in
 this experiment return a similar number of images for all database sizes.
 In other words, as the size of the database increase, we increase the probability
-threshold for the queries. We do this for both VDMS and the baseline, of course.
+threshold for the queries. We do this for both VDMS and the baselines, of course.
 This way, we remove bottleneck introduced by network bandwidth that would
 otherwise over-complicate the understanding of the results.
 
 \begin{figure*}[ht]
-\includegraphics[width=\textwidth]{figures/plot_56_mosaic_query_times}
+\includegraphics[width=\textwidth]{figures/plot_th_56_mosaic_query_times}
 \caption{Performance Analysis using all queries from our use-case
 described in the Experimental Setup Section.
 We show queries in different figures for readability reasons.
@@ -443,7 +485,7 @@ Top figures show the throughput of the queries for
 just retrieving metadata associated with the images.
 Bottom figures show the throughput when retrieving both metadata and images,
 plus operations applied to images when applicable (queries 2, 3, 4 and 5).
-The experiments show the performance of both systems (VDMS and baseline) as the
+The experiments show the performance of all systems (VDMS and two baselines) as the
 database size increases.
 These queries were run using 56 simultaneous clients (nthr = 56),
 and averaged out of 10 runs.}
@@ -452,7 +494,7 @@ and averaged out of 10 runs.}
 
 
 \begin{figure*}[ht]
-\includegraphics[width=\textwidth]{figures/plot_56_mosaic_results_throughput}
+\includegraphics[width=\textwidth]{figures/plot_th_56_mosaic_results_throughput}
 \caption{Throughput Analysis using all queries from our use-case
 described in the Experimental Setup Section.
 We show queries in different figures for readability reasons.
@@ -460,7 +502,7 @@ Top figures show the throughput of the queries for
 just retrieving metadata associated with the images.
 Bottom figures show the throughput when retrieving both metadata and images,
 plus operations applied to images when applicable (queries 2, 3, 4 and 5).
-The experiments show the performance of both systems (VDMS and baseline) as the
+The experiments show the performance of all systems (VDMS and the two baselines) as the
 database size increases.
 These queries were run using 56 simultaneous clients (nthr = 56),
 and averaged out of 10 runs.}
@@ -482,7 +524,7 @@ rather than latency.
 
 %% ========= Concurrency Comparison Analysis
 
-\subsubsection{Concurrency Analysis}
+\subsubsection{Concurrency Analysis} \label{concurrency analysis}
 
 Figure~\ref{fig:concurrency_comparison} illustrates a concurrency analysis for
 \textit{q2}(\textit{1tag\_resize}), described above,
@@ -600,12 +642,22 @@ the full-red line (VDMS) and the dotted-red line (baseline).
 
 \begin{figure*}[ht!]
 \centering
-\includegraphics[width=\textwidth]{figures/plot_56_query_times_speedup}
+\includegraphics[width=\textwidth]{figures/plot_th_56_query_times_speedup_mysql}
 \caption{Summary of performance gains for all queries.
 We see up to 35x speedup (\textit{q2}), and an average of about 15x.
 More importantly, we see that the speedup grow as the database size increases,
-showing that VDMS scales better than the baseline.}
-\label{fig:summary_images}
+showing that VDMS scales better than the MySQL baseline.}
+\label{fig:summary_mysql}
+\end{figure*}
+
+\begin{figure*}[ht!]
+\centering
+\includegraphics[width=\textwidth]{figures/plot_th_56_query_times_speedup_postgresql}
+\caption{Summary of performance gains for all queries.
+We see up to 35x speedup (\textit{q2}), and an average of about 15x.
+More importantly, we see that the speedup grow as the database size increases,
+showing that VDMS scales better than the PostGreSQL baseline.}
+\label{fig:summary_postgresql}
 \end{figure*}
 
 \subsubsection{Metadata Retrieval}
@@ -684,7 +736,8 @@ at the type of queries that require visual data access and transformations.
 
 %% ========= Summary Analysis
 
-Finally, Figure~\ref{fig:summary_images} summarizes the results.
+Finally, Figure~\ref{fig:summary_mysql} and
+Figure~\ref{fig:summary_postgresql}summarizes the results.
 We see up to 35x speedup (for the case of \textit{q2}),
 and an average improvement in throughput of about 15x.
 More importantly, we see that the speedup increases as the database size grows,
