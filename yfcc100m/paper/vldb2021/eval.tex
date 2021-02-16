@@ -10,18 +10,18 @@ For these type of applications, the starting point is usually
 a large set of data that must be curated
 before proceeding with the data processing (such as neural network training).
 In order to evaluate the different aspects of the performance on the
-image search, we have built a baseline following the methodology
+image search, we have built a different baselines following the methodology
 used in the industry, and following what we have done in the past
 in order to solve the data search problem,
 which we describe in Section \ref{images}.
-We have also included performance evaluation on the Video and Feature Vectors
-functionality in the appendix for further reference, together with a
-description of the key aspects of those functionalities.
+% We have also included performance evaluation on the Video and Feature Vectors
+% functionality in the appendix for further reference, together with a
+% description of the key aspects of those functionalities.
 
 \begin{figure*}
 \centering
 \includegraphics[width=\textwidth]{figures/comparison_system}
-\caption{Comparison Systems: Logical view of the interaction between the client application with VDMS (left) and the baseline system (right).}
+\caption{Comparison Systems: Logical view of the interaction between the client application with VDMS (left) and the baseline systems (right). The baseline systems are either based on MySQL or PostgreSQL for operating and querying metadata.}
 \label{fig:systems}
 \end{figure*}
 
@@ -30,17 +30,17 @@ description of the key aspects of those functionalities.
 
 The Yahoo! Flickr Creative Commons 100m (YFCC100M) dataset is a large
 collection of 100 million public Flickr media objects created to provide free,
-shareable multimedia data for research. This dataset contains approximately
-99.2 million images and 0.8 million videos with metadata characterized by
-25 fields such as the unique identifier, userid,
+shareable multimedia data for research.
+This dataset contains approximately 99.2 million images and 0.8 million videos
+with metadata characterized by 25 fields such as the unique identifier, userid,
 date the media was taken/uploaded, location in longitude/latitude coordinates,
 device type the media was captured, URL to download the media object,
 and the Creative Commons license type information.
 The YFCC100M dataset also contains \textit{autotags}
 provided as a set of comma-separated concepts such as people, scenery, objects,
 and animals from 1,570 trained machine learning classifiers ~\cite{Thomee_2016}.
-Together with each \textit{autotags}, there is a
-probability associated with each tag to indicate certainty of the classification.
+Together with each \textit{autotags}, there is a probability associated with
+each tag to indicate certainty of the classification.
 This is, an image can have the \textit{autotags} "people", "person", "party",
 "outdoor", and each \textit{autotag} assigned will be accompanied by a
 probability of that \textit{autotags} being present in that image/frame.
@@ -54,65 +54,64 @@ with.
 \subsection{Experimental Setup}
 \label{setup}
 
-Given that there are no other open-source systems
-that provides similar functionality and interfaces as VDMS,
-we have implemented two equivalent visual data management system as baselines,
-comprised of a combination of widely available, off-the-shelf components.
-The first baseline uses
-MySQL Server 5.7 (for storing metadata),
+Given that there are no other open-source systems that provides similar
+functionality and interfaces as VDMS, we have implemented two equivalent
+visual data management system as baselines, comprised of a combination of
+widely available, off-the-shelf components.
+The first baseline uses MySQL Server 5.7 (for storing metadata),
 Apache Web Server 2.4.18 (as interface for image access), and
 OpenCV 3.3 (to provide pre-processing operations on images).
 The other baseline system replaces the MySQL Server 5.7 with the
 most advanced open source relational database, PostgreSQL 9.5 \cite{postgresql}.
-We decided to use relational databases in the baseline systems instead of non-relational
-databases because~\cite{Jatana2012, li_2019}:
+We decided to use relational databases in the baseline systems instead of
+non-relational databases because~\cite{Jatana2012, li_2019}:
+
 \begin{itemize}
     \item Relational databases support atomicity, consistency, isolation,
     and durability (ACID) while non-relational may compromise some ACID properties.
     \item The YFCC100m data is clearly structured.
     \item We need to efficiently collate and return metadata records.
 \end{itemize}
+
 The baseline implementations only partially replicate the functionalities
-that VDMS offers when it comes to image and metadata handling, built for the
-purpose of an ad-hoc image search implementation.
-This implementation is based upon internal tools used for
-ML-based pipelines for media.
+that VDMS offers when it comes to image and metadata handling, and it was
+built for the purpose of an ad-hoc image search implementation.
+The baseline implementations are based upon internal tools used for ML-based
+pipelines for media, is the common practice in the industry \cite{haystack, tao}.
 We have implemented a set of client-side applications that take care
 of retrieving the components from the different systems, and applies
 pre-processing operations when needed.
-For visual data workloads, building a system like the baselines for this work
-is the common practice in the industry \cite{haystack, tao}.
 
-For all our experiments, we use two servers with Ubuntu 16.04, one hosting a VDMS server and
-another hosting the baseline implementations.
+For all our experiments, we use two servers with Ubuntu 20.04,
+one hosting a VDMS server and another hosting the baseline implementations.
 Both servers have a dual-socket Intel\textsuperscript{\textregistered}
 Xeon\textsuperscript{\textregistered} Platinum 8180 CPU @ 2.50GHz (Skylake),
 each CPU with 28 physical cores with hyper-threading enabled,
 for a total of 112 logical cores per server.
-The server hosting MySQL and PostgreSQL has 256GB of DDR4 DRAM, while the server hosting VDMS
-has 64GB of DDR4 DRAM.
+The server hosting MySQL and PostgreSQL has 256GB of DDR4 DRAM,
+while the server hosting VDMS has 194GB of DDR4 DRAM.
 We decided to run VDMS server in the machine with less DRAM to make
 sure MySQL and PostgreSQL had no disadvantage, and because previous evaluation
 indicated smaller footprint in the case of VDMS when
 compared to similar baselines based on MySQL.
 To build both MySQL and PostgreSQL on the same machine,
 we stored each relational database on separate SSD drives.
-Other than the difference in DRAM space and storage needed for two baselines, the machines are identical.
+Other than the difference in DRAM space and storage needed for two baselines,
+the machines are identical.
 The client application running the queries and measuring round-trip time
 is connected to the server through a 1GB wired link through
 a 10GB back-plane switch, same as both servers.
 The client application was implemented using Python 3 for both VDMS and the baselines.
 Figure~\ref{fig:systems} shows a logical view of the difference between the
 interaction of the client application (retrieves metadata and
-images) with VDMS (left) and the MySQL baseline (right).
-
+images) with VDMS (left) and the MySQL/PostgreSQL baselines (right).
 
 It is worth noting that the images are stored in a shared repository
 (ext4 filesystem on a RAID 6 configuration of 16TB) that both
 Apache WebServer and VDMS have direct access.
 In the case of Videos, only the first frame is used for the image search.
-More information and evaluation on video-specific functionalities can be found
-in the appendix of this work.
+% More information and evaluation on video-specific functionalities can be found
+% in the appendix of this work.
 In the case of the baselines, metadata is
 stored in MySQL and PostgreSQL using an attached SSD disk.
 Even if VDMS has native support for Optane Persistent Memory,
@@ -135,11 +134,11 @@ it contains, as follows: 1M, 5M, 10M, 50M, 100M.
 The databases have comparable number of elements.
 The exact number of images/elements in each database are shown in
 Table~\ref{table:vdmsnodes} and ~\ref{table:mysqltables}.
-The differences can be attributed to failures in data
+The differences can be attributed to minor failures in data
 preparation/loading because of incomplete/inconsistent formatting,
 which is common in large datasets \cite{failures}.
-In our set up, that difference is very small:
-less than 0.253\% in terms of number of elements (images and/or metadata information).
+In our set up, that difference is very small: less than 0.253\% in terms of
+number of elements (images and/or metadata information).
 
 \subsubsection{Data Representation}
 
@@ -292,16 +291,19 @@ the database and tablespace.
 The tablespace is associated with a database and stores the temporary files
 created within the database object ~\cite{postgresql}.
 When processing the larger databases, additional
-storage may be needed for the tablespace or a diskfull error may occur. To avoid this,
-we allocated a separate SSD disk specifically for the tablespace of all databases.
+storage may be needed for the tablespace or a diskfull error may occur.
+To avoid this, we allocated a separate SSD disk specifically
+for the tablespace of all databases.
 
-By default, PostgreSQL can manage concurrent access to data well using Multiversion
-Concurrency Control (MVCC) and a Serializable Snapshot Isolation (SSI) level of transcation isolation.
+By default, PostgreSQL can manage concurrent access to data well using
+Multiversion Concurrency Control (MVCC) and a Serializable Snapshot Isolation
+(SSI) level of transaction isolation.
 MVCC provides better performance by using SSI to guarantee querying data never
 blocks writing data, and vice versa ~\cite{postgresql}.
 The PostgreSQL configuration file initially limits the maximum
 number of concurrent connections to the database server to 100.
-We increased this limit to 200 to complete the concurency analysis in \label{concurrency analysis}.
+We increased this limit to 200 to complete the concurrency analysis
+in \label{concurrency analysis}.
 
 \begin{table}[ht]
 \caption{MySQL and PostgreSQL Databases - Number of Rows in each Table}
@@ -335,9 +337,10 @@ DB Name & images & autotags & taglist\\
 
 One of the first things we noticed is the difference in the time needed to
 build each database, where VDMS outperforms MySQL by a large margin.
-This analysis includes only the metadata, as the images are stored in a shared filesystem.
-Figure~\ref{fig:db_time_size} illustrates how VDMS can build databases
-faster than MySQL, and how the speedup is sustained as the database size grows.
+This analysis includes only the metadata, as the images are stored
+in a shared filesystem. Figure~\ref{fig:db_time_size} illustrates how
+VDMS can build databases faster than MySQL, and how the speedup
+is sustained as the database size grows.
 Key difference in the build times are attributed to the low-level
 implementation of how MySQL reads and stores data from the files, the
 optimizations (increased InnoDB pool size, etc.) needed
@@ -348,8 +351,9 @@ On average, it took MySQL around 3.72x longer to build each database than VDMS.
 
 Another important aspect to note is the storage footprint of the databases.
 PostgreSQL and VDMS require the same amount of storage for metadata which
-is more than required by mySQL, shown in Figure~\ref{fig:db_time_size}. In the case of VDMS,
-this is space used to store information about each node/connection.
+is more than required by mySQL, shown in Figure~\ref{fig:db_time_size}.
+In the case of VDMS, this is space used to store information about
+each node/connection.
 The Graph Database internal to VDMS (called PMGD) was designed for performance,
 especially in environments where persistent memory is present.
 This design decision comes as a trade-off for storage footprint, which is
