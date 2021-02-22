@@ -297,7 +297,8 @@ in Section \ref{concurrency_analysis}.
 
 In the case of VDMS, we did not attempt to tune any
 parameter to avoid unfairness in the comparison against the baselines.
-Unlike the baselines, VDMS can handle the entire YFCC100m dataset using the default parameters provided by the implementation.
+Unlike the baselines, VDMS can handle the entire YFCC100m dataset
+using the default parameters provided by the implementation.
 For all systems, we created indexes over the
 properties we used for search, such as name of
 \textit{autotag}, and geo-location values.
@@ -348,7 +349,8 @@ implementation of how MySQL reads and stores data from the files, the
 optimizations (increased InnoDB pool size, etc.) needed
 to handle large datasets such as YFCC100M, and the efficiency of PMGD.
 PostgreSQL Python API can efficiently copy data from files to the database
-which provides an advantage over VDMS which must insert multiple nodes/connections per image.
+which provides an advantage over VDMS which must insert
+multiple nodes/connections per image.
 On average, it took MySQL around $\sim$4x longer to build each database than VDMS,
 and PostgreSQL was around $\sim$21x faster than VDMS.
 
@@ -541,28 +543,28 @@ is shown with a blue vertical line (hw-concurrency = 56).}
 \label{fig:concurrency_comparison_10M}
 \end{figure}
 
-We continue by looking at Figure~\ref{fig:concurrency_comparison_10M} 
-which shows the images per second delivered by each system 
-for all queries using the 10M database, as the number of concurrent 
-clients grows (x-axis). This figure takes a closer look at the 
-concurrency for each of the six queries. 
+We continue by looking at Figure~\ref{fig:concurrency_comparison_10M}
+which shows the images per second delivered by each system
+for all queries using the 10M database, as the number of concurrent
+clients grows (x-axis). This figure takes a closer look at the
+concurrency for each of the six queries.
 It is obvious that VDMS consistently outperforms each of the baseline
-systems for queries \textit{q1}, \textit{q2}, \textit{q4}, 
-and \textit{q6} as concurrency grows. This figure 
-shows a similar trend as Figure~\ref{fig:concurrency_comparison_q2} 
+systems for queries \textit{q1}, \textit{q2}, \textit{q4},
+and \textit{q6} as concurrency grows. This figure
+shows a similar trend as Figure~\ref{fig:concurrency_comparison_q2}
 when it comes to concurrency.  The
 VDMS throughput continues to increase up to 56 concurrent clients, which is
 the hardware concurrency of the system, for all queries except \textit{q3}.
-In this query, the throughput seems to decrease after 32 clients 
+In this query, the throughput seems to decrease after 32 clients
 and both baselines outperform VDMS after 8 concurrent clients.
 Prior to 8 clients, VDMS has a slight advantage over PostgreSQL which has
 a major performance improvement at 16 concurrent clients. On the other hand,
 MySQL maintains its improvement in throughput over PostgreSQL and VDMS over all
 concurrent clients. In the case of \textit{q5}, the throughput of the baselines
-are less aggregated than those of VDMS up to 16 concurrent clients. When it comes 
-to low concurrency, the baselines do as good and even better than VDMS with 2 or 
+are less aggregated than those of VDMS up to 16 concurrent clients. When it comes
+to low concurrency, the baselines do as good and even better than VDMS with 2 or
 4 concurrent clients.  At 16 concurrent client, the performance of the MySQL baseline
-begin to stabilizes while the throughput of PostgreSQL begins to degrade. However, as 
+begin to stabilizes while the throughput of PostgreSQL begins to degrade. However, as
 concurrency increases beyond 16 concurrent clients, the difference
 in throughput becomes clear, with VDMS reaching its peak performance at
 112 concurrent clients.
@@ -596,23 +598,26 @@ all systems (VDMS and two baselines) as the database size increases.}
 \label{fig:concurrency_comparison_q4}
 \end{figure}
 
-In the case of \textit{q4} and \textit{q6}, we see the performance for MySQL 
+In the case of \textit{q4} and \textit{q6}, we see the performance for MySQL
 degrades up to 64 concurrent clients, then there's an improvement with 112 concurrent clients.
 To further evaluate the concurrency of these queries with an OR operation, we continue by
 looking at Figure~\ref{fig:concurrency_comparison_q4}. This figure illustrates a concurrency analysis for
-\textit{q4} (\textit{2tag\_resize\_or}) which shows the images per second 
-delivered by each system as the database size grows (x-axis). We show different number 
+\textit{q4} (\textit{2tag\_resize\_or}) which shows the images per second
+delivered by each system as the database size grows (x-axis). We show different number
 of concurrent clients in different figures for readability reasons.  For this query,
 VDMS delivers higher throughput for databases 1M through 10M for all concurrent clients.
 As the number of clients and the size of database grows, the performance for this query
 drops and the performance of PostgreSQL becomes more comparable to VDMS. Lets look at the
-case with 32 concurrent clients. In this case, the throughput of VDMS drops drastically with
-the 100M database and PostgreSQL outperforms by a small margin. As the clients increase, we 
-see this trade-off occurs with the 50M database instead of 100M while in the 100M database, 
-VDMS outperforms both baselines. In this case, the throughput of PostgreSQL drastically degrades
+case with 32 concurrent clients.
+In this case, the throughput of VDMS drops drastically with
+the 100M database and PostgreSQL outperforms by a small margin.
+As the clients increase, we see this trade-off occurs with the 50M database
+instead of 100M while in the 100M database, VDMS outperforms both baselines.
+In this case, the throughput of PostgreSQL drastically degrades
 for the 100M database and the performance of the baseline systems are more comparable.
 
-When considering Figure~\ref{fig:concurrency_comparison_q2} through Figure~\ref{fig:concurrency_comparison_q4},
+When considering Figure~\ref{fig:concurrency_comparison_q2}
+through Figure~\ref{fig:concurrency_comparison_q4},
 there are many reasons why we generally see performance improvement, the main being
 that the entire operation (metadata query, image fetching and resizing) happens
 on the server side in the case of VDMS, within a single message
@@ -623,8 +628,9 @@ visual entities as first class citizens, as it is the case of VDMS.
 Another reason, which is quantifiable in the figures, is that
 VDMS sends resized (smaller) versions to the client instead of the full image
 to be resized on the client side (as is the case in the baselines).
-This is in contrast with the baseline implementations, where 2 rounds of blocking back-and-forth
-communication with the server is needed, as depicted in Figure~\ref{fig:systems}.
+This is in contrast with the baseline implementations,
+where 2 rounds of blocking back-and-forth communication with the server is needed,
+as depicted in Figure~\ref{fig:systems}.
 Note that one could argue that the opposite will happen
 when the resize operation retrieves a an up-sampled (larger) version of the image
 instead of a down-sampled (smaller) one.
@@ -672,17 +678,22 @@ For \textit{q1} and \textit{q2}, we can appreciate higher performance being deli
 VDMS when compared to the baselines, and how this improvement is maintained
 as the size of the database increase while
 on the other hand, the baseline implementations have a drop in performance
-for the 100M database. For \textit{q3}, we see that VDMS performs best when the database size
-is small (1M images), but as the database size increases, the performance degrades as well.  
-For this query, MySQL (and in some cases PostgreSQL) outperforms VDMS for databases larger than 1M.
-This also occurs for \textit{q5} but only for databases larger than 10M.  
+for the 100M database.
+For \textit{q3}, we see that VDMS performs best when the database size
+is small (1M images), but as the database size increases,
+the performance degrades as well.
+For this query, MySQL (and in some cases PostgreSQL) outperforms VDMS
+for databases larger than 1M.
+This also occurs for \textit{q5} but only for databases larger than 10M.
 This is entirely attributed to the 2-round process needed for this query,
 as we explained before which is more visible in the larger databases.
 It is interesting to note that adding filtering by geo-location
 (\textit{q5}) decreases the performance as the database sizes scales.
-The behaviour is different in the case of \textit{q6}, which also filters by geo-location.
-This is attributed to the fact that OR queries involves processing larger results,
-and thus does not benefit from the filtering which is evident when compared to \textit{q4}.
+The behaviour is different in the case of \textit{q6},
+which also filters by geo-location.
+This is attributed to the fact that OR queries involves processing
+larger results, and thus does not benefit from the filtering
+which is evident when compared to \textit{q4}.
 
 From the first 2 queries, as well as \textit{q4} and
 \textit{q6} (with exception to the 50M case),
@@ -710,7 +721,7 @@ showing that VDMS scales better than the PostGreSQL baseline.}
 Finally, Figure~\ref{fig:summary_postgresql} summarizes the results
 comparing VDMS and PostgreSQL. A comparison with MySQL is
 provided in Figure~\ref{fig:summary_mysql} of the appendix.
-In comparison to PostgreSQL, VDMS provides up to 364x speedup 
+In comparison to PostgreSQL, VDMS provides up to 364x speedup
 (for the case of \textit{q1}),
 and an average improvement in throughput of about 85x. This is
 an impressive improvement over the two baseline systems.
