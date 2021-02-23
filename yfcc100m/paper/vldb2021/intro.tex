@@ -24,7 +24,7 @@ for extracting brain tumor information from existing brain images in a
 classic medical imaging use case.
 This requires assigning consistent
 identifiers for the scans and adding their metadata in
-a relational or key-value database.
+a relational or key-value database\cite{kumar2017data}.
 If the queries require a search over patient information,
 then patients are associated with their brain scans.
 Finally, if the ML pipeline needs images with a different resolution
@@ -39,7 +39,7 @@ As another example, many applications can be studied through the use of large
 and publicly available datasets.
 Applications include basic image search functionality (through the use
 of human-generated tags), advanced image search through the use of
-machine-generated tags and feature vectors\cite{imagesearch}
+machine-generated tags and feature vectors\cite{imagesearch, qin2020similarity}
 for each image, and video summarization.
 For these use-cases, the usual first step consists on selecting a
 subset of the data before running any processing, and a large effort
@@ -52,10 +52,11 @@ building the necessary pipelines for querying and retrieving the right data.
 More generally, data scientists and machine learning developers
 usually end up building an ad-hoc solution that results in a
 combination of databases and file systems to store
-metadata and visual data (images, videos), respectively.
+metadata and visual data (images, videos), respectively \cite{sculley2015hidden}.
 This is integrated with a set of custom scripts that tie multiple systems together,
 unique not only to a specific application/discipline but often
-to individual researchers or development teams.
+to individual researchers or development teams
+\cite{mayer2020scalable, sculley2015hidden}.
 These ad-hoc solutions make replicating experiments difficult,
 and more importantly, they do not scale well when deployed in the real-world.
 The reason behind such complexity is \textit{the lack of a system
@@ -65,15 +66,16 @@ including metadata, images, videos, and feature vectors}.
 In this paper, we describe VDMS and show how it provides a
 comprehensive solution to the data management for applications
 that heavily rely on visual data.
-VDMS is a completely Open Source project designed to enable
+VDMS is an Open Source project designed to enable
 efficient access of visual data.
 To the best of our knowledge, a rich set of functionalities
 designed for visual data management, provided behind an integrated API,
 is unique to VDMS and we were unable to find a system with similar functionality.
 While there are a number of big-data frameworks~\cite{spark, hadoop}, systems
-that can be used to store metadata~\cite{memsql, vertica}, and systems that
-manipulate a specific category of visual data~\cite{scidb, rasdaman}, VDMS can
-be distinguished from them on the following aspects:
+that can be used to store metadata~\cite{memsql, vertica, mysql, postgresql},
+and systems that manipulate a specific category of
+visual data~\cite{scidb, rasdaman},
+VDMS can be distinguished from them on the following aspects:
 
 \begin{itemize}
 \item {\em Design for analytics and machine learning}: By targeting
@@ -97,8 +99,8 @@ It contains the metadata of around 99.2 million photos
 and 0.8 million videos from Flickr,
 plus expansion packs that include a variety of multidimensional data,
 all of which were shared under one of the various Creative Commons licenses.
-We have used this dataset
-for multiple proof of concepts and applications within our research lab.
+We have used this dataset for multiple proof of concepts and
+applications within our research lab.
 
 We show how VDMS can be used as a centralize point for data
 management and data access even when having multiple modalities of data:
