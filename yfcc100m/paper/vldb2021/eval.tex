@@ -328,37 +328,44 @@ DB Name & images & autotags & taglist\\
 \label{table:mysqltables}
 \end{table}
 
+% \begin{figure}[ht]
+% \centering
+% \includegraphics[width=\columnwidth]{figures/all_build_times_plot}
+% \caption{Time to build and size (in GB) of MySQL, PostgreSQL, and VDMS databases.}
+% \label{fig:db_time_size}
+% \end{figure}
+
 \begin{figure}[ht]
 \centering
-\includegraphics[width=\columnwidth]{figures/all_build_times_plot}
-\caption{Time to build and size (in GB) of MySQL, PostgreSQL, and VDMS databases.}
-\label{fig:db_time_size}
+\includegraphics[width=\columnwidth]{figures/all_build_sizes_plot}
+\caption{Data footprint (in GB) of MySQL, PostgreSQL, and VDMS databases.}
+\label{fig:db_sizes}
 \end{figure}
 
-\subsubsection{Database Building Time}
+% \subsubsection{Database Building Time}
 
-One of the first things we noticed is the difference in the time needed to
-build each database, where VDMS outperforms MySQL by a large margin
-but PostgreSQL outperforms VDMS by a large margin as well.
-This analysis includes only the metadata, as the images are stored
-in a shared filesystem. Figure~\ref{fig:db_time_size} illustrates the
-comparison in time to build the databases, and how the speedup
-is sustained as the database size grows.
-Key difference in the build times are attributed to the low-level
-implementation of how MySQL reads and stores data from the files, the
-optimizations (increased InnoDB pool size, etc.) needed
-to handle large datasets such as YFCC100M, and the efficiency of PMGD.
-PostgreSQL Python API can efficiently copy data from files to the database
-which provides an advantage over VDMS which must insert
-multiple nodes/connections per image.
-On average, it took MySQL around $\sim$4x longer to build each database than VDMS,
-and PostgreSQL was around $\sim$21x faster than VDMS.
+% One of the first things we noticed is the difference in the time needed to
+% build each database, where VDMS outperforms MySQL by a large margin
+% but PostgreSQL outperforms VDMS by a large margin as well.
+% This analysis includes only the metadata, as the images are stored
+% in a shared filesystem. Figure~\ref{fig:db_time_size} illustrates the
+% comparison in time to build the databases, and how the speedup
+% is sustained as the database size grows.
+% Key difference in the build times are attributed to the low-level
+% implementation of how MySQL reads and stores data from the files, the
+% optimizations (increased InnoDB pool size, etc.) needed
+% to handle large datasets such as YFCC100M, and the efficiency of PMGD.
+% PostgreSQL Python API can efficiently copy data from files to the database
+% which provides an advantage over VDMS which must insert
+% multiple nodes/connections per image.
+% On average, it took MySQL around $\sim$4x longer to build each database than VDMS,
+% and PostgreSQL was around $\sim$21x faster than VDMS.
 
 \subsubsection{Database Storage Footprint}
 
-Another important aspect to note is the storage footprint of the databases.
+% Another important aspect to note is the storage footprint of the databases.
 PostgreSQL and VDMS require comparable amount of storage for metadata which
-is more than required by MySQL, shown in Figure~\ref{fig:db_time_size}.
+is more than required by MySQL, shown in Figure~\ref{fig:db_sizes}.
 In the case of VDMS, this is space used to store information about
 each node/connection.
 The Graph Database internal to VDMS (called PMGD) was designed for performance,
