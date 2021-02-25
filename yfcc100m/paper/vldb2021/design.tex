@@ -137,14 +137,67 @@ and the ability to natively support visual data operations.
 However, we believe it is possible for our API to achieve similar levels of
 expressiveness compared to more mature query languages over time.
 
-Listing~\ref{findimagegeo} shows a sample query.
-In this particular example, the transaction retrieves
-all the images of \textit{alligators}
-with probability higher than 0.66,
+Listing~\ref{addimageandautotag} shows a sample query for inserting an image
+and its associated metadata to VDMS.
+In this example, the transaction inserts an application-defined "Entity" of
+the class "autotag", with the "name" property being \textit{alligator},
+inserts an Image with its "latitude" and "longitude",
+stores the image  as a JPG (VDMS will transcode if needed),
+and creates a connection between the Image and the Entity, with a "prob"
+property (which indicates the probability of that image
+containing an object of type  \textit{alligator}) with a specific value.
+Note that no schema needs to be defined in advance.
+The Entity of class "autotag", with its properties, are declared and added
+at insertion time, without any need to define a schema of objects
+(and its properties) before hand.
+
+\begin{listing}[ht!]
+\begin{minted}[frame=single,
+              framesep=3mm,
+              linenos=true,
+              xleftmargin=21pt,
+              tabsize=4]{js}
+"AddEntity"{
+    "_ref" : 1,
+    "class": "autotag",
+    "properties": {
+        "name": "alligator"
+    }
+},
+"AddImage":{
+    "_ref": 2,
+    "properties": {
+        "latitude":  36.23433,
+        "longitude": -116.80666
+    },
+    "format": "jpg"
+}
+"AddConnection": {
+    "ref1": 1,
+    "ref2": 2,
+    "properties": {
+        "prob": 0.7653
+    }
+}
+
+\end{minted}
+\caption{Sample Query for Image Insertion -
+The query expresses the following:
+Insert an Entity of the class "autotag", with the "name" property being
+\textit{alligator}, insert an Image with its "latitude" and "longitude",
+store the image  as a JPG, and create a connection between
+the image and the "autotag",  with a property "prob"
+(which indicates the probability of that image
+containing an object of type  \textit{alligator}).}
+\label{addimageandautotag}
+\end{listing}
+
+Listing~\ref{findimagegeo} shows another sample query, in this case, for retrieval.
+In this particular example, the transaction retrieves all the images
+of \textit{alligators} with probability higher than 0.66,
 filter by latitude and longitude within 1 degree,
 apply a resize operation to make the images 224x224,
-rotate the images 45.34 degrees,
-and return the images as "png" files.
+rotate the images 45.34 degrees, and return the images as "png" files.
 It is important to note how the API natively supports basic building
 blocks of visual data processing, like resize, rotation, or transcoding
 (changing output formats and encodings).

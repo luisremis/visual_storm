@@ -1,30 +1,28 @@
 \section{Introduction}
 \label{intro}
 
-Visual computing workloads performing analytics on videos and/or images
+Visual computing workloads performing analytics on images and/or videos
 have become prolific across a wide range of application domains.
-This is in part due to the growing ability of machine learning (ML) techniques to
-extract information from the visual data which can subsequently be used
+This is in part due to the growing ability of machine learning (ML) techniques
+to extract information from the visual data which can subsequently be used
 for informed decision making \cite{vdms-nips}.
 The insights this information can provide depend on the
-application: retail vendors might be interested in knowing
-which are the most visited areas of their stores using security
-video feeds as input, or a doctor might want know the effect of a
-specific treatment by looking at the changes in size of a tumor from a brain scan.
+application: retail vendors might be interested in knowing which are the most
+visited areas of their stores using security video feeds as input,
+or a doctor might want know the effect of a specific treatment by
+looking at the changes in size of a tumor from a brain scan.
 
 Despite the increasing use of visual data processing,
 there has been very little research on the \textit{management} of visual data.
-Most of the current storage solutions for visual data are
-an ad-hoc collection of tools and systems, that are re-purposed and
-adapted to work with visual data.
+Most of the current storage solutions for visual data are an ad-hoc collection
+of tools and systems, that are re-purposed and adapted to work with visual data.
 The approach of re-purposing and integrating solutions not designed for a task
 results in resource utilization inefficiencies\cite{rasdaman}.
-For example, consider a ML developer constructing a pipeline
-for extracting brain tumor information from existing brain images in a
-classic medical imaging use case.
-This requires assigning consistent
-identifiers for the scans and adding their metadata in
-a relational or key-value database\cite{kumar2017data}.
+For example, consider a ML developer constructing a pipeline for extracting
+brain tumor information from existing brain images in a classic medical
+imaging use case.
+This requires assigning consistent identifiers for the scans and adding their
+metadata in a relational or key-value database\cite{kumar2017data}.
 If the queries require a search over patient information,
 then patients are associated with their brain scans.
 Finally, if the ML pipeline needs images with a different resolution
@@ -106,7 +104,7 @@ We show how VDMS can be used as a centralize point for data
 management and data access even when having multiple modalities of data:
 Metadata, Image, Videos, and Feature Vectors.
 
-\subsection{Related Work}
+\section{Related Work}
 
 There are several databases and data management systems that focus one enabling
 analytics or combining transactional and analytic workloads over large
