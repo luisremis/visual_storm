@@ -141,8 +141,8 @@ class Plotting(object):
                         log="y",
                         title="",
                         filename="plot_unnamed.pdf",
-                        xlabel="Database Size",
-                        ylabel="None"):
+                        xlabel="",
+                        ylabel=""):
 
         # print(len(values))
         # print(len(values[1:]))
@@ -194,7 +194,7 @@ class Plotting(object):
                              values[n_queries*j + i,0:len(db_sizes)],
                              yerr=values[n_queries*j + i,len(db_sizes):],
                              label=engines[j],
-                             color="black",
+                             color=color[j],
                              linestyle=linestyles[j % len(linestyles)],
                              marker=markers[j % len(markers)],
                              )
@@ -213,7 +213,8 @@ class Plotting(object):
             if i % side == 0:
                 plt.ylabel(ylabel, fontsize=12)
 
-            # plt.xlabel(xlabel, fontsize=12)
+            if i >= (n_queries - side):
+                plt.xlabel(xlabel, fontsize=12)
 
         plt.savefig(filename, format="pdf", bbox_inches='tight')
         plt.close()

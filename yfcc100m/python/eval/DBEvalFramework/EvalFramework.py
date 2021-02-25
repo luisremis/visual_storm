@@ -216,12 +216,12 @@ class EvalFramework(object):
         filename  = self.plot_folder + "plot_q_"
         filename += str(q) + "_mosaic_results_throughput_threads.pdf"
 
-        title = "Throughput as " + result_type + " per second for " + q
-        title += " as Database Size increases"
         threads = ["clients: " + str(a) for a in threads]
+        # title = "Throughput for " + q
+        # title += " as Database Size increases"
         p.plot_lines_all_mosaic(threads, db_sizes, engines, values,
                           filename=filename,
-                          title=title,
+                          # title=title,
                           log="both",
                           xlabel="Database Size",
                           ylabel=result_type + "/s")
@@ -267,7 +267,7 @@ class EvalFramework(object):
         filename  = self.plot_folder + "plot_conc_q_"
         filename += str(q) + "_results_throughput_db_size.pdf"
 
-        title = "Throughput as " + result_type + " per second Summary"
+        title = "Throughput as " + result_type + " per second - Summary"
         p.plot_lines_all(db_sizes, threads, engines, values,
                           title=title,
                           filename=filename,
@@ -277,11 +277,11 @@ class EvalFramework(object):
         filename  = self.plot_folder + "plot_conc_q_"
         filename += str(q) + "_mosaic_results_throughput_db_size.pdf"
 
-        title = "Throughput as " + result_type + " per second for " + q
-        title += " as number of concurrent clients increases"
+        # title = "Throughput for " + q
+        # title += " as number of concurrent clients increases"
         p.plot_lines_all_mosaic(db_sizes, threads, engines, values,
                           filename=filename,
-                          title=title,
+                          # title=title,
                           xlabel="# of concurrent clients",
                           ylabel=result_type + "/s")
 
@@ -326,7 +326,7 @@ class EvalFramework(object):
         filename  = self.plot_folder + "plot_conc_dbsize_"
         filename += str(db_size) + "_results_throughput.pdf"
 
-        title = "Throughput as " + result_type + " per second Summary"
+        title = "Throughput as " + result_type + " per second - Summary"
         p.plot_lines_all(queries, threads, engines, values,
                           title=title,
                           filename=filename,
@@ -336,11 +336,11 @@ class EvalFramework(object):
         filename  = self.plot_folder + "plot_conc_dbsize_"
         filename += str(db_size) + "_mosaic_results_throughput.pdf"
 
-        title = "Throughput as " + result_type + " per second for " + db_size
-        title += " as number of concurrent clients increases"
+        # title = "Throughput for " + db_size
+        # title += " as number of concurrent clients increases"
         p.plot_lines_all_mosaic(queries, threads, engines, values,
                           filename=filename,
-                          title=title,
+                          # title=title,
                           xlabel="# of concurrent clients",
                           ylabel=result_type + "/s")
 
@@ -380,7 +380,7 @@ class EvalFramework(object):
         filename  = self.plot_folder
         filename += "plot_th_" + str(n_threads) + "_results_throughput.pdf"
 
-        title = "Throughput as " + result_type + " per second Sumary"
+        title = "Throughput as " + result_type + " per second - Summary"
         p.plot_lines_all(queries, db_sizes, engines, values, log="both",
                           title=title,
                           filename=filename,
@@ -389,10 +389,11 @@ class EvalFramework(object):
         filename  = self.plot_folder
         filename += "plot_th_" + str(n_threads) + "_mosaic_results_throughput.pdf"
 
-        title = "Throughput as " + result_type + " per second for different queries"
+        # title = "Throughput for different queries"
         p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="both",
-                          title=title,
+                          # title=title,
                           filename=filename,
+                          xlabel="Database Size",
                           ylabel=result_type + "/s")
 
 
@@ -436,10 +437,11 @@ class EvalFramework(object):
         filename  = self.plot_folder
         filename += "plot_th_" + str(n_threads) + "_mosaic_query_throughput.pdf"
 
-        title = "Query Throughput (q/s) for different queries"
+        # title = "Query Throughput (q/s) for different queries"
         p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="both",
-                          title=title,
+                          # title=title,
                           filename=filename,
+                          xlabel="Database Size",
                           ylabel="Queries per second")
 
 
@@ -478,10 +480,11 @@ class EvalFramework(object):
         filename  = self.plot_folder
         filename += "plot_th_" + str(n_threads) + "_mosaic_query_times.pdf"
 
-        title = "Query Execution Time(s) for different queries"
+        # title = "Query Execution Time(s) for different queries"
         p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="both",
-                          title=title,
+                          # title=title,
                           filename=filename,
+                          xlabel="Database Size",
                           ylabel="Average Query Time(s)")
 
         return
@@ -526,6 +529,7 @@ class EvalFramework(object):
         p.plot_lines_all_mosaic(queries, db_sizes, engines, values, log="x",
                           title=title,
                           filename=filename,
+                          xlabel="Database Size",
                           ylabel="Number of Results")
 
         return
