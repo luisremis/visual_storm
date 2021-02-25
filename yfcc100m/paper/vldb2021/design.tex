@@ -1,15 +1,16 @@
 \section{VDMS Design \& Implementation}
 \label{arch}
 
-In this section, we describe VDMS design principles and implementation,
+In this section, we further describe VDMS design principles and implementation,
 which was briefly introduced in previous work \cite{vdms-nips}.
-Figure \ref{fig:arch} depicts the high-level architecture of VDMS.
+
 VDMS implements a client-server architecture that handles client
 requests concurrently, and coordinates query execution across
 the metadata and visual data components in order to return a unified response.
 Users interact with both metadata and visual data
 (i.e., images, videos, feature vectors) using a unified API,
 in a transactional manner.
+Figure \ref{fig:arch} depicts the high-level architecture of VDMS.
 
 The metadata component is the \textit{Persistent Memory Graph
 Database} (PMGD) and the (visual) data component is our Visual Compute Module.
@@ -18,7 +19,8 @@ visual data, exposing high-level abstractions to the \textit{Request Server}
 for dealing with a variety of images and video formats (through OpenCV and ffmpeg),
 and different methods for indexing for feature vectors
 (including Facebook's Faiss \cite{faiss}, TileDB \cite{TileDB}).
-Finally, a main component of VDMS is in charge of implementing the API and orchestrating between the PMGD and the Visual Compute Module
+Finally, a main component of VDMS is in charge of implementing the
+API and orchestrating between the PMGD and the Visual Compute Module
 to serve client's requests. This component is the \textit{Request Server}.
 
 VDMS and its components are fully available as open source projects
@@ -179,12 +181,12 @@ wiki~\footnote{https://github.com/IntelLabs/vdms/wiki/API-Description}.
                      "<=", -116.80666]
     },
     "operations": [{
-        "type": "resize",
-        "height": 224,
-        "width":  224,
-    }, {
-        "type": "rotate",
-        "angle": 45.34
+            "type": "resize",
+            "height": 224,
+            "width":  224,
+        }, {
+            "type": "rotate",
+            "angle": 45.34
     }]
 }
 
@@ -203,12 +205,12 @@ and return the images as "png" files.}
 \subsection{Client Library}
 
 The client library implements TCP/IP based connectors to the VDMS Server,
-similar to most database\cite{memsql, mysql}.
+similar to most database\cite{memsql, mysql, postgresql}.
 Users can connect to VDMS and implement queries using VDMS' API
 by defining JSON commands conforming to the query protocol we have defined.
 The client library provides a simple method that
 accepts a JSON string and an array or vector of blobs.
-Internally, the library wraps the query string and blob using
+Internally, the library wraps the query string and blobs using
 Google Protobufs \cite{protobufs} and sends it to the VDMS server.
 It also receives a similarly formed response from VDMS
 and returns it to the client.
