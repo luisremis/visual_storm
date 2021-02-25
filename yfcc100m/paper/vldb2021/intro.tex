@@ -105,3 +105,28 @@ applications within our research lab.
 We show how VDMS can be used as a centralize point for data
 management and data access even when having multiple modalities of data:
 Metadata, Image, Videos, and Feature Vectors.
+
+\subsection{Related Work}
+
+There are several databases and data management systems that focus one enabling
+analytics or combining transactional and analytic workloads over large
+scale data, such as SciDB~\cite{brown2010overview},
+BigTable~\cite{chang2008bigtable}, Shark~\cite{xin2013shark},
+and Vertica~\cite{lamb2012vertica}.
+While these systems do not focus on visual processing as a primary entity,
+they are valuable resources in distributing and analyzing very large scale data.
+A more concrete application and case of study include
+the Facebook architecture for photos that combines Tao~\cite{tao},
+Haystack~\cite{beaver2010finding}, and f4~\cite{muralidhar2014f4} for metadata,
+hot/recent data, and warm data respectively.
+While the social aspect of Facebook is logically suited to a graph,
+the bulk of their data is already stored in MySQL~\cite{mysql},
+so they chose to develop a graph-aware cache.
+A similar approach was taken by Grail~\cite{fan2015case},
+which argued that a syntactic layer written on top of a relational database
+could answer graph queries.
+Diamond~\cite{huston2004diamond,satyanarayanan2010unique} exploited active
+disks to perform discard-based searching order to shrink the amount of data
+returned to a reasonable size.
+We accomplish the same goal by exploiting persistent memory to store a
+graph database for metadata.
