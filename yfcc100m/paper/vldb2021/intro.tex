@@ -100,9 +100,27 @@ all of which were shared under one of the various Creative Commons licenses.
 We have used this dataset for multiple proof of concepts and
 applications within our research lab.
 
-We show how VDMS can be used as a centralize point for data
-management and data access even when having multiple modalities of data:
-Metadata, Image, Videos, and Feature Vectors.
+Overall, this paper makes the following contributions:
+
+\begin{itemize}
+\item We present the design and implementation of the Visual Data Management System.
+To the best of our knowledge, there are no other system capable of
+managing visual data and its metadata behind a unified API
+and that, at the same time, enable applications to operate over visual data
+(images, videos, feature vectors).
+
+\item We introduce the VDMS API in detail, designed for Machine Learning and visual
+data analytics at scale.
+
+\item We use our internal use-cases and implementations of visual data processing
+pipeline to make a comprehensive evaluation between common ad-hoc solutions
+that rely on multiple systems and VDMS.
+
+\item We use the largest public available image dataset, YFCC100m, together
+with machine generated tags for our real-world use case, providing a performance
+evaluation both from the point of view of high concurrency as well as
+scale (the database size, including images and metadata is 12TB in size).
+\end{itemize}
 
 \section{Related Work}
 
@@ -113,7 +131,7 @@ BigTable~\cite{chang2008bigtable}, Shark~\cite{xin2013shark},
 and Vertica~\cite{lamb2012vertica}.
 While these systems do not focus on visual processing as a primary entity,
 they are valuable resources in distributing and analyzing very large scale data.
-A more concrete application and case of study include
+A more concrete application involving visual data include
 the Facebook architecture for photos that combines Tao~\cite{tao},
 Haystack~\cite{beaver2010finding}, and f4~\cite{muralidhar2014f4} for metadata,
 hot/recent data, and warm data respectively.

@@ -340,7 +340,7 @@ DB Name & images & autotags & taglist\\
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=\columnwidth]{figures/all_build_sizes_plot}
+\includegraphics[width=0.8\columnwidth]{figures/all_build_sizes_plot}
 \caption{Data footprint (in GB) of MySQL, PostgreSQL, and VDMS databases.}
 \label{fig:db_sizes}
 \end{figure}
@@ -712,6 +712,36 @@ when retrieving visual data and applying operations.
 This is one of the most important finding, as it validates the design principles
 of VDMS, which aims to provide scalability and performance acceleration
 at the type of queries that require visual data access and transformations.
+
+Figure~\ref{fig:q_throughput_16} shows the measured throughput,
+as images per second, delivered by each system for all queries and databases.
+In comparison to figure~\ref{fig:q_throughput_56},
+when using fewer concurrent clients (nthr = 16),
+the throughput for VDMS for queries \textit{q4} (\textit{2tag\_or\_resize}),
+\textit{q5} (\textit{2tag\_resize\_geo\_and}), and
+\textit{q6} (\textit{2tag\_resize\_geo\_or}) improved by a large margin
+for the 50M and 100M databases.
+In the case of \textit{q4} and \textit{q6},
+the throughput for 50M (and 100M for \textit{q4})
+increase by a large margin which outperforms both baselines while in
+Figure~\ref{fig:q_throughput_56} PostgreSQL slightly performed better than VDMS.
+In the case of \textit{q5}, all systems perform a little differently for databases
+larger than 5M.
+The gaps between the throughput of each system narrows at 10M.
+At a database size of 50M, the performance of the baselines drastically drop
+while the throughput of VDMS has a large improvement in comparison.
+
+\begin{figure}[ht!]
+\includegraphics[width=\columnwidth]{figures/plot_th_16_mosaic_results_throughput}
+\caption{Throughput Analysis using all queries from our use-case
+described in the Experimental Setup Section.
+We show queries in different figures for readability reasons.
+The experiments show the performance of all systems (VDMS and the two baselines) as the
+database size increases.
+These queries were run using 16 simultaneous clients (nthr = 16),
+and averaged out of 5 runs.}
+\label{fig:q_throughput_16}
+\end{figure}
 
 
 %% ========= Queries Analysis - END

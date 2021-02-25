@@ -3,29 +3,8 @@
 
 In this section, we further describe VDMS design principles and implementation,
 which was briefly introduced in previous work \cite{vdms-nips}.
-
-VDMS implements a client-server architecture that handles client
-requests concurrently, and coordinates query execution across
-the metadata and visual data components in order to return a unified response.
-Users interact with both metadata and visual data
-(i.e., images, videos, feature vectors) using a unified API,
-in a transactional manner.
-Figure \ref{fig:arch} depicts the high-level architecture of VDMS.
-
-The metadata component is the \textit{Persistent Memory Graph
-Database} (PMGD) and the (visual) data component is our Visual Compute Module.
-The Visual Compute Module enables machine-friendly enhancements to
-visual data, exposing high-level abstractions to the \textit{Request Server}
-for dealing with a variety of images and video formats (through OpenCV and ffmpeg),
-and different methods for indexing for feature vectors
-(including Facebook's Faiss \cite{faiss}, TileDB \cite{TileDB}).
-Finally, a main component of VDMS is in charge of implementing the
-API and orchestrating between the PMGD and the Visual Compute Module
-to serve client's requests. This component is the \textit{Request Server}.
-
-VDMS and its components are fully available as open source projects
-\footnote{https://github.com/IntelLabs/\{vdms, pmgd\}}.
-We briefly describe each of the main components as follows:
+VDMS implementation is fully open-sourced
+\footnote{https://github.com/IntelLabs/vdms}.
 
 \begin{figure}
 \centering
@@ -34,98 +13,87 @@ We briefly describe each of the main components as follows:
 \label{fig:arch}
 \end{figure}
 
-\subsection{Persistent Memory Graph Database}
+VDMS implements a the typical client-server architecture that handles
+client queries transactionally and concurrently, as most of the most common
+relational and non-relational database systems
+\cite{mysql, postgresql, chang2008bigtable}.
+The main difference between other data management systems and VDMS is that
+it goes beyond the typical supported data types (string, integers, floats,
+blobs, JSON-documents, etc), recognizing visual entities (image, videos,
+feature vectors, etc) as first class citizens.
+VDMS API enable users to insert, index, process, and query visual data,
+as well as provides full support for inserting, indexing and querying
+user-defined metadata.
+Users interact with both metadata and visual data using a unified API,
+in a transactional manner.
 
-We use the Persistent Memory Graph Database (PMGD) to provide an efficient storage
-solution addressing the increasing popularity of connected data and
-applications that benefit from graph-like processing.
-PMGD implements an in-persistent-memory graph database, PMGD, optimized
-to run on a platform equipped with persistent memory.
-PMGD provides a property graph model of data storage with the traditional
+VDMS provides a property \textit{graph model} abstraction with the traditional
 atomicity, consistency, isolation, and durability
 (ACID) properties expected from databases.
-Graph represents an easier abstraction to model complex problems \cite{tao}.
-Moreover, the graph model makes it very suitable for the data and
-access patterns shown by visual metadata, which can be easily mapped
-into application-level abstractions by developers.
+This is, users interact with their objects (metadata, images, videos, etc),
+as if these objects were in a connected graph.
+Graph represents an easier abstraction to model complex problems,
+making it very suitable for the data and access patterns shown by visual metadata,
+which can be easily mapped into application-level abstractions by
+developers~\cite{tao}.
 For instance, abstractions like \textit{BoundingBoxes} associated to
-images or videos can be easily represented using nodes and edges.
-With its natural ability to extend the schema very
-easily (due to the use of a property graph model),
-we can support new developments in machine learning that can lead to
-enhancements to existing metadata over time.
+images or videos can be easily represented using nodes and edges in a graph.
 These are the reasons the team chose a graph database over a
 relational database as the metadata management for the implementation of VDMS.
-PMGD is designed and optimized for persistent memory technologies
-like Intel Optane~\cite{IntelXPoint15}, which
-promise storage providing nearly the speed of DRAM and the
-durability of block-oriented storage.
 
-\subsection{Visual Compute Module}
+VDMS API provides mechanism to insert and connect Images, Videos, BoundingBoxes,
+Frames, and Descriptors (feature vectors), together with any metadata
+associated with the objects.
+Each object is a node in the graph.
+The metadata associated to each object is is modeled as
+"properties" of the node in the graph.
+Users can query, filter, and retrieve this objects based
+on its metadata (the "properties" associated with them).
+VDMS does not simply treat these objects as binary blobs of data, but rather
+understands them and the type of processing that is common for them,
+providing the ability to run processing on-the-fly, both at insertion and
+at retrieval type.
+Users can, for instance, retrieve a resized version of an image,
+or retrieve only a clip from a large video.
+This is one of the main differentiation aspect when compared to other
+database systems, including relational databases.
+In a relational database, for instance, one can query \textit{and compute}
+over values in a column only for basic data types (strings, integers, floats),
+and over the abstractions the relational model support (tables, columns).
+A SQL query can then retrieve the \textit{computed average} "salary" of all
+the employees in a company (stored using the table/columns abstraction),
+but cannot perform any computation over data stored as a blob or binary object.
+VDMS, because it recognized the nature of visual objects by design,
+provides the ability to \textit{compute} on these visual objects
+(image, videos, etc).
 
-The Visual Compute Module was designed and implemented to provide
-an internal abstraction layer for interacting with visual data.
-It enables simple visual data handling and processing (i.e., basic building block
-operations like crop, resize, etc).
-For traditional formats (jpg, png, tiff, mp4, etc.),
-the interface is an abstraction layer over OpenCV.
-However, it also provides a way to use novel formats that are
-better suited for visual analytics: a novel, array-based lossless image format.
-This format is built on the array data manager TileDB~\cite{TileDB} and
-is well suited for images that are used in visual analytics.
+VDMS API also allows users to insert application-defined "Entities",
+that enable applications to model any use-case specific metadata.
+An "Entity" object (and its properties) is a node in the graph.
+For example, a user can define an Entity object of a class "Person",
+and \textit{connect} this person to one or multiple image objects.
+Later, the user can retrieve the Entity object corresponding to a person,
+together with all the images \textit{connected} to it.
 
-VDMS provides full support for video storage and operations,
-in a similar way it does for images.
-This includes support for encoding, decoding, and transcoding of
-\textit{mp4}, \textit{avi}, and \textit{mov} containers,
-as well as support for \textit{xvid}, \textit{H.263} and \textit{H.264} encoders.
-This is supported through the use of either OpenCV~\cite{opencv}
-or \textit{libffmpeg}\cite{ffmpeg}, or both.
-All operations supported for images in VDMS are also supported at the
-video and frame level of the API.
-On top of that, there are a number of video-specific operations that
-are supported, such as the interval operations,
-enabling users to retrieve clips at different
-frames-per-second (FPS) versions of the video.
+By providing the ability to store visual data objects together with
+application-defined entities and its properties, VDMS can manage
+all the data the application need behind a single, unified API.
+This is in contrast with current applications that rely on a combination
+of multiple systems and APIs to access different portions of the data they need
+\cite{tao, sculley2015hidden, mayer2020scalable, sculley2015hidden}.
 
-Another key differentiating factor of VDMS is that it allows the creation of
-indexes for high-dimensional feature vectors and the insertion of
-these feature vectors associated with entities, images, and/or videos.
-Feature vectors are intermediate results of various machine
-learning or computer vision algorithms when run on visual data.
-Feature vectors are also known as \textit{descriptors}
-or \textit{visual descriptors}.
-We use these terms interchangeably.
-These descriptors can be classified, labeled, and used to build search indexes.
-Feature Vectors support is provided through our implementation based
-on high-dimensional sparse arrays, also using TileDB.
-In addition, the Visual Compute Library provides a wrapper
-for another high-dimensional index implementation,
-Facebook's Faiss~\cite{faiss}.
-
-\subsection{Request Server}
-
-Developers and users of machine learning frameworks and data science
-applications favor simpler interfaces to access and process data.
-They cannot be expected to deal with two different ways of interacting
-with information (metadata and visual data) instead of focusing on the
-algorithmic parts of their pipelines.
-VDMS takes care of coordinating client requests across the metadata and the
-visual data, and managing multiple clients through the \textit{Request Server}.
-The \textit{Request Server} is a key component of the system,
-as it implements VDMS' API and coordinates request and responses from
-the PMGD and Visual Compute Module subsystems.
-It decomposes the user queries into
-metadata and visual data requests, invokes the relevant calls behind the scene,
-and returns a coherent and unified response that is easy for the user to parse
-and interpret.
+Figure \ref{fig:arch} depicts the high-level architecture of VDMS, which
+is composed by several subcomponents, and a Query Engine that implements
+the unified API and hides all the complexity underneath.
+We first describe the VDMS API, and then describe its subcomponents
+and design decisions.
 
 \subsection{VDMS API}
 
-One of the most important differentiating factor of VDMS is its interface.
+One of the most important differentiating aspects of VDMS is its API.
 VDMS is unique in recognizing visual entities (i.e., images, videos, etc)
-as first class citizens. Thus, VDMS provides an API that revolves
-around visual data operations and retrieval.
+as first class citizens.
+Thus, VDMS' API revolves around visual data operations and retrieval.
 VDMS API is easy to use and explicitly pre-defines certain
 primitives associated with metadata, images, videos, and feature vectors.
 Authors have paid particular attention to hide the complexities of our internal
@@ -254,6 +222,88 @@ rotate the image 45.34 degrees,
 and return the images as "png" files.}
 \label{findimagegeo}
 \end{listing}
+
+\subsection{Graph Engine}
+
+The Graph Engine used for in VDMS is the
+\textit{Persistent Memory Graph Database} (PMGD).
+PMGD was developed at Intel Labs, and was designed and optimized for
+persistent memory technologies like Intel Optane~\cite{IntelXPoint15}, which
+promise storage providing nearly the speed of DRAM and the
+durability of block-oriented storage.
+PMGD is also fully open-sourced \footnote{https://github.com/IntelLabs/pmgd}.
+PMGD implements an in-persistent-memory graph database, PMGD, optimized
+to run on a platform equipped with persistent memory, but
+also provides the option to run on SSD and ext4 filesystem
+using OS support to provide transactional guarantees (through \textit{msync}).
+PMGD provides a property graph model of data storage with the traditional
+atomicity, consistency, isolation, and durability
+(ACID) properties expected from databases.
+PMGD comes as a C++ library that VDMS uses for its internal query engine.
+Because PMGD already supports most of the graph abstractions we wanted
+to see on VDMS API, it was our preferred option.
+Also, our internal evaluation shows that PMGD is faster
+than other graph databases, including Neo4j\cite{miller2013graph}.
+PMGD performance evaluation will be published separately.
+
+\subsection{Visual Compute Module}
+
+% The Visual Compute Module enables machine-friendly enhancements to
+% visual data, exposing high-level abstractions to the \textit{Request Server}
+% for dealing with a variety of images and video formats (through OpenCV and ffmpeg),
+% and different methods for indexing for feature vectors
+% (including Facebook's Faiss \cite{faiss}, TileDB \cite{TileDB}).
+% Finally, a main component of VDMS is in charge of implementing the
+% API and orchestrating between the PMGD and the Visual Compute Module
+% to serve client's requests. This component is the \textit{Request Server}.
+
+The Visual Compute Module was designed and implemented to provide
+an internal abstraction layer for interacting with visual data.
+It enables simple visual data handling and processing
+(i.e., basic building block operations like crop, resize, etc).
+For traditional formats (jpg, png, tiff, mp4, etc.),
+the interface is an abstraction layer over OpenCV.
+However, it also provides a way to use novel formats that are
+better suited for visual analytics: a novel, array-based lossless image format.
+This format is built on the array data manager TileDB~\cite{TileDB} and
+is well suited for images that are used in visual analytics.
+Note that, even if VDMS currently provides support for array-based lossless
+image format, we do not use it as part of this evaluation.
+This work focuses on a more direct comparison with a combination of alternatives,
+and thus we use the traditional format (jpg and png).
+The performance comparison between the array-based lossless image format
+we develop and other similar formats (like PNG or TIFF) are outside of the
+scope of this evaluation.
+
+VDMS also provides full support for video storage and operations,
+in a similar way it does for images.
+This includes support for encoding, decoding, and transcoding of
+\textit{mp4}, \textit{avi}, and \textit{mov} containers,
+as well as support for \textit{xvid}, \textit{H.263} and \textit{H.264} encoders.
+This is supported through the use of either OpenCV~\cite{opencv}
+or \textit{libffmpeg}\cite{ffmpeg}, or both.
+All operations supported for images in VDMS are also supported at the
+video and frame level of the API.
+On top of that, there are a number of video-specific operations that
+are supported, such as the interval operations,
+enabling users to retrieve clips at different
+frames-per-second (FPS) versions of the video.
+
+Another key differentiating factor of VDMS is that it allows the creation of
+indexes for high-dimensional feature vectors and the insertion of
+these feature vectors associated with entities, images, and/or videos.
+Feature vectors are intermediate results of various machine
+learning or computer vision algorithms when run on visual data.
+Feature vectors are also known as \textit{descriptors}
+or \textit{visual descriptors}.
+We use these terms interchangeably.
+These descriptors can be classified, labeled, and used to build search indexes.
+Feature Vectors support is provided through our implementation based
+on high-dimensional sparse arrays, also using array-based approaches.
+In addition, the Visual Compute Library provides a wrapper
+for another high-dimensional index implementation,
+Facebook's Faiss~\cite{faiss}.
+
 
 \subsection{Client Library}
 
