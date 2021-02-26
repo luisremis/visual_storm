@@ -41,25 +41,25 @@ images or videos can be easily represented using nodes and edges in a graph.
 These are the reasons the team chose a graph database over a
 relational database as the metadata management for the implementation of VDMS.
 
-VDMS API provides mechanism to insert and connect Images, Videos, BoundingBoxes,
+VDMS API provides a mechanism to insert and connect Images, Videos, BoundingBoxes,
 Frames, and Descriptors (feature vectors), together with any metadata
 associated with the objects.
 Each object is a node in the graph.
-The metadata associated to each object is is modeled as
+The metadata associated to each object is modeled as
 "properties" of the node in the graph.
 Users can query, filter, and retrieve this objects based
 on its metadata (the "properties" associated with them).
 VDMS does not simply treat these objects as binary blobs of data, but rather
 understands them and the type of processing that is common for them,
 providing the ability to run processing on-the-fly, both at insertion and
-at retrieval type.
+retrieval.
 Users can, for instance, retrieve a resized version of an image,
 or retrieve only a clip from a large video.
 This is one of the main differentiation aspect when compared to other
 database systems, including relational databases.
 In a relational database, for instance, one can query \textit{and compute}
 over values in a column only for basic data types (strings, integers, floats),
-and over the abstractions the relational model support (tables, columns).
+and over the abstractions the relational model supports (tables, columns).
 A SQL query can then retrieve the \textit{computed average} "salary" of all
 the employees in a company (stored using the table/columns abstraction),
 but cannot perform any computation over data stored as a blob or binary object.
@@ -110,7 +110,7 @@ and its associated metadata to VDMS.
 In this example, the transaction inserts an application-defined "Entity" of
 the class "autotag", with the "name" property being \textit{alligator},
 inserts an Image with its "latitude" and "longitude",
-stores the image  as a JPG (VDMS will transcode if needed),
+stores the image as a JPG (VDMS will transcode if needed),
 and creates a connection between the Image and the Entity, with a "prob"
 property (which indicates the probability of that image
 containing an object of type  \textit{alligator}) with a specific value.
@@ -225,7 +225,7 @@ and return the images as "png" files.}
 
 \subsection{Graph Engine}
 
-The Graph Engine used for in VDMS is the
+The Graph Engine used in VDMS is the
 \textit{Persistent Memory Graph Database} (PMGD).
 PMGD was developed at Intel Labs, and was designed and optimized for
 persistent memory technologies like Intel Optane~\cite{IntelXPoint15}, which
@@ -308,7 +308,7 @@ Facebook's Faiss~\cite{faiss}.
 \subsection{Client Library}
 
 The client library implements TCP/IP based connectors to the VDMS Server,
-similar to most database\cite{memsql, mysql, postgresql}.
+similar to most databases\cite{memsql, mysql, postgresql}.
 Users can connect to VDMS and implement queries using VDMS' API
 by defining JSON commands conforming to the query protocol we have defined.
 The client library provides a simple method that
