@@ -1,29 +1,25 @@
 \section{Conclusion}
-In this paper, we described VDMS design and implementation and 
-show a comprehensive evaluation on our Image Search Application. 
-We use one of the largest publicly available datasets: 
-The Yahoo Flickr Creative Commons 100M (YFCC100M), 
-together with the expansions packs that include 
-machine-generated labels and feature vectors.
-We show how VDMS compares against a combination of 
-industry standard systems, all of which are needed to 
-replicate only a portion of VDMS' functionality. 
-We see improvements up to 364x in certain queries, 
-and an average improvement of about 85x when compared to PostgreSQL.
-When compared to MySQL, we see up to 96x speedup
-and and average improvement of 31x. 
-% Finally, we analyze the different trade-offs of VDMS' 
-% descriptors indexes, a functionality 
-% that fully integrates with the rest of VDMS interface, 
-% providing a powerful and comprehensive API.
-The design of VDMS, which was conceived as a 
-data management system that treats visual entities 
-as first class citizens, can remove inefficiencies 
+In this paper, we described VDMS design and implementation and
+show a comprehensive evaluation on our Image Search Application.
+We use one of the largest publicly available datasets:
+The Yahoo Flickr Creative Commons 100M (YFCC100M),
+together with the expansions packs that include
+machine-generated labels.
+We show how VDMS compares against a combination of
+industry standard systems, all of which are needed to
+replicate only a portion of VDMS' functionality.
+We see improvements up to 364x in certain queries,
+and an average improvement of about 85x when compared to PostgreSQL+Apache.
+When compared to MySQL+Apache, we see up to 96x speedup
+and and average improvement of 31x.
+The design of VDMS, which was conceived as a
+data management system that treats visual entities
+as first class citizens, can remove inefficiencies
 that result from re-purposing and combining solutions
-that were not designed for the job while providing 
-simpler and richer interfaces. 
+that were not designed for the job while providing
+simpler and richer interfaces.
 VDMS' easy-to-use interfaces outperform industry standard systems
 with a set of functionalities which, to the best of our knowledge,
 are not available in any other single data management solution for visual data.
-VDMS was designed for analytics and it can efficiently handle complex queries 
+VDMS was designed for analytics and it can efficiently handle complex queries
 which can simplify the design of future applications that rely on visual data.

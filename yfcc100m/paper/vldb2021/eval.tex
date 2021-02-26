@@ -221,7 +221,7 @@ DB Name & \# Images & \# Connections & \# TagList\\
 \label{table:vdmsnodes}
 \end{table}
 
-\textbf{MySQL-Based System:}
+\textbf{MySQL-Based System (\textit{mysql}):}
 Each MySQL database is created in a similar manner as VDMS
 but the data is represented as three tables, following the relational model:
 1) \textit{images} table: contains one row per image,
@@ -277,7 +277,7 @@ We concluded that the default settings perform better for large databases instea
 setting a limit.
 Therefore, we let MySQL automatically handle the concurrency.
 
-\textbf{PostgreSQL-Based System:}
+\textbf{PostgreSQL-Based System (\textit{postgresql}):}
 Each PostgreSQL database is created in the exact same manner as MySQL
 where data is represented as three tables:
 \textit{images}, \textit{taglist}, and \textit{taglist}.
@@ -388,14 +388,20 @@ metadata of intensive use-cases\cite{IntelXPoint15}.
 \subsection{Images Search}
 \label{images}
 
-In order to evaluate VDMS and the baseline systems on our use-case queries,
+In order to evaluate VDMS and the baseline systems for our use-case queries,
 we implemented 6 queries that filter and retrieve a specific set of images.
-We chose these queries because they represent typical use-cases where a
-cohort of images is to be retrieved and processed from a large corpus of data.
+We chose these queries because they are the same that we use when filtering a
+cohort of images to be retrieved and processed from a large corpus of data.
 As we mentioned before, we took this approach mainly because we wanted to
 replicate systems we have built internally for our use cases,
 and also because of the lack of standard
 benchmarks that are oriented towards visual data retrieval.
+
+The implementation of this evaluation, as well as all the queries, are available
+open-source for reproducibility
+\footnote{https://github.com/luisremis/visual\_storm/tree/master/yfcc100m},
+together with all the results of our evaluation
+\footnote{https://github.com/luisremis/visual\_storm/tree/master/yfcc100m/python/eval/results}.
 
 We use the metadata associated with the images to filter the images.
 We use the \textit{autotags} (as they contain information about the content
@@ -413,7 +419,7 @@ We used both ResNet and Yolov3 for object detection, both of which
 have the requirement of a downsized, lower resolution image as input.
 
 To evaluate the access to metadata and images,
-we use the following queries, modeled after our internal use cases:
+we use the following queries, based on our internal use cases:
 
 \begin{itemize}
 \item \textit{q1} - {\bf {\em 1tag\_resize}}: Retrieve images with one specific autotag and resize to 224x224.
@@ -436,17 +442,13 @@ For instance, we only retrieve images with an autotag \textit{alligator}
 and a probability higher than 92\%.
 These probabilities are both present in VDMS (in the form of a property
 of the \textit{connection} between the image and that \textit{autotag}),
-as well as in MySQL and PostgreSQL (in the form of a column in the
+as well as in \textit{mysql} and \textit{postgresql} (in the form of a column in the
 \textit{autotags} table that links images with tags).
 In the case of VDMS, the query involves a graph traversal query that starts
 from the \textit{autotag} node and ends in the images node,
 following \textit{connections} between the image and that \textit{autotag}).
 In the case of the baseline implementations,
 the query involves JOIN operations between the 3 tables.
-The implementation of this evaluation, as well as all the queries, are available
-under the benchmarks branch of the VDMS project
-\footnote{https://github.com/luisremis/visual\_storm/tree/master/yfcc100m},
-and some examples of the queries can be found in the appendix of this paper.
 
 Also, note that the size of the result (number of images retrieved)
 is linear with the size of the database. This is, if a query returns 100 images
@@ -460,7 +462,8 @@ this experiment return a similar number of images for all database sizes.
 In other words, as the size of the database increase, we increase the probability
 threshold for the queries. We do this for both VDMS and the baselines, of course.
 This way, we remove bottleneck introduced by network bandwidth that would
-otherwise over-complicate the understanding of the results.
+otherwise over-complicate the understanding of the results,
+and play in disadvantage for the baseline implementations.
 
 Image search based on metadata is very expensive in large databases.
 Because of the large volume of data, the processing of the retrieved images
@@ -472,8 +475,8 @@ Consequently, it is key that the data management system used supports
 concurrency, providing multiple workers with data in parallel.
 The ability to scale with the number of simultaneous clients is key for the
 applicability of visual data management systems like VDMS.
-Because of this, we put emphasis on the analysis of concurrency and throughput,
-rather than latency.
+Because of this, \textit{we put emphasis on the analysis of
+\textbf{concurrency and throughput}, rather than latency}.
 
 
 %% ========= Concurrency Comparison Analysis
@@ -485,7 +488,6 @@ rather than latency.
 \includegraphics[width=\columnwidth]{figures/plot_conc_q_1tag_geo_resize_mosaic_results_throughput_db_size}
 \caption{Concurrency Analysis on \textit{q2} (\textit{1tag\_geo\_resize}) from our use-case
 described in the Experimental Setup Section.
-We show each database in different figures for readability reasons.
 The figures show the throughput (images per second) when retrieving
 resized versions of the images, as the number of concurrent clients increases.
 Hardware concurrency (number of physical cores in each system)
@@ -493,10 +495,15 @@ is 56.}
 \label{fig:concurrency_comparison_q2}
 \end{figure}
 
-Figure~\ref{fig:concurrency_comparison_q2} illustrates a concurrency analysis for
-\textit{q2} (\textit{1tag\_geo\_resize}), described above,
+To analyze these results, one needs to compare the full-line (VDMS) versus the
+dotted-lines (two baselines).
+We start with a simple query that involves a simple
+metadata filtering over 1 tag and also geo-location,
+plus pre-processing operations.
+Figure~\ref{fig:concurrency_comparison_q2} illustrates a concurrency analysis
+for \textit{q2} (\textit{1tag\_geo\_resize}), described above,
 using VDMS and the baselines.
-Here we evaluate the scalability of all systems, as the number of concurrent
+Here we evaluate the concurrency of all systems, as the number of concurrent
 clients grows (x-axis) and as the size of the databases grow.
 Figure~\ref{fig:concurrency_comparison_q2} shows throughput (images per second)
 when retrieving resized versions of the images, as the number of
@@ -516,7 +523,7 @@ for the larger databases (50M and 100M) but there is a slight improvement in the
 other databases (1M, 5M, and 10M).
 On the other hand, both baselines seem to deliver less aggregated
 throughput after 16 threads except for the 100M case.
-In this case, PostgreSQL has a performance spike at 32 clients
+In this case, \textit{postgresql} has a performance spike at 32 clients
 and the performance for both baselines is less stable when compared
 to VDMS.
 Note that most of the throughput for the baseline systems are very close to each other.
@@ -540,7 +547,6 @@ VDMS delivers between 8x and 10X the throughput.
 % WAS: begin{figure*}[ht]; textwidth
 \includegraphics[width=\columnwidth]{figures/plot_conc_dbsize_10M_mosaic_results_throughput}
 \caption{Concurrency Analysis for all the queries using the 10M database).
-We show queries in different figures for readability reasons.
 Each figure shows the throughput (images per second) when retrieving
 resized versions of the images as the number of concurrent clients increases.
 Hardware concurrency (number of physical cores in each system)
@@ -553,24 +559,26 @@ which shows the images per second delivered by each system
 for all queries using the 10M database, as the number of concurrent
 clients grows (x-axis). This figure takes a closer look at the
 concurrency for each of the six queries.
-It is obvious that VDMS consistently outperforms each of the baseline
+VDMS consistently outperforms each of the baseline
 systems for queries \textit{q1}, \textit{q2}, \textit{q4},
 and \textit{q6} as concurrency grows. This figure
 shows a similar trend as Figure~\ref{fig:concurrency_comparison_q2}
 when it comes to concurrency.  The
-VDMS throughput continues to increase up to 56 concurrent clients, which is
-the hardware concurrency of the system, for all queries except \textit{q3}.
+VDMS throughput continues to significantly increase up to 56 concurrent clients,
+which is the hardware concurrency of the system, for all queries except \textit{q3}.
 In this query, the throughput seems to decrease after 32 clients
 and both baselines outperform VDMS after 8 concurrent clients.
-Prior to 8 clients, VDMS has a slight advantage over PostgreSQL which has
+Prior to 8 clients, VDMS has a slight advantage over \textit{postgresql} which has
 a major performance improvement at 16 concurrent clients. On the other hand,
-MySQL maintains its improvement in throughput over PostgreSQL and VDMS over all
-concurrent clients. In the case of \textit{q5}, the throughput of the baselines
+\textit{mysql} maintains its improvement in throughput over \textit{postgresql}
+and VDMS over all concurrent clients.
+In the case of \textit{q5}, the throughput of the baselines
 are less aggregated than those of VDMS up to 16 concurrent clients. When it comes
 to low concurrency, the baselines do as good and even better than VDMS with 2 or
-4 concurrent clients.  At 16 concurrent client, the performance of the MySQL baseline
-begin to stabilize while the throughput of PostgreSQL begins to degrade. However, as
-concurrency increases beyond 16 concurrent clients, the difference
+4 concurrent clients.
+At 16 concurrent client, the performance of the \textit{mysql} baseline
+begin to stabilize while the throughput of \textit{postgresql} begins to degrade.
+However, as concurrency increases beyond 16 concurrent clients, the difference
 in throughput becomes clear, with VDMS reaching its peak performance at
 112 concurrent clients.
 
@@ -587,23 +595,22 @@ The reason for this is a lack of operations that would enable this query to be
 run entirely on the server is not an inherent limitation to VDMS but rather
 just a missing implementation.
 In the case of \textit{q4} and \textit{q6}, it is worth noting
-that for the OR operation, there is no need for 2 retrievals.
-Rather, a single retrieval is performed and the result filtered on the client.
-Future release will add more of such operators (AND, OR, etc) in order to prevent
-unnecessary retrievals and extra filtering on the client side.
+that for the OR operation, there is no need for 2 retrievals (2 transactions).
+Rather, a single transaction is performed and the result filtered on the client.
+Future VDMS releases will add more of such operators (AND, OR, etc)
+in order to prevent unnecessary retrievals and extra filtering on the client side.
 
 % WAS: begin{figure*}[ht]; textwidth
 \begin{figure}[ht]
 \includegraphics[width=\columnwidth]{figures/plot_q_2tag_resize_or_mosaic_results_throughput_threads}
 \caption{Concurrency Analysis on \textit{q4} (\textit{2tag\_or\_resize}) from our use-case
 described in the Experimental Setup Section.
-We show different number of concurrent clients in different figures for readability reasons.
 The experiments show the throughput as images per second for
 all systems (VDMS and two baselines) as the database size increases.}
 \label{fig:concurrency_comparison_q4}
 \end{figure}
 
-In the case of \textit{q4} and \textit{q6}, we see the performance for MySQL
+In the case of \textit{q4} and \textit{q6}, we see the performance for \textit{mysql}
 degrades up to 64 concurrent clients, then there's an improvement with 112 concurrent clients.
 To further evaluate the concurrency of these queries with an OR operation, we continue by
 looking at Figure~\ref{fig:concurrency_comparison_q4}. This figure illustrates a concurrency analysis for
@@ -612,13 +619,13 @@ delivered by each system as the database size grows (x-axis). We show different 
 of concurrent clients in different figures for readability reasons.  For this query,
 VDMS delivers higher throughput for databases 1M through 10M for all concurrent clients.
 As the number of clients and the size of database grows, the performance for this query
-drops and the performance of PostgreSQL becomes more comparable to VDMS. Lets look at the
+drops and the performance of \textit{postgresql} becomes more comparable to VDMS. Lets look at the
 case with 32 concurrent clients.
 In this case, the throughput of VDMS drops drastically with
-the 100M database and PostgreSQL outperforms by a small margin.
+the 100M database and \textit{postgresql} outperforms by a small margin.
 As the clients increase, we see this trade-off occurs with the 50M database
 instead of 100M while in the 100M database, VDMS outperforms both baselines.
-In this case, the throughput of PostgreSQL drastically degrades
+In this case, the throughput of \textit{postgresql} drastically degrades
 for the 100M database and the performance of the baseline systems are more comparable.
 
 When considering Figure~\ref{fig:concurrency_comparison_q2}
@@ -628,7 +635,7 @@ that the entire operation (metadata query, image fetching and resizing) happens
 on the server side in the case of VDMS, within a single message
 exchange between the client and the server.
 Many of the inefficiencies that come with combining tools that were designed
-for other use cases simply disappear when building a tool that treats
+without visual data in mind simply disappear when building a tool that treats
 visual entities as first class citizens, as it is the case of VDMS.
 Another reason, which is quantifiable in the figures, is that
 VDMS sends resized (smaller) versions to the client instead of the full image
@@ -650,7 +657,7 @@ practice when it comes to image processing through CNNs \cite{cnn,resnet}.
 
 %% ========= Queries Analysis
 
-\subsubsection{Query Execution Analysis}
+\subsubsection{Scalability Analysis}
 
 \begin{figure}[ht]
 % WAS: begin{figure*}[ht]; textwidth
@@ -660,22 +667,21 @@ described in the Experimental Setup Section.
 We show queries in different figures for readability reasons.
 The experiments show the performance of all systems (VDMS and the two baselines) as the
 database size increases.
-These queries were run using 56 simultaneous clients (nthr = 56),
-and averaged out of 5 runs.}
+These queries were run using 56 simultaneous clients,
+and averaged out of 10 runs.}
 \label{fig:q_throughput_56}
 \end{figure}
 
-The next step in our analysis involved running a set of queries
-(described above in this section),
-to better understand the performance of the systems under different query conditions.
+The next step in our analysis involves looking more deeply at how
+the performance scales with the number of elements in the database.
 Figure~\ref{fig:q_throughput_56} shows the evaluation of the
 queries we analysed for our use case.
 Each figure shows the throughput when retrieving images,
 plus operations applied to images when applicable.
 The experiments show the performance of all systems (VDMS and two baselines) as the
 database size increases in terms of number of images.
-These queries were run using 56 simultaneous clients (nthr = 56),
-and averaged over 5 runs (niter = 5).
+These queries were run using 56 simultaneous clients,
+and averaged over 10 runs.
 To analyze these plots, one needs to compare the full-line (VDMS) versus the
 dotted-lines (two baselines), each plot representing a different query.
 
@@ -687,14 +693,14 @@ for the 100M database.
 For \textit{q3}, we see that VDMS performs best when the database size
 is small (1M images), but as the database size increases,
 the performance degrades as well.
-For this query, MySQL (and in some cases PostgreSQL) outperforms VDMS
+For this query, \textit{mysql} (and in some cases \textit{postgresql}) outperforms VDMS
 for databases larger than 1M.
 This also occurs for \textit{q5} but only for databases larger than 10M.
 This is entirely attributed to the 2-round process needed for this query,
 as we explained before which is more visible in the larger databases.
 It is interesting to note that adding filtering by geo-location
 (\textit{q5}) decreases the performance as the database sizes scales.
-The behaviour is different in the case of \textit{q6},
+The behavior is different in the case of \textit{q6},
 which also filters by geo-location.
 This is attributed to the fact that OR queries involves processing
 larger results, and thus does not benefit from the filtering
@@ -711,15 +717,13 @@ at the type of queries that require visual data access and transformations.
 Figure~\ref{fig:q_throughput_16} shows the measured throughput,
 as images per second, delivered by each system for all queries and databases.
 In comparison to figure~\ref{fig:q_throughput_56},
-when using fewer concurrent clients (nthr = 16),
-the throughput for VDMS for queries \textit{q4} (\textit{2tag\_or\_resize}),
-\textit{q5} (\textit{2tag\_resize\_geo\_and}), and
-\textit{q6} (\textit{2tag\_resize\_geo\_or}) improved by a large margin
-for the 50M and 100M databases.
+when using fewer concurrent clients (16),
+the throughput for VDMS for queries \textit{q4}, \textit{q5}, and \textit{q6}
+improved by a large margin for the 50M and 100M databases.
 In the case of \textit{q4} and \textit{q6},
 the throughput for 50M (and 100M for \textit{q4})
 increase by a large margin which outperforms both baselines while in
-Figure~\ref{fig:q_throughput_56} PostgreSQL slightly performed better than VDMS.
+Figure~\ref{fig:q_throughput_56} \textit{postgresql} slightly performed better than VDMS.
 In the case of \textit{q5}, all systems perform a little differently for databases
 larger than 5M.
 The gaps between the throughput of each system narrows at 10M.
@@ -754,16 +758,16 @@ showing that VDMS scales better than the PostGreSQL baseline.}
 \end{figure*}
 
 Finally, Figure~\ref{fig:summary_postgresql} summarizes the results
-comparing VDMS and PostgreSQL. A comparison with MySQL is
-provided in Figure~\ref{fig:summary_mysql} of the appendix.
-In comparison to PostgreSQL, VDMS provides up to 364x speedup
+comparing VDMS and \textit{postgresql}.
+In comparison to \textit{postgresql}, VDMS provides up to 364x speedup
 (for the case of \textit{q1}),
-and an average improvement in throughput of about 85x. This is
-an impressive improvement over the two baseline systems.
+and an average improvement in throughput of about 85x.
+This is an impressive improvement over the two baseline systems.
 More importantly, we see that the speedup increases as the database size grows,
 showing that VDMS scales better than the baseline systems.
 We also see how \textit{q3} and \textit{q5} have poor performances and scalability
-when compared to the baselines as the database size grows.
+when compared to the baselines as the database size grows, except in the
+case of the largest database (100M), where the baselines performed very poorly.
 This evaluation served the
 purpose of understanding the importance of VDMS server side operators
 that enable more complex queries for our use cases.
@@ -771,13 +775,13 @@ The team will address the missing implementation as part of future work.
 Most of the performance improvements can be attributed to the design
 principles of VDMS, which aims to eliminate the need of combining and
 re-purposing systems that were designed to handle types of date other than visual.
-VDMS, by design, eliminates all the inefficiencies that result
+VDMS, by design, eliminates most of the inefficiencies that result
 from a forced integration of components designed for a
 different range of applications.
 
 Because of space constraints, we are only showing a subset of our evaluation.
-More details about our comprehensive evaluation are available.
-\footnote{https://github.com/luisremis/visual\_storm/tree/master/yfcc100m/python/eval/results}
+More details about our comprehensive evaluation are available
+\footnote{https://github.com/luisremis/visual\_storm/tree/master/yfcc100m/python/eval/results}.
 % TODO. Upload the final version of the plots once we are sure we are not making
 % more modifications.
 
