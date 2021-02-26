@@ -155,7 +155,7 @@ We detail the data representation for each of the systems we implemented:
 For each database size, we created an instance of VDMS using the image/video metadata,
 the machine-generated \textit{autotags} associated with
 each image/video identifier, and the list of 1,570 \textit{autotags}.
-Internally, that information is represented as a property graph,
+Internally, that information is represented as a graph,
 where we have one node for each image, one node for each tag
 (always 1,570 tags), and a connection between each image and its respective tag(s).
 For instance, if an image has four \textit{autotags} assigned,
@@ -260,8 +260,8 @@ increase the amount of memory allocated to internal data structures.
 It is recommended to set the buffer pool size to 60-80\% of the physical
 memory size ~\cite{mysql,mysql_blog}.
 However, the time to build a database increased.
-We later changed  the buffer pool size to a multiple of the default value, i.e. 16x,
-which produced the best results for loading time.
+We later changed  the buffer pool size to be 16x the default value,
+where we saw the best performance.
 
 By default, MySQL uses the available operating system threads to
 execute \textit{n} requests in parallel where \textit{n} is
@@ -292,6 +292,9 @@ When processing the larger databases, additional
 storage may be needed for the tablespace or a diskfull error may occur.
 To avoid this, we allocated a separate SSD disk specifically
 for the tablespace of all databases.
+This was required, specially for 100M database, in order to make the queries
+complete execution without failures, and represented a big disadvantage
+in terms of the disk space footprint during query execution.
 
 By default, PostgreSQL can manage concurrent access to data well using
 Multiversion Concurrency Control (MVCC) and a Serializable Snapshot Isolation
@@ -307,6 +310,8 @@ In the case of VDMS, we did not attempt to tune any
 parameter to avoid unfairness in the comparison against the baselines.
 Unlike the baselines, VDMS can handle the entire YFCC100m dataset
 using the default parameters provided by the implementation.
+
+\subsubsection{Indexes:}
 For all systems, we created indexes over the
 properties we used for search, such as name of
 \textit{autotag}, and geo-location values.
@@ -350,36 +355,21 @@ DB Name & images & autotags & taglist\\
 \label{fig:db_sizes}
 \end{figure}
 
-% \subsubsection{Database Building Time}
-
-% One of the first things we noticed is the difference in the time needed to
-% build each database, where VDMS outperforms MySQL by a large margin
-% but PostgreSQL outperforms VDMS by a large margin as well.
-% This analysis includes only the metadata, as the images are stored
-% in a shared filesystem. Figure~\ref{fig:db_time_size} illustrates the
-% comparison in time to build the databases, and how the speedup
-% is sustained as the database size grows.
-% Key difference in the build times are attributed to the low-level
-% implementation of how MySQL reads and stores data from the files, the
-% optimizations (increased InnoDB pool size, etc.) needed
-% to handle large datasets such as YFCC100M, and the efficiency of PMGD.
-% PostgreSQL Python API can efficiently copy data from files to the database
-% which provides an advantage over VDMS which must insert
-% multiple nodes/connections per image.
-% On average, it took MySQL around $\sim$4x longer to build each database than VDMS,
-% and PostgreSQL was around $\sim$21x faster than VDMS.
-
 \subsubsection{Database Storage Footprint}
 
-% Another important aspect to note is the storage footprint of the databases.
+The Graph Database used by VDMS (PMGD) was designed for performance,
+especially in environments where persistent memory is present.
+This design decision comes as a trade-off for storage footprint, which is
+noticeable in other PMGD evaluation we have run in the past.
+Because PMGD was not optimized for low storage footprint, authors feared that
+any improvement would come at the expenses of a significant increase on
+disk occupancy.
+We measured metadata disk footprint for that reason, and show the results
+in Figure~\ref{fig:db_sizes}.
 PostgreSQL and VDMS require comparable amount of storage for metadata which
 is more than required by MySQL, shown in Figure~\ref{fig:db_sizes}.
 In the case of VDMS, this is space used to store information about
 each node/connection.
-The Graph Database internal to VDMS (called PMGD) was designed for performance,
-especially in environments where persistent memory is present.
-This design decision comes as a trade-off for storage footprint, which is
-noticeable in our results.
 VDMS required 37-41\% more storage than MySQL for storing the same amount
 of metadata. On the other hand, PostgreSQL required 1-4\% more storage than VDMS.
 The storage footprint may become a factor if storage is a limitation, but
