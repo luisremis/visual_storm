@@ -1,38 +1,51 @@
 \section{Introduction}
 \label{intro}
 
-Visual computing workloads performing analytics on videos and/or images
+Visual computing workloads performing analytics on images and/or videos
 have become prolific across a wide range of application domains.
-This is in part due to the growing ability of machine learning (ML) techniques to
-extract information from the visual data which can subsequently be used
+This is in part due to the growing ability of machine learning (ML) techniques
+to extract information from the visual data which can subsequently be used
 for informed decision making \cite{vdms-nips}.
 The insights this information can provide depend on the
-application: retail vendors might be interested in knowing
-which are the most visited areas of their stores using security
-video feeds as input, or a doctor might want know the effect of a
-specific treatment by looking at the changes in size of a tumor from a brain scan.
+application: retail vendors might be interested in knowing which are the most
+visited areas of their stores using security video feeds as input,
+or a doctor might want know the effect of a specific treatment by
+looking at the changes in size of a tumor from a brain scan.
 
 Despite the increasing use of visual data processing,
 there has been very little research on the \textit{management} of visual data.
-Most of the current storage solutions for visual data are
-an ad-hoc collection of tools and systems, that are re-purposed and
-adapted to work with visual data.
+Most of the current storage solutions for visual data are an ad-hoc collection
+of tools and systems, that are re-purposed and adapted to work with visual data.
 The approach of re-purposing and integrating solutions not designed for a task
 results in resource utilization inefficiencies\cite{rasdaman}.
-For example, consider a ML developer constructing a pipeline
-for extracting brain tumor information from existing brain images in a
-classic medical imaging use case.
-This requires assigning consistent
-identifiers for the scans and adding their metadata in
-a relational or key-value database\cite{kumar2017data}.
+The combination of systems is required to manage both \textit{metadata} and
+\textit{visual data}.
+We use \textit{visual data} to refer to any pixel-data (images, videos,
+frames in a video, etc), and feature vectors (a.k.a. descriptors, or embeddings),
+which are representations of the pixel data.
+We use \textit{metadata} to refer to any data that is important within
+the context of specific applications.
+Information about a patient (name, last name, unique identifiers), or
+about a clinic (name, location, etc) are examples of what we refer to
+as \textit{metadata} in the context of a health-care IT system.
+One can think of \textit{metadata} as the data an application would store
+in rows and tables following the relational model.
+
+To illustrate the point on the need for multiple system to build the data
+infrastructure for applications,
+consider a ML developer constructing a pipeline for extracting
+brain tumor information from existing brain images in a classic medical
+imaging use case.
+This requires assigning consistent identifiers for the scans and adding their
+\textit{metadata} in a relational or key-value database\cite{kumar2017data}.
 If the queries require a search over patient information,
 then patients are associated with their brain scans.
 Finally, if the ML pipeline needs images with a different resolution
 than the original, there is additional compute
-diverted towards pre-processing the original images which are typically larger.
+diverted towards pre-processing the original images.
 All these steps require understanding different software
 solutions that provide various functionalities that can then be stitched
-together with a script for this specific use case.
+together with many scripts for this specific use case.
 Moreover, if the pipeline identifies new metadata to be added for
 the tumor images, most databases make it hard to change the schema on the fly.
 As another example, many applications can be studied through the use of large
@@ -43,7 +56,7 @@ machine-generated tags and feature vectors\cite{imagesearch, qin2020similarity}
 for each image, and video summarization.
 For these use-cases, the usual first step consists on selecting a
 subset of the data before running any processing, and a large effort
-is devoted to cleaning and pre-processing the data.
+is devoted to filtering, curating, and pre-processing the data.
 Selecting subsets of data is by itself a time consuming task,
 as it involves loading all metadata into a solution that enables searching
 based on tags (relational database, graph database, csv files, etc), and
@@ -51,7 +64,7 @@ building the necessary pipelines for querying and retrieving the right data.
 
 More generally, data scientists and machine learning developers
 usually end up building an ad-hoc solution that results in a
-combination of databases and file systems to store
+combination of databases and file servers to store
 metadata and visual data (images, videos), respectively \cite{sculley2015hidden}.
 This is integrated with a set of custom scripts that tie multiple systems together,
 unique not only to a specific application/discipline but often
@@ -94,14 +107,57 @@ performance of simple queries.
 
 In order to evaluate VDMS in a realistic use case,
 we use the YFCC100M dataset\cite{Thomee_2016}.
-The YFCC100M is the largest public multimedia collection.
+The YFCC100M dataset is the largest public multimedia collection.
 It contains the metadata of around 99.2 million photos
 and 0.8 million videos from Flickr,
-plus expansion packs that include a variety of multidimensional data,
-all of which were shared under one of the various Creative Commons licenses.
+plus expansion packs \cite{features} that include a variety of multidimensional
+data, all of which were shared under one of the various Creative Commons licenses.
 We have used this dataset for multiple proof of concepts and
 applications within our research lab.
 
-We show how VDMS can be used as a centralize point for data
-management and data access even when having multiple modalities of data:
-Metadata, Image, Videos, and Feature Vectors.
+Overall, this paper makes the following contributions:
+
+\begin{itemize}
+\item We present the design and implementation of the Visual Data Management System.
+To the best of our knowledge, there are no other system capable of
+managing visual data and its metadata behind a unified API
+and that, at the same time, enable applications to operate over visual data
+(images, videos, feature vectors).
+
+\item We introduce the VDMS API in detail, designed for Machine Learning and visual
+data analytics at scale.
+
+\item We use our internal use-cases and implementations of visual data processing
+pipeline to make a comprehensive evaluation between common ad-hoc solutions
+that rely on multiple systems and VDMS.
+
+\item We use the largest public available image dataset, YFCC100m, together
+with machine generated tags for our real-world use case, providing a performance
+evaluation both from the point of view of high concurrency as well as
+scale (the database size, including images and metadata is 12TB in size).
+\end{itemize}
+
+\section{Related Work}
+
+There are several databases and data management systems that focus on enabling
+analytics or combining transactional and analytic workloads over large
+scale data, such as SciDB~\cite{brown2010overview},
+BigTable~\cite{chang2008bigtable}, Shark~\cite{xin2013shark},
+and Vertica~\cite{lamb2012vertica}.
+While these systems do not focus on visual processing as a primary entity,
+they are valuable resources in distributing and analyzing very large scale data.
+A more concrete application involving visual data include
+the Facebook architecture for photos that combine Tao~\cite{tao},
+Haystack~\cite{beaver2010finding}, and f4~\cite{muralidhar2014f4} for metadata,
+hot/recent data, and warm data respectively.
+While the social aspect of Facebook is logically suited to a graph,
+the bulk of their data is already stored in MySQL~\cite{mysql},
+so they chose to develop a graph-aware cache.
+A similar approach was taken by Grail~\cite{fan2015case},
+which argued that a syntactic layer written on top of a relational database
+could answer graph queries.
+Diamond~\cite{huston2004diamond,satyanarayanan2010unique} exploited active
+disks to perform discard-based searching order to shrink the amount of data
+returned to a reasonable size.
+We accomplish the same goal by exploiting persistent memory to store a
+graph database for metadata.

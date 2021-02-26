@@ -21,6 +21,8 @@
 \usepackage{mathtools}
 \usepackage{minted}
 
+% \setlength{\intextsep}{10pt plus 2pt minus 3pt}
+
 %% The following content must be adapted for the final version
 % paper-specific
 \newcommand\vldbdoi{XX.XX/XXX.XX}
@@ -45,9 +47,9 @@
 \author{Luis Remis}
 \affiliation{%
   \institution{ApertureData}
+  \titlenote{Luis Remis was a Research Scientist at Intel Labs until late 2019. Most of this work was done while at Intel Labs.}
 }
 \email{luis@aperturedata.io}
-%\titlenote{Luis was a Research Scientist at Intel Labs until late 2019. Most of this work was done while at Intel Labs.}
 
 \author{Chaunt\'e W. Lacewell}
 \affiliation{%
@@ -67,16 +69,16 @@ and consequently gain in efficiency simply because
 we are using a system designed for the job.
 To demonstrate this, we use one of the largest available
 public datasets (YFCC100M),
-with 99+ million images and videos, plus add-ons that include
-machine-generated tags and 4K dimensional feature vectors,
-for a total of $\sim$13TB of data.
+with 100 million images and videos, plus additional data including
+machine-generated tags, for a total of about $\sim$13TB of data.
 VDMS differs from existing data management systems
 due to its focus on supporting machine learning and
 data analytics pipelines that rely on images, videos, and feature vectors,
 treating these as first class citizens.
 We demonstrate how VDMS outperforms well-known and widely used
 systems for data management by up to $\sim$364x, with
-an average improvement of about 85x for our use-cases, and particularly at scale.
+an average improvement of about 85x for our use-cases, and particularly at scale,
+for a \textit{image search} engine implementation.
 At the same time, VDMS simplifies the process of data preparation and data access,
 and provides functionalities non-existent in alternative options.
 \end{abstract}
@@ -114,6 +116,7 @@ The source code, data, and/or other artifacts have been made available at \url{\
 \input{eval.tex}
 \input{conclusion.tex}
 \input{acks.tex}
+\input{legal.tex}
 
 \clearpage
 
@@ -123,11 +126,9 @@ The source code, data, and/or other artifacts have been made available at \url{\
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{vdms-vldb2021}
 
-\input{legal.tex}
 
 \clearpage
 
-\input{appendix}
 
 \end{document}
 \endinput

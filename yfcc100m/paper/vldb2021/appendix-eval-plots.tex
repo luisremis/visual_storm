@@ -10,7 +10,7 @@ clients (nthr = 16), the throughput for VDMS for queries \textit{q4} (\textit{2t
 \textit{q6} (\textit{2tag\_resize\_geo\_or}) improved by a large margin 
 for the 50M and 100M databases. 
 In the case of \textit{q4} and \textit{q6}, the throughput for 50M (and 100M for \textit{q4})
-increase by a large margin which outperforms both baselines while in figure~\ref{fig:q_throughput_56}
+increase by a large margin which outperforms both baselines while, in figure~\ref{fig:q_throughput_56},
 PostgreSQL slightly performed better than VDMS. 
 In the case of \textit{q5}, all systems perform a little differently for databases
 larger than 5M.  The gaps between the throughput of each system narrows at 10M.  
@@ -33,7 +33,7 @@ Figure~\ref{fig:summary_mysql} summarizes the results
 comparing VDMS and MySQL. We see up to 96x speedup (for the case of \textit{q2}),
 and an average improvement in throughput of about 31x.
 We also see how \textit{q3} and \textit{q5} have poor performances and scalability
-as the database size grows same as shown in Figure~\ref{fig:summary_postgresql}.
+as the database size grows, same as shown in Figure~\ref{fig:summary_postgresql}.
 Considering all other queries (\textit{q1}, \textit{q2}, \textit{q4}, and \textit{q6}), 
 VDMS provides at least 3x speedup in throughput.
 
