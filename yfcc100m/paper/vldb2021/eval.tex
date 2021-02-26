@@ -12,8 +12,7 @@ before proceeding with the data processing (such as neural network training).
 In order to evaluate the different aspects of the performance on the
 image search, we have built different baselines following the methodology
 used in the industry, and following what we have done in the past
-in order to solve the data search problem,
-which we describe in Section \ref{images}.
+in order to build an image search engine, which we describe in Section \ref{images}.
 % We have also included performance evaluation on the Video and Feature Vectors
 % functionality in the appendix for further reference, together with a
 % description of the key aspects of those functionalities.
@@ -44,8 +43,8 @@ each tag to indicate certainty of the classification.
 This is, an image can have the \textit{autotags} "people", "person", "party",
 "outdoor", and each \textit{autotag} assigned will be accompanied by a
 probability of that \textit{autotags} being present in that image/frame.
-We have also used feature vectors generated for every image and first frame
-of every video \cite{features} to implement a similarity search.
+% We have also used feature vectors generated for every image and first frame
+% of every video \cite{features} to implement a similarity search.
 Given that there is no standard benchmark oriented towards visual data queries,
 we have built a series of queries to filter this dataset that is modeled after
 our internal use cases for many of the mentioned applications we have worked
@@ -57,11 +56,16 @@ with.
 Given that there are no other open-source systems that provide similar
 functionality and interfaces as VDMS (i.e., transactionally dealing with images
 and metadata behind a single interface), we have implemented two equivalent
-visual data management system as baselines, comprised of a combination of
-widely available, off-the-shelf components.
+visual data management system as baselines,
+desing specifically for the image search use case,
+and comprised of a combination of widely available, off-the-shelf components.
 The first baseline uses MySQL Server 5.7 (for storing metadata),
 Apache Web Server 2.4.18 (as interface for image access), and
 OpenCV 3.3 (to provide pre-processing operations on images).
+We chose Apache Web Server to work as a file server (serving the image files),
+because it provides the lowest possible overhead
+(when compared to other object store system), at the expenses of providing less
+functionality (authentication, data integrity checking, etc).
 The other baseline system replaces the MySQL Server 5.7 with a
 most advanced open-source relational database, PostgreSQL 9.5 \cite{postgresql}.
 We decided to use relational databases in the baseline systems instead of
@@ -72,15 +76,17 @@ the most common tools used for storing and querying metadata
 \begin{itemize}
     \item Relational databases support atomicity, consistency, isolation,
     and durability (ACID) while non-relational may compromise some ACID properties.
-    \item The YFCC100m data is clearly structured.
-    \item We need to efficiently collate and return metadata records.
+    \item The YFCC100m data is clearly structured, and can be modeled with relatively ease with a relational database.
+    \item We need to efficiently collate and return metadata records,
+    and SQL engines are very mature and optimized for that task.
 \end{itemize}
 
 The baseline implementations only partially replicate the functionalities
 that VDMS offers when it comes to image and metadata handling, and it was
 built for the purpose of an ad-hoc image search implementation.
 The baseline implementations are based upon internal tools used for ML-based
-pipelines for media, the common practice in the industry \cite{haystack, tao}.
+pipelines for visual data, which is common practice
+in the industry \cite{haystack, tao}.
 We have implemented a set of client-side applications that take care
 of retrieving the components from the different systems, and applies
 pre-processing operations when needed.
@@ -98,7 +104,7 @@ sure MySQL and PostgreSQL had no disadvantage. Previous evaluation
 indicated smaller footprint in the case of VDMS when
 compared to similar baselines based on MySQL.
 To build both MySQL and PostgreSQL on the same machine,
-we stored each relational database on separate SSD drives.
+we stored each database on separate SSD drives.
 Other than the difference in DRAM space and storage needed for two baselines,
 the machines are identical.
 The client application running the queries and measuring round-trip time
@@ -127,14 +133,13 @@ and outside the scope of this evaluation.
 For this experiment, in the case of VDMS we simply use a similar
 attached SSD disk to store metadata.
 Even if PMGD, the graph database used by VDMS, is designed for persistent memory,
-it can deliver good performance when using SSDs directly, while still
-providing ACID-compliant transactions.
+it can deliver good performance when using SSDs directly.
 
-For the metadata, we built VDMS, MySQL, and PostgreSQL databases
-using the YFCC100M dataset with incremental database sizes.
+For the metadata, we built VDMS, MySQL, and PostgreSQL databases using
+the YFCC100M dataset with incremental database sizes to study the effects at scale.
 For simplicity, we named the database based on the approximate number of images
 it contains, as follows: 1M, 5M, 10M, 50M, 100M.
-The databases have comparable number of elements.
+The baseline systems have comparable number of elements.
 The exact number of images/elements in each database are shown in
 Table \ref{table:vdmsnodes} and \ref{table:mysqltables}.
 The differences can be attributed to minor failures in data
@@ -144,7 +149,7 @@ In our set up, that difference is very small: less than 0.253\% in terms of
 number of elements (images and/or metadata information).
 
 \subsubsection{Data Representation}
-
+We detail the data representation for each of the systems we implemented:
 
 \textbf{VDMS:}
 For each database size, we created an instance of VDMS using the image/video metadata,
@@ -216,7 +221,7 @@ DB Name & \# Images & \# Connections & \# TagList\\
 \label{table:vdmsnodes}
 \end{table}
 
-\textbf{MySQL/Baseline 1:}
+\textbf{MySQL-Based System:}
 Each MySQL database is created in a similar manner as VDMS
 but the data is represented as three tables, following the relational model:
 1) \textit{images} table: contains one row per image,
@@ -272,7 +277,7 @@ We concluded that the default settings perform better for large databases instea
 setting a limit.
 Therefore, we let MySQL automatically handle the concurrency.
 
-\textbf{PostgreSQL (Baseline 2):}
+\textbf{PostgreSQL-Based System:}
 Each PostgreSQL database is created in the exact same manner as MySQL
 where data is represented as three tables:
 \textit{images}, \textit{taglist}, and \textit{taglist}.

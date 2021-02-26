@@ -18,19 +18,36 @@ Most of the current storage solutions for visual data are an ad-hoc collection
 of tools and systems, that are re-purposed and adapted to work with visual data.
 The approach of re-purposing and integrating solutions not designed for a task
 results in resource utilization inefficiencies\cite{rasdaman}.
-For example, consider a ML developer constructing a pipeline for extracting
+The combination of systems is required to manage both \textit{metadata} and
+\textit{visual data}.
+We use \textit{visual data} to refer to any pixel-data (images, videos,
+frames in a video, etc), and feature vectors (a.k.a. descriptors, or embeddings),
+which are representations of the pixel data.
+We use \textit{metadata} to refer to any data that is important within
+the context of specific applications.
+Information about a patient (name, last name, unique identifiers), or
+about a clinic (name, location, etc) are examples of what we refer to
+as \textit{metadata} in the context of a health-care IT system.
+One can think of \textit{metadata} as the data an application would store
+in rows and tables following the relational model.
+
+To illustrate the point on the need for multiple system to build the data
+infrastructure for applications,
+consider a ML developer constructing a pipeline for extracting
 brain tumor information from existing brain images in a classic medical
 imaging use case.
 This requires assigning consistent identifiers for the scans and adding their
-metadata in a relational or key-value database\cite{kumar2017data}.
+\textit{metadata} in a relational or key-value database\cite{kumar2017data}.
+If the queries require a search over patient information,
+then patients are associated with their brain scans.
 If the queries require a search over patient information,
 then patients are associated with their brain scans.
 Finally, if the ML pipeline needs images with a different resolution
 than the original, there is additional compute
-diverted towards pre-processing the original images which are typically larger.
+diverted towards pre-processing the original images.
 All these steps require understanding different software
 solutions that provide various functionalities that can then be stitched
-together with a script for this specific use case.
+together with many scripts for this specific use case.
 Moreover, if the pipeline identifies new metadata to be added for
 the tumor images, most databases make it hard to change the schema on the fly.
 As another example, many applications can be studied through the use of large
@@ -41,7 +58,7 @@ machine-generated tags and feature vectors\cite{imagesearch, qin2020similarity}
 for each image, and video summarization.
 For these use-cases, the usual first step consists on selecting a
 subset of the data before running any processing, and a large effort
-is devoted to cleaning and pre-processing the data.
+is devoted to filtering, curating, and pre-processing the data.
 Selecting subsets of data is by itself a time consuming task,
 as it involves loading all metadata into a solution that enables searching
 based on tags (relational database, graph database, csv files, etc), and
@@ -49,7 +66,7 @@ building the necessary pipelines for querying and retrieving the right data.
 
 More generally, data scientists and machine learning developers
 usually end up building an ad-hoc solution that results in a
-combination of databases and file systems to store
+combination of databases and file servers to store
 metadata and visual data (images, videos), respectively \cite{sculley2015hidden}.
 This is integrated with a set of custom scripts that tie multiple systems together,
 unique not only to a specific application/discipline but often
@@ -92,11 +109,11 @@ performance of simple queries.
 
 In order to evaluate VDMS in a realistic use case,
 we use the YFCC100M dataset\cite{Thomee_2016}.
-The YFCC100M is the largest public multimedia collection.
+The YFCC100M dataset is the largest public multimedia collection.
 It contains the metadata of around 99.2 million photos
 and 0.8 million videos from Flickr,
-plus expansion packs that include a variety of multidimensional data,
-all of which were shared under one of the various Creative Commons licenses.
+plus expansion packs \cite{features} that include a variety of multidimensional
+data, all of which were shared under one of the various Creative Commons licenses.
 We have used this dataset for multiple proof of concepts and
 applications within our research lab.
 
