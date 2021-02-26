@@ -65,7 +65,7 @@ OpenCV 3.3 (to provide pre-processing operations on images).
 The other baseline system replaces the MySQL Server 5.7 with a
 most advanced open-source relational database, PostgreSQL 9.5 \cite{postgresql}.
 We decided to use relational databases in the baseline systems instead of
-non-relational databases because of their madurity, and also because it is
+non-relational databases because of their maturity, and also because it is
 the most common tools used for storing and querying metadata
 ~\cite{Jatana2012, li_2019}:
 
@@ -94,7 +94,7 @@ for a total of 112 logical cores per server.
 The server hosting MySQL and PostgreSQL has 256GB of DDR4 DRAM,
 while the server hosting VDMS has 194GB of DDR4 DRAM.
 We decided to run the VDMS server in the machine with less DRAM to make
-sure MySQL and PostgreSQL had no disadvantage, and because previous evaluation
+sure MySQL and PostgreSQL had no disadvantage. Previous evaluation
 indicated smaller footprint in the case of VDMS when
 compared to similar baselines based on MySQL.
 To build both MySQL and PostgreSQL on the same machine,
@@ -107,7 +107,7 @@ a 10GB back-plane switch, same as both servers.
 The client application was implemented using Python 3 for both VDMS and the baselines.
 Figure~\ref{fig:systems} shows a logical view of the difference between the
 interaction of the client application (retrieves metadata and
-images) with VDMS (left) and the MySQL/PostgreSQL baselines (right).
+images) with VDMS (left), the PostgreSQL baseline (middle), and the MySQL baseline (right).
 
 It is worth noting that the images are stored in a shared repository
 (ext4 filesystem on a RAID 6 configuration of 16TB) that both
@@ -383,7 +383,7 @@ overall database size even if we have a 41\% increase in metadata size.
 For example, the largest database (both metadata and images) we built
 (100M) has around 230GB of metadata and 12TB of images.
 In systems where persistent memory is a scarce resource,
-the increased storage foot print of PMGD may represent a challenge.
+the increased storage footprint of PMGD may represent a challenge.
 On the other hand, persistent memory is expected to be available
 in the order of TBs per server, which should fit the
 metadata of intensive use-cases\cite{IntelXPoint15}.
@@ -492,9 +492,9 @@ rather than latency.
 described in the Experimental Setup Section.
 We show each database in different figures for readability reasons.
 The figures show the throughput (images per second) when retrieving
-resized versions of the images, as the number of concurrent clients increases
+resized versions of the images, as the number of concurrent clients increases.
 Hardware concurrency (number of physical cores in each system)
-is shown with a blue vertical line (hw-concurrency = 56).}
+is 56.}
 \label{fig:concurrency_comparison_q2}
 \end{figure}
 
@@ -527,8 +527,8 @@ to VDMS.
 Note that most of the throughput for the baseline systems are very close to each other.
 This is mostly an effect of the log-scale used, which is needed to clearly
 depict the difference between VDMS and the baselines.
-Here, the baselines are the full architecture described in
-Figure~\ref{fig:systems} (right).
+Here, the baselines are the full architectures described in
+Figure~\ref{fig:systems} (middle and right).
 
 All queries run a resize operation on the image,
 an operation that requires decoding, resizing, and encoding the image
@@ -549,7 +549,7 @@ We show queries in different figures for readability reasons.
 Each figure shows the throughput (images per second) when retrieving
 resized versions of the images as the number of concurrent clients increases.
 Hardware concurrency (number of physical cores in each system)
-is shown with a blue vertical line (hw-concurrency = 56).}
+is 56.}
 \label{fig:concurrency_comparison_10M}
 \end{figure}
 
@@ -574,7 +574,7 @@ concurrent clients. In the case of \textit{q5}, the throughput of the baselines
 are less aggregated than those of VDMS up to 16 concurrent clients. When it comes
 to low concurrency, the baselines do as good and even better than VDMS with 2 or
 4 concurrent clients.  At 16 concurrent client, the performance of the MySQL baseline
-begin to stabilizes while the throughput of PostgreSQL begins to degrade. However, as
+begin to stabilize while the throughput of PostgreSQL begins to degrade. However, as
 concurrency increases beyond 16 concurrent clients, the difference
 in throughput becomes clear, with VDMS reaching its peak performance at
 112 concurrent clients.
@@ -686,7 +686,7 @@ dotted-lines (two baselines), each plot representing a different query.
 
 For \textit{q1} and \textit{q2}, we can appreciate higher performance being delivered by
 VDMS when compared to the baselines, and how this improvement is maintained
-as the size of the database increase while
+as the size of the database increase while,
 on the other hand, the baseline implementations have a drop in performance
 for the 100M database.
 For \textit{q3}, we see that VDMS performs best when the database size
@@ -781,9 +781,7 @@ from a forced integration of components designed for a
 different range of applications.
 
 Because of space constraints, we are only showing a subset of our evaluation.
-
-We are making available the all available  of For more details about our comprehensive evaluation.
-available
+More details about our comprehensive evaluation are available.
 \footnote{https://github.com/luisremis/visual\_storm/tree/master/yfcc100m/python/eval/results}
 % TODO. Upload the final version of the plots once we are sure we are not making
 % more modifications.
