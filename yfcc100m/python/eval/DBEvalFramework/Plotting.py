@@ -121,7 +121,7 @@ class Plotting(object):
         plt.xlabel(xlabel, fontsize=12)
         plt.ylabel(ylabel, fontsize=12)
 
-        if len(engines) > 2 or len(n_queries > 2):
+        if len(engines) > 2 or n_queries > 2:
             plt.legend(bbox_to_anchor=(0, -0.15),
                        loc="upper left",
                        # mode="expand",
