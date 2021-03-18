@@ -1,12 +1,7 @@
 import argparse
 import time
 
-from DBEvalFramework import EvalFramework
-
-def main(args):
-
-    e = EvalFramework.EvalFramework(args.in_file)
-    e.plot_all(folder=args.out_folder)
+from dbeval import EvalTool
 
 def get_args():
     obj = argparse.ArgumentParser()
@@ -28,6 +23,11 @@ def get_args():
         exit()
 
     return params
+
+def main(args):
+
+    e = EvalTool.EvalTool(args.in_file)
+    e.plot_all(folder=args.out_folder)
 
 if __name__ == '__main__':
     args = get_args()
