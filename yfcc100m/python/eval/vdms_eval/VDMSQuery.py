@@ -506,7 +506,8 @@ class VDMSQuery(object):
 
         out_dict = {
             'response_len':  len(decoded_images),
-            'response_time': total_time
+            'response_time': total_time,
+            'metadata_perc': 0,
         }
 
         if return_images:

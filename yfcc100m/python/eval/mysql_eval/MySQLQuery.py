@@ -189,6 +189,7 @@ class MySQL(object):
                                      lat, long, range_dist,
                                      comptype=comptype,
                                      return_responses=True)
+        metadata_time = time.time() - start
 
         img_array = []
         cols = ['line_number', 'download_url', 'id',
@@ -250,7 +251,8 @@ class MySQL(object):
 
         out_dict = {
             'response_len':  len(img_array),
-            'response_time': total_time
+            'response_time': total_time,
+            'metadata_perc': metadata_time / total_time,
         }
 
         if return_images:
