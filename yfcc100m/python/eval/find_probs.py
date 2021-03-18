@@ -10,8 +10,6 @@ from mysql_eval  import MySQLQuery
 from memsql_eval import MemSQLQuery
 from vdms_eval   import VDMSQuery
 
-from DBEvalFramework import EvalFramework
-
 VDMS_PORT_MAPPING = {'100k': 55500, '500k': 55405,
                      '1M':   55501, '5M':   55450,
                      '10M':  55510, '50M':  55000,
@@ -134,8 +132,8 @@ def main(params):
     # print('DB_SIZE: {}'.format(params.db_name))
     # print("============================\n")
 
-    desire_results = 200
-    error = 0.3
+    desire_results = 2000
+    error = 0.2
 
     result_dic = {}
 
@@ -172,7 +170,7 @@ def main(params):
             for i in range(len(query_args["probs"])):
                 query_args["probs"][i] = prob
 
-            if prob < 0.1:
+            if prob < 0.001:
                 break
 
             # print("prob_min: ", prob_min, "prob_max:", prob_max)
