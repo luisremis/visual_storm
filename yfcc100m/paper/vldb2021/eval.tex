@@ -57,7 +57,7 @@ Given that there are no other open-source systems that provide similar
 functionality and interfaces as VDMS (i.e., transactionally dealing with images
 and metadata behind a single interface), we have implemented two equivalent
 visual data management system as baselines,
-desing specifically for the image search use case,
+design specifically for the image search use case,
 and comprised of a combination of widely available, off-the-shelf components.
 The first baseline uses MySQL Server 5.7 (for storing metadata),
 Apache Web Server 2.4.18 (as interface for image access), and
@@ -280,7 +280,7 @@ Therefore, we let MySQL automatically handle the concurrency.
 \textbf{PostgreSQL-Based System (\textit{postgresql}):}
 Each PostgreSQL database is created in the exact same manner as MySQL
 where data is represented as three tables:
-\textit{images}, \textit{taglist}, and \textit{taglist}.
+\textit{images}, \textit{taglist}, and \textit{autotags}.
 PostgreSQL works well out-of-box and optimizations were not necessary,
 as in MySQL, to load or execute queries.
 When executing queries for larger databases,
@@ -546,7 +546,7 @@ VDMS delivers between 8x and 10X the throughput.
 \begin{figure}[ht]
 % WAS: begin{figure*}[ht]; textwidth
 \includegraphics[width=\columnwidth]{figures/plot_conc_dbsize_10M_mosaic_results_throughput}
-\caption{Concurrency Analysis for all the queries using the 10M database).
+\caption{Concurrency Analysis for all the queries using the 10M database.
 Each figure shows the throughput (images per second) when retrieving
 resized versions of the images as the number of concurrent clients increases.
 Hardware concurrency (number of physical cores in each system)
