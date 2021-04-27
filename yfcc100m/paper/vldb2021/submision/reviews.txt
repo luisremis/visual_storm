@@ -1,0 +1,117 @@
+View Reviews
+Paper ID
+1971
+Paper Title
+Using VDMS to Index and Search 100M Images
+Track Name
+Industry
+Reviewer #1
+Questions
+
+    6. Overall Rating
+        Weak Accept
+    8. Summary of the paper (what is being proposed and in what context) and a brief justification of your overall recommendation. One solid paragraph.
+        The paper presents Visual Data Management System (VDMS); a system to store, index, process and query visual data and their metadata with high efficiency with focus to support machine learning applications.
+        VDMS allows to search based on tags (both human and machine generated), feature vectors and metadata (such as location, names), while manipulating the resulting visual information (e.g., resize) through a common API.
+        VDMS architecture design and implementation are explained, with emphasis on the VDMS API, Graph Engine, Visual Compute Module and Client Library.
+        VDMS is evaluated against two common solutions, which are considered as baselines, on the YFCC100M dataset, consisting of 12TB of visual data and metadata. The evaluation shows sigificant improvements (364x) for certain queries and 31x improvement on average.
+    9. Three (or more) strong points about the paper (Please be precise and explicit; clearly explain the value and nature of the contribution).
+        S1: The paper is well-written and the components of VDMS are clearly explained. Its implementation is open-sourced: https://github.com/IntelLabs/vdms
+        S2: The system can benefit several ML image-based applications that require selecting a subset of large image datasets.
+        S3: The experiments compare the proposed system with two baselines, based on MySQL and PostgreSQL with a real-world large dataset (12TB). Experimental results show significant improvement over baselines, in terms of concurrency and throughput.
+    10. Three (or more) weak points about the paper (Please clearly indicate whether the paper has any mistakes, missing related work, or results that cannot be considered a contribution; write it so that the authors can understand what is seen as negative).
+        W1: The evaluation reports on 6 queries based on internal use-cases.
+        W2: A summary of what queries are or not supported or part of future work will be helpful to clarify which applications can benefit from VDMS.
+        W3: Minor typo
+    11. Novelty (Please give a high novelty ranking to papers on new topics, opening new fields, or proposing truly new ideas; assign medium ratings to delta papers and papers on well-known topics but still with some valuable contribution).
+        Novel
+    12. Significance
+        Improvement over existing work
+    13. Technical Depth and Quality of Content
+        Solid work
+    14. Experiments
+        Very nicely support the claims made in the paper
+    16. Presentation
+        Excellent: careful, logical, elegant, easy to understand
+    17. Detailed Evaluation (Contribution, Pros/Cons, Errors); please number each point.
+        The paper describes VDMS, a system to manage visual data with ACID guarantees. Its architecture features a graph model abstraction with a unified API, graph engine based on PMGD and Visual Compute Module which allows interacting with visual data. The experimental results show significant improvements over traditional approaches.
+
+        D1 (W1): Although VDMS mentions that it supports Visual Feature Vectors as first class citizens in Section 3.3, the queries used in evaluation do not include an example.
+        D2 (W1): All queries involve “resize” operation, which is expensive for the baselines since it is happening on the client side. A simplistic query without resizing can show how the graph model performs against traditional RDS DBs (i.e., will show that VDMS has comparable performance even for such use-case without "visual manipulation").
+        D3 (W2): It is not clear which queries are supported or not. The queries used for evaluation are based on tags and geo search. What about visual-based queries? For example, is image similarity search based on Visual Feature Vectors within a geographical region supported?
+        D4 (W2): Section 4.3.1, paragraph 5, mentions that INTERSECTION operation is not yet implemented at the server side. A discussion on current limitations/future work for such queries or queries such as in D3, will be better to be clarified in paper.
+        D5 (W3): Section 4.2 paragraph 1, desing
+
+Reviewer #4
+Questions
+
+    6. Overall Rating
+        Weak Reject
+    8. Summary of the paper (what is being proposed and in what context) and a brief justification of your overall recommendation. One solid paragraph.
+        Despite the importance and popularity of data science projects working on visual data, storage and preprocessing of images, videos, and their metadata often requires data scientist teams to build ad-hoc solutions for their use. Visual Data Management System (VDMS) combines the strength of existing toolchains from data storage and image processing, aiming to provide common functionalities of retrieval, preprocessing, and metadata management in data science. It outperforms naïve combinations that store metadata in relational databases and perform preprocessing at the client side.
+    9. Three (or more) strong points about the paper (Please be precise and explicit; clearly explain the value and nature of the contribution).
+        S1. VDMS integrates the metadata management and typical image preprocessing related to data sciences into one integrated system that improves its usability and could substitute customized solutions built for different types of image/video-related projects.
+        S2. VDMS can push data preprocessing and selection at the server side, reducing redundant data transfer and network round trips when data scientists were to perform exploration interactively.
+        S3. VDMS demonstrates good performance with a public large image dataset and with common queries pattern that filters candidates with metadata and resize the data upon retrieval.
+    10. Three (or more) weak points about the paper (Please clearly indicate whether the paper has any mistakes, missing related work, or results that cannot be considered a contribution; write it so that the authors can understand what is seen as negative).
+        W1. The system lacks technical novelty. How the authors combined OpenCV, TileDB, and their graph engine PMGD seems to be relatively simple. (D1)
+
+        W2. As admitted by the authors, the performance gain is mainly due to that, with VDMS, users can retrieve data with only a single network round trip. (D2)
+
+        W3. The queries used in evaluations are simple, yet operations that filter images with two tags are not supported natively. It raises concerns regarding the completeness of the system and the additional benefits users could gain by switching from their ad-hoc solutions to VDMS. (D3)
+    11. Novelty (Please give a high novelty ranking to papers on new topics, opening new fields, or proposing truly new ideas; assign medium ratings to delta papers and papers on well-known topics but still with some valuable contribution).
+        Novelty unclear
+    12. Significance
+        Improvement over existing work
+    13. Technical Depth and Quality of Content
+        Syntactically complete but with limited contribution
+    14. Experiments
+        OK, but certain claims are not covered by the experiments
+    16. Presentation
+        Excellent: careful, logical, elegant, easy to understand
+    17. Detailed Evaluation (Contribution, Pros/Cons, Errors); please number each point.
+        D1. The proposed solution seems to use the functionalities of the existing systems as it is. Authors should provide more original ideas or more innovative designs. For example, providing optimizations that specifically target visual data or query patterns associated could have been more meaningful to the research communities and convince users to replace their customized solution to VDMS.
+        D2. Both baselines are similar in architecture, and the evaluation has not effectively highlighted the performance gain of other design choices authors made in VDMS, except that the VDMS server process both metadata operation and image operation within only one round of communication with clients. For example, benchmarking systems can be built to test in isolation the improvement on metadata handling.
+        D3. The paper should detail the types of queries, and image preprocessing it supports, as this being “one of the most differentiating aspects” as mentioned by them. And for the selection of operations supported, authors need to argue for their decision in the application contexts.
+
+        D4. Data scientists commonly perform data exploration on raw data and interactively curate their datasets for downstream tasks like model training. VDMS could design new mechanisms to support interactive analysis, which would be beneficial.
+
+        D5. In terms of scalability, the paper only shows that VDMS can handle large datasets, yet it is not known how VDMS can scale horizontally with more computation resources. For more complex logic of image preprocessing, VDMS will suffer from its single server capacity.
+
+Reviewer #5
+Questions
+
+    6. Overall Rating
+        Weak Accept
+    8. Summary of the paper (what is being proposed and in what context) and a brief justification of your overall recommendation. One solid paragraph.
+        This paper proposes a DBMS that handles visual data as a first-class citizen (called VDMS). Unlike DBMS’s where images or videos are simply considered blobs, VDMS supports computation on these objects and provides a graph model abstraction with ACID properties. The graph engine uses persistent memory, although the experiments do not use it. Extensive experiments are performed to compare VDMS with MySQL and PostgreSQL on the YFCC100m dataset and show how VDMS is more scalable in most scenarios. While VDMS is a valuable addition to traditional database systems, the paper can also be improved with more technical details and perhaps a more succinct experiments section.
+    9. Three (or more) strong points about the paper (Please be precise and explicit; clearly explain the value and nature of the contribution).
+        S1: VDMS is a valuable addition to traditional DBMS’s where images and videos are considered first-class citizens. All of its code is open-sourced, which is a big plus.
+        S2: VDMS provides a novel graph model abstraction specialized for visual data and guarantees ACID properties.
+        S3: The experiments are extensive and make an apples-to-apples comparison with MySQL and PostGreSQL.
+    10. Three (or more) weak points about the paper (Please clearly indicate whether the paper has any mistakes, missing related work, or results that cannot be considered a contribution; write it so that the authors can understand what is seen as negative).
+        W1: The technical description of VDMS is rather short (4 pages) and is missing critical details like how the ACID properties are guaranteed.
+        W2: The experiments, on the other hand, seem unnecessarily long with redundant-looking results.
+        W3: Some minor typos.
+    11. Novelty (Please give a high novelty ranking to papers on new topics, opening new fields, or proposing truly new ideas; assign medium ratings to delta papers and papers on well-known topics but still with some valuable contribution).
+        Novel
+    12. Significance
+        The paper is going to start a new line of research and products
+    13. Technical Depth and Quality of Content
+        Solid work
+    14. Experiments
+        Very nicely support the claims made in the paper
+    16. Presentation
+        Reasonable: improvements needed
+    17. Detailed Evaluation (Contribution, Pros/Cons, Errors); please number each point.
+        D1: VDMS is a valuable contribution to Database systems where it takes some first important steps to handle visual data as a first-class citizen instead of considering it a blob of information. However, the description of VDMS is rather short (only 4 pages), and some critical technical details are missing. In particular, what are the technical challenges for supporting ACID properties using the graph model abstraction? Are the solutions analogous to RDBMS’s? Does VDMS also support crash recovery like an RDBMS? What are the key challenges for implementing the new visual object computations?
+
+        D2: The coverage of persistent memory is underwhelming because persistent memory is never used in the experiments. What is the key advantage of using persistent memory and how is it more suitable for visual data? Why not add experiments comparing VDMS with and without using PMGD?
+
+        D3: The experiments section seems unnecessarily long, yet missing some important details. All the experiments are performed on images and do not handle videos or feature values at all. For example, video operations may include interval operations or video clip retrieval. Some parts seem redundant, e.g., the description of Figure 9 seems near-identical to that of Figure 8.
+
+        D4: There are some minor typos.
+        Page 1: “need for multiple system” -> “need for multiple systems” ?
+        Page 5: “desing specifically” -> “designed specifically” ?
+        Page 7: “images, taglist, and taglist” -> “images, taglist, and autotags” ?
+        Page 10, Figure 6: “10M database).” -> “10M database”
