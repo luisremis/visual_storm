@@ -1,0 +1,61 @@
+\documentclass[11pt]{proposalnsf}
+\usepackage{times}
+\usepackage{mathptmx}
+\usepackage{epsfig}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{listings}
+\usepackage{array}
+\usepackage[noend,nofillcomment]{algorithm2e}
+\usepackage{verbatim}
+%\usepackage{algorithmic}
+%\usepackage{amsfonts}
+%\usepackage{lineno}
+\usepackage{ifthen}
+\usepackage{booktabs}
+
+\usepackage{color}
+
+\usepackage{multirow}
+\usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
+
+\makeatletter
+\def\tightitemize{\ifnum \@itemdepth >3 \@toodeep\else \advance\@itemdepth \@ne
+\edef\@itemitem{labelitem\romannumeral\the\@itemdepth}%
+\list{\csname\@itemitem\endcsname}{\setlength{\topsep}{-\parskip}\setlength{\parsep}{0in}\setlength{\itemsep}{0in}\setlength{\parskip}{0in}\def\makelabel##1{\hss\llap{##1}}}\fi}
+\let\endtightitemize =\endlist
+\def\tightenumerate{%
+\ifnum \@enumdepth >\thr@@\@toodeep\else
+\advance\@enumdepth\@ne
+\edef\@enumctr{enum\romannumeral\the\@enumdepth}%
+\expandafter
+\list
+\csname label\@enumctr\endcsname
+{\setlength{\topsep}{-\parskip}\setlength{\parsep}{0in}\setlength{\itemsep}{0in}\setlength{\parskip}{0in}\usecounter\@enumctr\def\makelabel##1{\hss\llap{##1}}}%
+\fi}
+\let\endtightenumerate =\endlist
+\makeatother
+\renewcommand{\refname}{\centerline{References cited}}
+
+% this handles hanging indents for publications
+\def\rrr#1\\{\par
+\medskip\hbox{\vbox{\parindent=2em\hsize=6.12in
+\hangindent=4em\hangafter=1#1}}}
+
+\def\baselinestretch{1}
+
+\begin{document}
+
+\begin{center}
+{\Large{\bf VLDB 2021 - Notes for Reviewers}}
+
+\end{center}
+
+Here we address rebviews comments 1 by one.
+
+\newpage
+\pagenumbering{arabic}
+
+
+\end{document}
