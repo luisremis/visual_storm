@@ -132,7 +132,9 @@ and connection are inserted, or none of them are and an error is returned.
 Note that no schema needs to be defined in advance.
 The Entity of class "autotag", with its properties, are declared and added
 at insertion time, without any need to define a schema of objects
-(and its properties) before hand.
+(and its properties) before hand. This is a benefit over relational
+databases which require the user to identify how data is divided into
+different tables and determine the relationship between tables.
 
 \begin{listing}[ht!]
 \begin{minted}[frame=single,
@@ -256,6 +258,10 @@ using OS support to provide transactional guarantees (through \textit{msync}).
 PMGD provides a property graph model of data storage with the traditional
 atomicity, consistency, isolation, and durability
 (ACID) properties expected from databases.
+In cases where the system may crash or fail, PMGD has the ability
+to recover to a consistent state without loading its content into memory.
+Unlike existing graph databases that are disk-based, our graph engine
+avoids converting data from a disk-friendly format to an usable format for an application.
 PMGD comes as a C++ library that VDMS uses for implementing its query engine.
 Because PMGD already supports most of the graph abstractions we wanted
 to see on VDMS API, it was our preferred option.

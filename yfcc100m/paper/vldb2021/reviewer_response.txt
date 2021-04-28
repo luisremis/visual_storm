@@ -9,6 +9,9 @@ Reviewer #4
     data or query patterns associated could have been more meaningful to the research communities and convince
     users to replace their customized solution to VDMS.
         - Partially addressed in D3
+        - Section 3.1: "...schema of objects(and its properties) before hand. This is a benefit over relational
+            databases which require the user to identify how data is divided into
+            different tables and determine the relationship between tables."
 
     D2. Both baselines are similar in architecture, and the evaluation has not effectively highlighted the performance
     gain of other design choices authors made in VDMS, except that the VDMS server process both metadata operation
@@ -36,6 +39,7 @@ Reviewer #4
     downstream tasks like model training. VDMS could design new mechanisms to support interactive analysis, which
     would be beneficial.
         - Out of scope of paper, would require new API to allow interactive analysis
+        - Future work?
 
     D5. In terms of scalability, the paper only shows that VDMS can handle large datasets, yet it is not known how
     VDMS can scale horizontally with more computation resources. For more complex logic of image preprocessing,
@@ -45,6 +49,13 @@ Reviewer #4
 
 
 Reviewer #5
+    D1: VDMS is a valuable contribution to Database systems where it takes some first important steps to handle visual data as a first-class citizen instead of considering it a blob of information. However, the description of VDMS is rather short (only 4 pages), and some critical technical details are missing. In particular, what are the technical challenges for supporting ACID properties using the graph model abstraction? Are the solutions analogous to RDBMS’s? Does VDMS also support crash recovery like an RDBMS? What are the key challenges for implementing the new visual object computations?
+        - Section 3.2: "...(ACID) properties expected from databases.
+            In cases where the system may crash or fail, PMGD has the ability
+            to recover to a consistent state without loading its content into memory.
+            Unlike existing graph databases that are disk-based, our graph engine
+            avoids converting data from a disk-friendly format to an usable format for an application."
+
     D3: The experiments section seems unnecessarily long, yet missing some important details. All the experiments are performed on images and do not handle videos or feature values at all. For example, video operations may include interval operations or video clip retrieval. Some parts seem redundant, e.g., the description of Figure 9 seems near-identical to that of Figure 8.
         - POssibly remove figure 8 or 9 and use space for either PMGD (D2) or something else
 
