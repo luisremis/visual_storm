@@ -706,6 +706,37 @@ This is attributed to the fact that OR queries involves processing
 larger results, and thus does not benefit from the filtering
 which is evident when compared to \textit{q4}.
 
+\begin{figure}[ht!]
+\includegraphics[width=\columnwidth]{figures/plot_th_16_mosaic_results_throughput}
+\caption{Throughput Analysis using all queries from our use-case
+described in the Experimental Setup Section.
+We show queries in different figures for readability reasons.
+The experiments show the performance of all systems (VDMS and the two baselines) as the
+database size increases.
+These queries were run using 16 simultaneous clients (nthr = 16),
+and averaged out of 5 runs.}
+\label{fig:q_throughput_16}
+\end{figure}
+
+%% ========= Resize Comparison
+
+\begin{figure}[h!]
+% WAS: begin{figure*}[ht]; textwidth
+\includegraphics[width=\columnwidth]{figures/plot_th_56_mosaic_results_throughput_resize}
+\caption{Throughput Analysis using a subset of the queries, with and without resize.}
+\label{fig:q_throughput_56_resize}
+\end{figure}
+
+\begin{figure*}[ht!]
+\centering
+\includegraphics[width=\textwidth]{figures/plot_th_56_query_times_speedup_postgresql}
+\caption{Summary of performance gains for all queries.
+We see up to 364x speedup (\textit{q1}), and an average of about 85x.
+More importantly, we see that the speedup grow as the database size increases,
+showing that VDMS scales better than the PostgreSQL+Apache baseline.}
+\label{fig:summary_postgresql}
+\end{figure*}
+
 From the first 2 queries, as well as \textit{q4} and
 \textit{q6} (with exception to the 50M case),
 we clearly see that VDMS outperforms the baseline systems
@@ -730,41 +761,11 @@ The gaps between the throughput of each system narrows at 10M.
 At a database size of 50M, the performance of the baselines drastically drop
 while the throughput of VDMS has a large improvement in comparison.
 
-\begin{figure}[ht!]
-\includegraphics[width=\columnwidth]{figures/plot_th_16_mosaic_results_throughput}
-\caption{Throughput Analysis using all queries from our use-case
-described in the Experimental Setup Section.
-We show queries in different figures for readability reasons.
-The experiments show the performance of all systems (VDMS and the two baselines) as the
-database size increases.
-These queries were run using 16 simultaneous clients (nthr = 16),
-and averaged out of 5 runs.}
-\label{fig:q_throughput_16}
-\end{figure}
-
-%% ========= Resize Comparison
-
-\begin{figure}[ht]
-% WAS: begin{figure*}[ht]; textwidth
-\includegraphics[width=\columnwidth]{figures/plot_th_56_mosaic_results_throughput_resize}
-\caption{Throughput Analysis using a subset of the queries, with and without resize.}
-\label{fig:q_throughput_56_resize}
-\end{figure}
-
 
 %% ========= Queries Analysis - END
 
 %% ========= Summary Analysis
 
-\begin{figure*}[ht!]
-\centering
-\includegraphics[width=\textwidth]{figures/plot_th_56_query_times_speedup_postgresql}
-\caption{Summary of performance gains for all queries.
-We see up to 364x speedup (\textit{q1}), and an average of about 85x.
-More importantly, we see that the speedup grow as the database size increases,
-showing that VDMS scales better than the PostgreSQL+Apache baseline.}
-\label{fig:summary_postgresql}
-\end{figure*}
 
 Finally, Figure~\ref{fig:summary_postgresql} summarizes the results
 comparing VDMS and \textit{postgresql}.
