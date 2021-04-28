@@ -48,13 +48,85 @@
 \begin{document}
 
 \begin{center}
-{\Large{\bf VLDB 2021 - Notes for Reviewers}}
+{\Large{\bf VLDB 2021 - Response to Reviews: \\
+Using VDMS to Index and Search 100M Images}}
 
 \end{center}
 
-Here we address rebviews comments 1 by one.
+\section{Reviewer \#1}
+
+\textbf{
+D1 (W1): Although VDMS mentions that it supports Visual Feature Vectors as
+first class citizens in Section 3.3, the queries used in evaluation
+do not include an example.
+}\bigskip
+
+
+Not for this work, we will add to future work.
+Also, building a comparison baseline that integrates all that functionality
+is very ad-hoc, and would complicate the understanding of the origins
+of the benefits of VDMS.
+
+We can provide appendix.
+
+\bigskip
+\textbf{
+D2 (W1): All queries involve “resize” operation, which is expensive for the
+baselines since it is happening on the client side.
+A simplistic query without resizing can show how the graph model performs
+against traditional RDS DBs (i.e., will show that VDMS has comparable
+performance even for such use-case without "visual manipulation").
+}\bigskip
+
+This is a great point, we appreciate the suggestion.
+We have added
+
+\bigskip
+\textbf{
+D3 (W2): It is not clear which queries are supported or not.
+The queries used for evaluation are based on tags and geo search.
+What about visual-based queries? For example, is image similarity search based
+on Visual Feature Vectors within a geographical region supported?
+}\bigskip
+
+VDMS do support the suggested query, i.e., perform a similarity search based
+on feature vectors and also filter by geographical location.
+This can be achieved using the very similar queries as the one used in
+the present evaluation, plus the use of the feature vector queries,
+that are natively supported using the same set of APIs.
+Because of space constraints, we were not able to accommodate initial evaluation
+we have been working on with Feature Vector search specifically,
+and we plan to perform a more comprehensive evaluation on this functionality
+of this feature because of its relevance when processing visual data, as well
+as our own needs in our use cases.
+
+\bigskip
+\textbf{
+D4 (W2): Section 4.3.1, paragraph 5, mentions that INTERSECTION operation is not
+yet implemented at the server side.
+A discussion on current limitations/future work for such queries or queries
+such as in D3, will be better to be clarified in paper.
+}\bigskip
+
+Thanks for this comment, we have added a "Future Work" section where we cover
+this and other question, expanding further on the most immediate lines of
+improvement and research for the VDMS project.
+
+\bigskip
+\textbf{
+D5 (W3): Section 4.2 paragraph 1, desing
+}\bigskip
+
+Fixed in final version.
+
+\bigskip
 
 \newpage
+\section{Reviewer \#4}
+
+\newpage
+\section{Reviewer \#5}
+
 \pagenumbering{arabic}
 
 
