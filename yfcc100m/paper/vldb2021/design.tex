@@ -51,10 +51,7 @@ Users can query, filter, and retrieve these objects based on its properties.
 VDMS does not simply treat these objects as binary blobs of data, but rather
 understands them and the type of processing that is common for them,
 providing the ability to run processing on-the-fly, both at insertion and
-retrieval time.
-Users can, for instance, retrieve a resized version of an image,
-or retrieve only a clip from a large video.
-This is one of the main differentiating aspects when compared to other
+retrieval time. This is one of the main differentiating aspects when compared to other
 database systems, including relational databases.
 In a relational database, for instance, one can query \textit{and compute}
 over values in a column only for basic data types (strings, integers, floats),
@@ -72,7 +69,18 @@ An "Entity" object (and its properties) is a node in the graph.
 For example, a user can define an Entity object of a class "Person",
 and \textit{connect} this person to one or multiple image objects.
 Later, the user can retrieve the Entity object corresponding to a person,
-together with all the images \textit{connected} to it.
+together with all the images \textit{connected} to it. In some cases,
+users may need to apply different processing operations to the visual data
+for their application. We chose to support
+specific operations due to their frequent use in ML applications using
+visual data. Common operations supported for both images and videos are
+thresholding, cropping, and resizing. Additional operations such as
+flipping and rotation are supported for images and extracting
+frames by interval is supported for videos.
+In most ML applications, a subset of these operations are included in
+the preprocessing stage of model training and/or inferencing which supports
+majority of the research communities who analyze visual data and may benefit
+from replacing customized solutions with VDMS.
 
 By providing the ability to store visual data objects together with
 application-defined entities and its properties, VDMS can manage

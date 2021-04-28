@@ -4,7 +4,52 @@ Reviewer #1
 
 
 Reviewer #4
+    D1. The proposed solution seems to use the functionalities of the existing systems as it is. Authors should provide
+    more original ideas or more innovative designs. For example, providing optimizations that specifically target visual
+    data or query patterns associated could have been more meaningful to the research communities and convince
+    users to replace their customized solution to VDMS.
+        - Partially addressed in D3
+
+    D2. Both baselines are similar in architecture, and the evaluation has not effectively highlighted the performance
+    gain of other design choices authors made in VDMS, except that the VDMS server process both metadata operation
+    and image operation within only one round of communication with clients. For example, benchmarking systems can
+    be built to test in isolation the improvement on metadata handling.
+        - Should we include metadata only results?
+
+    D3. The paper should detail the types of queries, and image preprocessing it supports, as this being “one of the
+    most differentiating aspects” as mentioned by them. And for the selection of operations supported, authors need to
+    argue for their decision in the application contexts.
+        - In Section 3: "VDMS API also allows users to insert application-defined "Entities", ... In some cases,
+            users may need to apply different processing operations to the visual data
+            for their application. We chose to support
+            specific operations due to their frequent use in ML applications using
+            visual data. Common operations supported for both images and videos are
+            thresholding, cropping, and resizing. Additional operations such as
+            flipping and rotation are supported for images and extracting
+            frames by interval is supported for videos.
+            In most ML applications, a subset of these operations are included in
+            the preprocessing stage of model training and/or inferencing which supports
+            majority of the research communities who analyze visual data and may benefit
+            from replacing customized solutions with VDMS."
+
+    D4. Data scientists commonly perform data exploration on raw data and interactively curate their datasets for
+    downstream tasks like model training. VDMS could design new mechanisms to support interactive analysis, which
+    would be beneficial.
+        - Out of scope of paper, would require new API to allow interactive analysis
+
+    D5. In terms of scalability, the paper only shows that VDMS can handle large datasets, yet it is not known how
+    VDMS can scale horizontally with more computation resources. For more complex logic of image preprocessing,
+    VDMS will suffer from its single server capacity.
+    - Sounds more like distributed VDMS to me
+    - Any experiements comparing more complex image processing operations?
 
 
 Reviewer #5
+    D3: The experiments section seems unnecessarily long, yet missing some important details. All the experiments are performed on images and do not handle videos or feature values at all. For example, video operations may include interval operations or video clip retrieval. Some parts seem redundant, e.g., the description of Figure 9 seems near-identical to that of Figure 8.
+        - POssibly remove figure 8 or 9 and use space for either PMGD (D2) or something else
+
     D4: Fixed all typos
+        -Page 1: “need for multiple system” -> “need for multiple systems”
+        -Page 5: “desing specifically” -> “designed specifically”
+        -Page 7: “images, taglist, and taglist” -> “images, taglist, and autotags”
+        -Page 10, Figure 6: “10M database).” -> “10M database”
