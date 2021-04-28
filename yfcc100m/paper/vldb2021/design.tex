@@ -131,6 +131,7 @@ at insertion time, without any need to define a schema of objects
               framesep=3mm,
               linenos=true,
               xleftmargin=21pt,
+              fontsize=\footnotesize,
               tabsize=4]{js}
 "AddEntity"{
     "_ref" : 1,
@@ -142,11 +143,11 @@ at insertion time, without any need to define a schema of objects
 "AddImage":{
     "_ref": 2,
     "properties": {
-        "latitude":  36.23433,
+        "latitude":    36.23433,
         "longitude": -116.80666
     },
     "format": "jpg"
-}
+},
 "AddConnection": {
     "ref1": 1,
     "ref2": 2,
@@ -186,13 +187,14 @@ wiki~\footnote{https://github.com/IntelLabs/vdms/wiki/API-Description}.
               framesep=3mm,
               linenos=true,
               xleftmargin=21pt,
+              fontsize=\footnotesize,
               tabsize=4]{js}
 "FindEntity"{
+    "_ref" : 1,
     "class": "autotag",
     "constraints": {
         "name": ["==", "alligator"]
     }
-    "_ref" : 1
 },
 "FindImage":{
     "format": "png",
