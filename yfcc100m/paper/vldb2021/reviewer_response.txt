@@ -58,6 +58,7 @@ Reviewer #5
 
     D3: The experiments section seems unnecessarily long, yet missing some important details. All the experiments are performed on images and do not handle videos or feature values at all. For example, video operations may include interval operations or video clip retrieval. Some parts seem redundant, e.g., the description of Figure 9 seems near-identical to that of Figure 8.
         - POssibly remove figure 8 or 9 and use space for either PMGD (D2) or something else
+        appendix
 
     D4: Fixed all typos
         -Page 1: “need for multiple system” -> “need for multiple systems”
