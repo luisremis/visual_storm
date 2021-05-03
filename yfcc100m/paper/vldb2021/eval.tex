@@ -659,18 +659,18 @@ practice when it comes to image processing through CNNs \cite{cnn,resnet}.
 
 \subsubsection{Scalability Analysis}
 
-\begin{figure}[ht]
-% WAS: begin{figure*}[ht]; textwidth
-\includegraphics[width=\columnwidth]{figures/plot_th_56_mosaic_results_throughput}
-\caption{Throughput Analysis using all queries from our use-case
-described in the Experimental Setup Section.
-We show queries in different figures for readability reasons.
-The experiments show the performance of all systems (VDMS and the two baselines) as the
-database size increases.
-These queries were run using 56 simultaneous clients,
-and averaged out of 10 runs.}
-\label{fig:q_throughput_56}
-\end{figure}
+% \begin{figure}[ht]
+% % WAS: begin{figure*}[ht]; textwidth
+% \includegraphics[width=\columnwidth]{figures/plot_th_56_mosaic_results_throughput}
+% \caption{Throughput Analysis using all queries from our use-case
+% described in the Experimental Setup Section.
+% We show queries in different figures for readability reasons.
+% The experiments show the performance of all systems (VDMS and the two baselines) as the
+% database size increases.
+% These queries were run using 56 simultaneous clients,
+% and averaged out of 10 runs.}
+% \label{fig:q_throughput_56}
+% \end{figure}
 
 The next step in our analysis involves looking more deeply at how
 the performance scales with the number of elements in the database.
@@ -744,21 +744,57 @@ This is one of the most important finding, as it validates the design principles
 of VDMS, which aims to provide scalability and performance acceleration
 at the type of queries that require visual data access and transformations.
 
-Figure~\ref{fig:q_throughput_16} shows the measured throughput,
-as images per second, delivered by each system for all queries and databases.
-In comparison to figure~\ref{fig:q_throughput_56},
-when using fewer concurrent clients (16),
-the throughput for VDMS for queries \textit{q4}, \textit{q5}, and \textit{q6}
-improved by a large margin for the 50M and 100M databases.
-In the case of \textit{q4} and \textit{q6},
-the throughput for 50M (and 100M for \textit{q4})
-increase by a large margin which outperforms both baselines while in
-Figure~\ref{fig:q_throughput_56} \textit{postgresql} slightly performed better than VDMS.
-In the case of \textit{q5}, all systems perform a little differently for databases
-larger than 5M.
-The gaps between the throughput of each system narrows at 10M.
-At a database size of 50M, the performance of the baselines drastically drop
-while the throughput of VDMS has a large improvement in comparison.
+% Figure~\ref{fig:q_throughput_16} shows the measured throughput,
+% as images per second, delivered by each system for all queries and databases.
+% In comparison to figure~\ref{fig:q_throughput_56},
+% when using fewer concurrent clients (16),
+% the throughput for VDMS for queries \textit{q4}, \textit{q5}, and \textit{q6}
+% improved by a large margin for the 50M and 100M databases.
+% In the case of \textit{q4} and \textit{q6},
+% the throughput for 50M (and 100M for \textit{q4})
+% increase by a large margin which outperforms both baselines while in
+% Figure~\ref{fig:q_throughput_56} \textit{postgresql} slightly performed better than VDMS.
+% In the case of \textit{q5}, all systems perform a little differently for databases
+% larger than 5M.
+% The gaps between the throughput of each system narrows at 10M.
+% At a database size of 50M, the performance of the baselines drastically drop
+% while the throughput of VDMS has a large improvement in comparison.
+
+
+We designed VDMS with the idea in mind that pre-processing operations will be
+commonly performed, as visual data is generally pre-processed before analytics
+computation are performed on them.
+Figure \ref{fig:q_throughput_56_resize} shows how the query throughput varies
+when a pre-processing operations is applied (in this case, a resize operation).
+The first thing to notice is that a resize operation is a significant part of
+the overall operation (retrieval + preprocessing).
+Doing a resize operation as part of the retrieval process
+brings the throughput orders of magnitude down.
+This is the case for both VDMS and the baseline.
+Nonetheless, VDMS is orders of magnitude faster when retrieving images
+both with and without resize operations.
+An important thing to notice is that, even if a resized image is smaller,
+and thus transfered faster between the server and the client,
+transferring the image as is (without resize) is faster in this case.
+This is a characteristic of the dataset, which has relatively small images
+(the average image is about 150KB in size).
+We have seen on other applications and datasets with higher resolution images
+that transferring resized (or cropped) images is significantly faster than
+transferring images as they are stored.
+An interesting aspect to notice is that, when removing the resize operations,
+differences between the 2 baseline systems become more noticeable.
+For instance, for an image retrieval based on a single tag, we see how
+\textit{postgresql} outperforms \textit{mysql}, but when adding geo-location
+filtering, we see \textit{mysql} showing a small advantage.
+When the resize operations is performed, both baselines do very similar
+on 1tag based queries, and orders of magnitude worst than VDMS.
+Note that in the baseline systems, the resize happens on the client side,
+rather than on the server side.
+This is the common case in most analytics applications, where pre-processing
+operations happen on the client side (or when the analytics computation happens),
+rather than near where the data is located, as it is the case with VDMS.
+We kept both the server and client systems the same to avoid the computation
+capabilities difference complicating our understanding of the results.
 
 
 %% ========= Queries Analysis - END
