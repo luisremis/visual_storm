@@ -81,9 +81,15 @@ performance even for such use-case without "visual manipulation").
 This is a great point, we very much appreciate the suggestion.
 We have run a new experiment and added a new figure to the paper (Figure 9),
 where we compare 3 of the queries with and without the resize operation
-to compare the results.
-We have also added an explanation on the differences in performance
+to understand the difference in performance better.
+We have also added an explanation on these differences in performance
 in the final version.
+Note that, even if the resize happens on the client side in the case of both
+baselines we have built, the computing capabilities of the server and the
+client are identical. This is on purpose, to avoid the difference in
+computing power for the resize operation to affect the understanding
+of the results.
+
 
 \bigskip
 \textbf{
@@ -151,9 +157,10 @@ improvement on metadata handling.
 }\bigskip
 
 Thank you for the input. To demonstrate the benefits of VDMS more clearly,
-we have added Figure 9 which compares queries with and without the resize operation.
+we have added Figure 9, which compares queries with and without the resize operation.
 Without the resize operation, the evaluation demonstrates the
-improvement on metadata handling better.
+improvement on metadata handling better, plus the effect of a single round
+of communication between client and the server (as it is the case with VDMS).
 
 \bigskip
 \textbf{
@@ -165,7 +172,7 @@ decision in the application contexts.
 
 Thank you for this recommendation.
 We have provided additional details on which operations we support and our
-decision for chosing the operations in section 3.
+decision for choosing the operations in section 3.
 
 \bigskip
 \textbf{
@@ -178,8 +185,11 @@ which would be beneficial.
 Interactive analysis is out of scope for this paper but this can easily be done
 using the current implementation of VDMS.
 To support interactive analysis, a new API/frontend could be implemented on top of
-VDMS as a webservice without adding any additional abstractions.
-An example of such frontend can be found <http://coco.datasets.aperturedata.io>.
+VDMS as a web app without adding any additional abstractions.
+An example of such front-end can be found <http://coco.datasets.aperturedata.io>.
+The front-end is very thin, as most of the heavy-load is done by VDMS through
+the interfaces mentioned in this work
+(plus a thin REST abstraction we have added recently).
 
 \bigskip
 \textbf{
