@@ -79,7 +79,7 @@ performance even for such use-case without "visual manipulation").
 }\bigskip
 
 This is a great point, we very much appreciate the suggestion.
-We have run a new experiment and added a new figure to the paper (Figure 10),
+We have run a new experiment and added a new figure to the paper (Figure 9),
 where we compare 3 of the queries with and without the resize operation
 to compare the results.
 We have also added an explanation on the differences in performance
@@ -130,38 +130,68 @@ Fixed in final version.
 
 \bigskip
 \textbf{
-D1. The proposed solution seems to use the functionalities of the existing systems as it is. Authors should provide more original ideas or more innovative designs. For example, providing optimizations that specifically target visual data or query patterns associated could have been more meaningful to the research communities and convince users to replace their customized solution to VDMS.
+D1. The proposed solution seems to use the functionalities of the existing systems
+as it is. Authors should provide more original ideas or more innovative designs.
+For example, providing optimizations that specifically target visual data or query
+patterns associated could have been more meaningful to the research communities and
+convince users to replace their customized solution to VDMS.
 }\bigskip
 
-We partially address this in D3 and also elaborated more on the benefits of using VDMS over relational databases in Section 3.1.
+We partially address this in D3 and also elaborated more on the benefits of
+using VDMS over relational databases in Section 3.1.
 
 \bigskip
 \textbf{
-D2. Both baselines are similar in architecture, and the evaluation has not effectively highlighted the performance gain of other design choices authors made in VDMS, except that the VDMS server process both metadata operation and image operation within only one round of communication with clients. For example, benchmarking systems can be built to test in isolation the improvement on metadata handling.
+D2. Both baselines are similar in architecture, and the evaluation has not effectively
+highlighted the performance gain of other design choices authors made in VDMS,
+except that the VDMS server process both metadata operation and image operation
+within only one round of communication with clients.
+For example, benchmarking systems can be built to test in isolation the
+improvement on metadata handling.
 }\bigskip
 
-Thank you for the input. To demonstrate the benefits of VDMS more clearly, we have added Figure 10 which compares queries with and without the resize operation.  Without the resize operation, the evaluation demonstrates the improvement on metadata handling better.
+Thank you for the input. To demonstrate the benefits of VDMS more clearly,
+we have added Figure 9 which compares queries with and without the resize operation.
+Without the resize operation, the evaluation demonstrates the
+improvement on metadata handling better.
 
 \bigskip
 \textbf{
-D3. The paper should detail the types of queries, and image preprocessing it supports, as this being “one of the most differentiating aspects” as mentioned by them. And for the selection of operations supported, authors need to argue for their decision in the application contexts.
+D3. The paper should detail the types of queries, and image preprocessing it supports,
+as this being “one of the most differentiating aspects” as mentioned by them.
+And for the selection of operations supported, authors need to argue for their
+decision in the application contexts.
 }\bigskip
 
-Thank you for this recommendation.  We have provided additional details on which operations we support and our decision for chosing the operations in section 3.
+Thank you for this recommendation.
+We have provided additional details on which operations we support and our
+decision for chosing the operations in section 3.
 
 \bigskip
 \textbf{
-D4. Data scientists commonly perform data exploration on raw data and interactively curate their datasets for downstream tasks like model training. VDMS could design new mechanisms to support interactive analysis, which would be beneficial.
+D4. Data scientists commonly perform data exploration on raw data and interactively
+curate their datasets for downstream tasks like model training.
+VDMS could design new mechanisms to support interactive analysis,
+which would be beneficial.
 }\bigskip
 
-Interactive analysis is out of scope for this paper but this can easily be done using the current implementation of VDMS.  To support interactive analysis, a new API/frontend could be implemented on top of VDMS as a webservice without adding any additional abstractions. An example of such frontend can be found <insert URL>.
+Interactive analysis is out of scope for this paper but this can easily be done
+using the current implementation of VDMS.
+To support interactive analysis, a new API/frontend could be implemented on top of
+VDMS as a webservice without adding any additional abstractions.
+An example of such frontend can be found <http://coco.datasets.aperturedata.io>.
 
 \bigskip
 \textbf{
-D5. In terms of scalability, the paper only shows that VDMS can handle large datasets, yet it is not known how VDMS can scale horizontally with more computation resources. For more complex logic of image preprocessing, VDMS will suffer from its single server capacity.
+D5. In terms of scalability, the paper only shows that VDMS can handle large
+datasets, yet it is not known how VDMS can scale horizontally with more
+computation resources.
+For more complex logic of image preprocessing, VDMS will suffer from its
+single server capacity.
 }\bigskip
 
-Thanks for this comment, we have added a "Future Work" section where the need for this capability in a distributed version of VDMS.
+Thanks for this comment, we have added a "Future Work" section where the need
+for this capability in a distributed version of VDMS.
 
 \newpage
 \section{Reviewer \#5}
@@ -179,23 +209,38 @@ recovery like an RDBMS? What are the key challenges for implementing
 the new visual object computations?
 }\bigskip
 
-Thank you for the comment.  In Section 3.2, we have expanded on the crash recovery of PMGD in comparison to other graph databases.
+Thank you for the comment.
+In Section 3.2, we have expanded on the crash recovery of PMGD in
+comparison to other graph databases.
 
 \bigskip
 \textbf{
-D2: The coverage of persistent memory is underwhelming because persistent memory is never used in the experiments. What is the key advantage of using persistent memory and how is it more suitable for visual data? Why not add experiments comparing VDMS with and without using PMGD?
+D2: The coverage of persistent memory is underwhelming because persistent memory
+is never used in the experiments.
+What is the key advantage of using persistent memory and how is it
+more suitable for visual data? Why not add experiments comparing VDMS with
+and without using PMGD?
 }\bigskip
 
-Due to page limitations and the use of SSDs instead of persistent memory in the evaluation, we did not elaborate on advantages of PMGD and related experiments.
+Due to page limitations and the use of SSDs instead of persistent memory in the
+evaluation, we did not elaborate on advantages of PMGD and related experiments.
 
 \bigskip
 \textbf{
-D3: The experiments section seems unnecessarily long, yet missing some important details. All the experiments are performed on images and do not handle videos or feature values at all. For example, video operations may include interval operations or video clip retrieval. Some parts seem redundant, e.g., the description of Figure 9 seems near-identical to that of Figure 8.
+D3: The experiments section seems unnecessarily long, yet missing some important
+details. All the experiments are performed on images and do not handle videos or feature
+values at all. For example, video operations may include interval operations or video
+clip retrieval. Some parts seem redundant, e.g., the description of Figure 9 seems
+near-identical to that of Figure 8.
 }\bigskip
 
-The paper is focused on an image search application so we did not include any experiments on videos or feature vectors. We have experiments that we can provide in appendix but due to page limitations, it did not fit the scope of this paper.
+The paper is focused on an image search application so we did not include any
+experiments on videos or feature vectors. We have experiments that we can provide in
+appendix but due to page limitations, it did not fit the scope of this paper.
 
-Figure 8 and 9 are quite similar but provide the performance difference with different numer of concurrent clients. We have removed figure 9 and replaced with a figure demonstrating the difference between queries with and without the resize operation.
+Figure 8 and 9 are quite similar but provide the performance difference with different
+numer of concurrent clients. We have removed figure 9 and replaced with a figure
+demonstrating the difference between queries with and without the resize operation.
 
 \bigskip
 \textbf{
