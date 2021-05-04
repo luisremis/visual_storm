@@ -426,13 +426,13 @@ we use the following queries, based on our internal use cases:
 
 \item \textit{q2} - {\bf {\em 1tag\_geo\_resize}}: Retrieve images with one specific autotag, in a particular geo-location, and resize to 224x224,.
 
-\item \textit{q3} - {\bf {\em 2tag\_and\_resize}}: Retrieve images with two specific autotags (i.e. alligator AND lake), and resize to 224x224.
+\item \textit{q3} - {\bf {\em 2tag\_resize\_and}}: Retrieve images with two specific autotags (i.e. alligator AND lake), and resize to 224x224.
 
-\item \textit{q4} - {\bf {\em 2tag\_or\_resize}}: Retrieve images with either of two specific autotags (i.e. alligator OR lake), and resize to 224x224.
+\item \textit{q4} - {\bf {\em 2tag\_resize\_or}}: Retrieve images with either of two specific autotags (i.e. alligator OR lake), and resize to 224x224.
 
-\item \textit{q5} - {\bf {\em 2tag\_resize\_geo\_and}}: Retrieve images with two specific autotags (i.e. alligator AND lake), in a particular geo-location, and resize to 224x224.
+\item \textit{q5} - {\bf {\em 2tag\_geo\_resize\_and}}: Retrieve images with two specific autotags (i.e. alligator AND lake), in a particular geo-location, and resize to 224x224.
 
-\item \textit{q6} - {\bf {\em 2tag\_resize\_geo\_or}}: Retrieve images with either of two specific autotags (i.e. alligator OR lake), in a particular geo-location, and resize to 224x224.
+\item \textit{q6} - {\bf {\em 2tag\_geo\_resize\_or}}: Retrieve images with either of two specific autotags (i.e. alligator OR lake), in a particular geo-location, and resize to 224x224.
 
 \end{itemize}
 
@@ -603,7 +603,7 @@ in order to prevent unnecessary retrievals and extra filtering on the client sid
 % WAS: begin{figure*}[ht]; textwidth
 \begin{figure}[ht]
 \includegraphics[width=\columnwidth]{figures/plot_q_2tag_resize_or_mosaic_results_throughput_threads}
-\caption{Concurrency Analysis on \textit{q4} (\textit{2tag\_or\_resize}) from our use-case
+\caption{Concurrency Analysis on \textit{q4} (\textit{2tag\_resize\_or}) from our use-case
 described in the Experimental Setup Section.
 The experiments show the throughput as images per second for
 all systems (VDMS and two baselines) as the database size increases.}
