@@ -190,10 +190,19 @@ rotate the images 45.34 degrees, and return the images as "png" files.
 It is important to note how the API natively supports basic building
 blocks of visual data processing, like resize, rotation, or transcoding
 (changing output formats and encodings).
+Moreover, because VDMS is in control of the metadata and the image data,
+re-ordering or pre-processing operations can be done transparently,
+increasing the performance of the retrieval process.
 The API allows interaction with metadata, images, videos, bounding boxes,
 frames, feature vectors, and more in a similar fashion,
 and it is fully documented on the project's Github
 wiki~\footnote{https://github.com/IntelLabs/vdms/wiki/API-Description}.
+The visual data pre-processing operations supported in VDMS are generic and
+application independent.
+By design, we only include pre-processing operations that are not specific
+to one domain, but rather general for visual analytics.
+
+
 
 \begin{listing}[ht!]
 \begin{minted}[frame=single,
