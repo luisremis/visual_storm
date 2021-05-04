@@ -148,7 +148,9 @@ patterns associated could have been more meaningful to the research communities 
 convince users to replace their customized solution to VDMS.
 }\bigskip
 
-We partially address this in D3 and also elaborated more on the benefits of
+We have provided additional details on which operations we support and our
+decision for choosing the operations in section 3.
+We also elaborated more on the benefits of
 using VDMS over relational databases in Section 3.1.
 
 \bigskip
@@ -198,6 +200,7 @@ An example of such front-end can be found \url{http://coco.datasets.aperturedata
 The front-end is very thin, as most of the heavy-load is done by VDMS through
 the interfaces mentioned in this work
 (plus a thin REST abstraction we have added recently).
+In section 3 of final version, we briefly mention this ability.
 
 \bigskip
 \noindent %
@@ -209,8 +212,9 @@ For more complex logic of image preprocessing, VDMS will suffer from its
 single server capacity.
 }\bigskip
 
-Thanks for this comment, we have added a "Future Work" section where the need
-for this capability in a distributed version of VDMS.
+Thanks for this comment.
+We have included this capability in the "Future Work" section
+added to the final version.
 
 \newpage
 \section{Reviewer \#5}
@@ -229,7 +233,6 @@ the new visual object computations?
 }\bigskip
 
 Thank you for the comment.
-We have expanded portions of the VDMS description where necessary.
 In Section 3.2, we have expanded on the crash recovery of PMGD in
 comparison to other graph databases.
 
@@ -243,8 +246,11 @@ more suitable for visual data? Why not add experiments comparing VDMS with
 and without using PMGD?
 }\bigskip
 
-Due to page limitations and the use of SSDs instead of persistent memory in the
-evaluation, we did not elaborate on advantages of PMGD and related experiments.
+We did not elaborate on advantages of using persistent memory or include
+any PMGD experiments due to page limitations and the use of SSDs
+instead of persistent memory in the evaluation.
+PMGD performance evaluation will be published separately to highlight
+the advantages of using persistent memory for visual data.
 
 \bigskip
 \noindent %
@@ -256,6 +262,7 @@ clip retrieval. Some parts seem redundant, e.g., the description of Figure 9 see
 near-identical to that of Figure 8.
 }\bigskip
 
+Thank you for this comment.
 The paper is focused on an image search application so we did not include any
 experiments on videos or feature vectors. We have experiments that we can provide in
 appendix but due to page limitations, it did not fit the scope of this paper.
@@ -274,7 +281,7 @@ Page 7: “images, taglist, and taglist” $\rightarrow$ “images, taglist, and
 Page 10, Figure 6: “10M database).” $\rightarrow$ “10M database”
 }\bigskip
 
-All typos are fixed in the final version.
+Thank you for highlighting this. All typos are fixed in the final version.
 
 \pagenumbering{arabic}
 
