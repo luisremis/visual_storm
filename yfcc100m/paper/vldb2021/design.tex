@@ -30,7 +30,7 @@ in a transactional manner.
 VDMS provides a \textit{graph model} abstraction with the traditional
 atomicity, consistency, isolation, and durability
 (ACID) properties expected from databases.
-This is, users interact with their objects (metadata, images, videos, etc),
+This is, users interact with their objects (metadata, images, videos, etc.),
 as if these objects were in a connected graph.
 Graph represents an easier abstraction to model complex problems,
 making it very suitable for the data and access patterns shown by visual metadata,
@@ -45,7 +45,7 @@ VDMS API provides a mechanism to insert and connect Images, Videos, BoundingBoxe
 Frames, and Descriptors (feature vectors), together with any metadata
 associated with the objects.
 Each object is a node in the graph.
-The information associated to each visual object (image, video, etc) is modeled as
+The information associated to each visual object (image, video, etc.) is modeled as
 "properties" of the node in the graph.
 Users can query, filter, and retrieve these objects based on its properties.
 VDMS does not simply treat these objects as binary blobs of data, but rather
@@ -61,7 +61,7 @@ the employees in a company (stored using the table/columns abstraction),
 but cannot perform any computation over data stored as a blob or binary object.
 VDMS, because it recognized the nature of visual objects by design,
 provides the ability to \textit{compute} on these visual objects
-(image, videos, etc).
+(image, videos, etc.).
 
 VDMS API also allows users to insert application-defined "Entities",
 that enable applications to model any use-case specific metadata.
@@ -91,15 +91,15 @@ portions of the data they need
 \cite{tao, sculley2015hidden, mayer2020scalable, sculley2015hidden}.
 
 Figure \ref{fig:arch} depicts the high-level architecture of VDMS, which
-is composed by several subcomponents, and a Query Engine that implements
+is composed by several sub-components, and a Query Engine that implements
 the unified API and hides all the complexity underneath.
-We first describe the VDMS API, and then describe its subcomponents
+We first describe the VDMS API, and then describe its sub-components
 and design decisions.
 
 \subsection{VDMS API}
 
 One of the most important differentiating aspects of VDMS is its API.
-VDMS is unique in recognizing visual entities (i.e., images, videos, etc)
+VDMS is unique in recognizing visual entities (i.e., images, videos, etc.)
 as first class citizens.
 Thus, VDMS' API revolves around visual data operations and retrieval,
 but at the same time, enables applications to store any other
@@ -171,10 +171,10 @@ different tables and determine the relationship between tables.
 The query expresses the following:
 Insert an Entity of the class "autotag", with the "name" property being
 \textit{alligator}, insert an Image with its "latitude" and "longitude",
-store the image  as a JPG, and create a connection between
-the image and the "autotag",  with a property "prob"
+store the image as a JPG, and create a connection between
+the image and the "autotag", with a property "prob"
 (which indicates the probability of that image
-containing an object of type  \textit{alligator}).}
+containing an object of type \textit{alligator}).}
 \label{addimageandautotag}
 \end{listing}
 
@@ -258,6 +258,9 @@ using OS support to provide transactional guarantees (through \textit{msync}).
 PMGD provides a property graph model of data storage with the traditional
 atomicity, consistency, isolation, and durability
 (ACID) properties expected from databases.
+Specifically, the database remains consistent, each transaction either
+completes entirely or not at all, and the effects of a completed transaction
+survives any failure.
 In cases where the system may crash or fail, PMGD has the ability
 to recover to a consistent state without loading its content into memory.
 Unlike existing graph databases that are disk-based, our graph engine
@@ -267,7 +270,9 @@ Because PMGD already supports most of the graph abstractions we wanted
 to see on VDMS API, it was our preferred option.
 Also, our internal evaluation shows that PMGD is faster
 than other graph databases, including Neo4j\cite{miller2013graph}.
-PMGD performance evaluation will be published separately.
+In this paper, the evaluation uses SSDs instead of persistent memory.
+Hence, PMGD performance evaluation will be published separately to highlight
+the advantages of using persistent memory for visual data.
 
 \subsection{Visual Compute Module}
 
@@ -284,7 +289,7 @@ The Visual Compute Module was designed and implemented to provide
 an internal abstraction layer for interacting with visual data.
 It enables the query engines to coordinate and perform
 visual data handling and processing
-(i.e., basic building block operations like crop, resize, etc for images/videos
+(i.e., basic building block operations like crop, resize, etc. for images/videos
 and k-nearest neighbor search for feature vectors),
 shown in Figure \ref{fig:arch}.
 For traditional formats (jpg, png, tiff, mp4, etc.),
@@ -298,7 +303,7 @@ image format, we do not use it as part of this evaluation.
 This work focuses on a more direct comparison with a combination of alternatives,
 and thus we use the traditional format (jpg and png).
 The performance comparison between the array-based lossless image format
-we develop and other similar formats (like png or tiff) are outside of the
+we developed and other similar formats (like png or tiff) are outside of the
 scope of this evaluation.
 
 VDMS also provides full support for video storage and operations,
