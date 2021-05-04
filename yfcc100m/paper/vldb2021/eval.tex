@@ -385,7 +385,7 @@ metadata of intensive use-cases\cite{IntelXPoint15}.
 
 %=========================================
 
-\subsection{Images Search}
+\subsection{Image Search}
 \label{images}
 
 In order to evaluate VDMS and the baseline systems for our use-case queries,
@@ -644,7 +644,7 @@ This is in contrast with the baseline implementations,
 where 2 rounds of blocking back-and-forth communication with the server is needed,
 as depicted in Figure~\ref{fig:systems}.
 Note that one could argue that the opposite will happen
-when the resize operation retrieves a an up-sampled (larger) version of the image
+when the resize operation retrieves an up-sampled (larger) version of the image
 instead of a down-sampled (smaller) one.
 In practice, retrieving an up-sampled version is not a common use case,
 given that up-sampling the image does not add any extra information that can help,
@@ -659,18 +659,18 @@ practice when it comes to image processing through CNNs \cite{cnn,resnet}.
 
 \subsubsection{Scalability Analysis}
 
-% \begin{figure}[ht]
-% % WAS: begin{figure*}[ht]; textwidth
-% \includegraphics[width=\columnwidth]{figures/plot_th_56_mosaic_results_throughput}
-% \caption{Throughput Analysis using all queries from our use-case
-% described in the Experimental Setup Section.
-% We show queries in different figures for readability reasons.
-% The experiments show the performance of all systems (VDMS and the two baselines) as the
-% database size increases.
-% These queries were run using 56 simultaneous clients,
-% and averaged out of 10 runs.}
-% \label{fig:q_throughput_56}
-% \end{figure}
+\begin{figure}[ht]
+% WAS: begin{figure*}[ht]; textwidth
+\includegraphics[width=\columnwidth]{figures/plot_th_56_mosaic_results_throughput}
+\caption{Throughput Analysis using all queries from our use-case
+described in the Experimental Setup Section.
+We show queries in different figures for readability reasons.
+The experiments show the performance of all systems (VDMS and the two baselines) as the
+database size increases.
+These queries were run using 56 simultaneous clients,
+and averaged out of 10 runs.}
+\label{fig:q_throughput_56}
+\end{figure}
 
 The next step in our analysis involves looking more deeply at how
 the performance scales with the number of elements in the database.
@@ -706,16 +706,16 @@ This is attributed to the fact that OR queries involves processing
 larger results, and thus does not benefit from the filtering
 which is evident when compared to \textit{q4}.
 
-\begin{figure}[ht!]
-\includegraphics[width=\columnwidth]{figures/plot_th_16_mosaic_results_throughput}
-\caption{Throughput Analysis using all queries from our use-case
-described in the Experimental Setup Section.
-We show queries in different figures for readability reasons.
-The experiments show the performance of all systems (VDMS and the two baselines) as the
-database size increases.
-These queries were run using 16 simultaneous clients, and averaged out of 10 runs.}
-\label{fig:q_throughput_16}
-\end{figure}
+% \begin{figure}[ht!]
+% \includegraphics[width=\columnwidth]{figures/plot_th_16_mosaic_results_throughput}
+% \caption{Throughput Analysis using all queries from our use-case
+% described in the Experimental Setup Section.
+% We show queries in different figures for readability reasons.
+% The experiments show the performance of all systems (VDMS and the two baselines) as the
+% database size increases.
+% These queries were run using 16 simultaneous clients, and averaged out of 10 runs.}
+% \label{fig:q_throughput_16}
+% \end{figure}
 
 %% ========= Resize Comparison
 
@@ -769,8 +769,8 @@ when a pre-processing operations is applied (in this case, a resize operation).
 The first thing to notice is that a resize operation is a significant part of
 the overall operation (retrieval + preprocessing).
 Doing a resize operation as part of the retrieval process
-brings the throughput orders of magnitude down.
-This is the case for both VDMS and the baseline.
+brings the throughput down by orders of magnitude.
+This is the case for both VDMS and the baselines.
 Nonetheless, VDMS is orders of magnitude faster when retrieving images
 both with and without resize operations.
 An important thing to notice is that, even if a resized image is smaller,
