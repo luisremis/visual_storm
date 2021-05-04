@@ -55,6 +55,7 @@ Using VDMS to Index and Search 100M Images}}
 
 \section{Reviewer \#1}
 
+\noindent %
 \textbf{
 D1 (W1): Although VDMS mentions that it supports Visual Feature Vectors as
 first class citizens in Section 3.3, the queries used in evaluation
@@ -70,6 +71,7 @@ of the benefits of VDMS.
 We can provide appendix.
 
 \bigskip
+\noindent %
 \textbf{
 D2 (W1): All queries involve “resize” operation, which is expensive for the
 baselines since it is happening on the client side.
@@ -92,6 +94,7 @@ of the results.
 
 
 \bigskip
+\noindent %
 \textbf{
 D3 (W2): It is not clear which queries are supported or not.
 The queries used for evaluation are based on tags and geo search.
@@ -111,6 +114,7 @@ of this feature because of its relevance when processing visual data, as well
 as our own needs in our use cases.
 
 \bigskip
+\noindent %
 \textbf{
 D4 (W2): Section 4.3.1, paragraph 5, mentions that INTERSECTION operation is not
 yet implemented at the server side.
@@ -123,6 +127,7 @@ this and D3, expanding further on the most immediate lines of
 improvement and research for the VDMS project.
 
 \bigskip
+\noindent %
 \textbf{
 D5 (W3): Section 4.2 paragraph 1, desing
 }\bigskip
@@ -134,7 +139,7 @@ Fixed in final version.
 \newpage
 \section{Reviewer \#4}
 
-\bigskip
+\noindent %
 \textbf{
 D1. The proposed solution seems to use the functionalities of the existing systems
 as it is. Authors should provide more original ideas or more innovative designs.
@@ -147,6 +152,7 @@ We partially address this in D3 and also elaborated more on the benefits of
 using VDMS over relational databases in Section 3.1.
 
 \bigskip
+\noindent %
 \textbf{
 D2. Both baselines are similar in architecture, and the evaluation has not effectively
 highlighted the performance gain of other design choices authors made in VDMS,
@@ -163,6 +169,7 @@ improvement on metadata handling better, plus the effect of a single round
 of communication between client and the server (as it is the case with VDMS).
 
 \bigskip
+\noindent %
 \textbf{
 D3. The paper should detail the types of queries, and image preprocessing it supports,
 as this being “one of the most differentiating aspects” as mentioned by them.
@@ -175,6 +182,7 @@ We have provided additional details on which operations we support and our
 decision for choosing the operations in section 3.
 
 \bigskip
+\noindent %
 \textbf{
 D4. Data scientists commonly perform data exploration on raw data and interactively
 curate their datasets for downstream tasks like model training.
@@ -184,14 +192,15 @@ which would be beneficial.
 
 Interactive analysis is out of scope for this paper but this can easily be done
 using the current implementation of VDMS.
-To support interactive analysis, a new API/frontend could be implemented on top of
+To support interactive analysis, a new API/front-end could be implemented on top of
 VDMS as a web app without adding any additional abstractions.
-An example of such front-end can be found <http://coco.datasets.aperturedata.io>.
+An example of such front-end can be found \url{http://coco.datasets.aperturedata.io}.
 The front-end is very thin, as most of the heavy-load is done by VDMS through
 the interfaces mentioned in this work
 (plus a thin REST abstraction we have added recently).
 
 \bigskip
+\noindent %
 \textbf{
 D5. In terms of scalability, the paper only shows that VDMS can handle large
 datasets, yet it is not known how VDMS can scale horizontally with more
@@ -206,7 +215,7 @@ for this capability in a distributed version of VDMS.
 \newpage
 \section{Reviewer \#5}
 
-\bigskip
+\noindent %
 \textbf{
 D1: VDMS is a valuable contribution to Database systems where it takes
 some first important steps to handle visual data as a first-class citizen
@@ -220,10 +229,12 @@ the new visual object computations?
 }\bigskip
 
 Thank you for the comment.
+We have expanded portions of the VDMS description where necessary.
 In Section 3.2, we have expanded on the crash recovery of PMGD in
 comparison to other graph databases.
 
 \bigskip
+\noindent %
 \textbf{
 D2: The coverage of persistent memory is underwhelming because persistent memory
 is never used in the experiments.
@@ -236,6 +247,7 @@ Due to page limitations and the use of SSDs instead of persistent memory in the
 evaluation, we did not elaborate on advantages of PMGD and related experiments.
 
 \bigskip
+\noindent %
 \textbf{
 D3: The experiments section seems unnecessarily long, yet missing some important
 details. All the experiments are performed on images and do not handle videos or feature
@@ -249,16 +261,17 @@ experiments on videos or feature vectors. We have experiments that we can provid
 appendix but due to page limitations, it did not fit the scope of this paper.
 
 Figure 8 and 9 are quite similar but provide the performance difference with different
-numer of concurrent clients. We have removed figure 9 and replaced with a figure
+number of concurrent clients. We have removed figure 9 and replaced with a figure
 demonstrating the difference between queries with and without the resize operation.
 
 \bigskip
+\noindent %
 \textbf{
-D4: Fixed all typos
-Page 1: “need for multiple system” -> “need for multiple systems”
-Page 5: “desing specifically” -> “designed specifically”
-Page 7: “images, taglist, and taglist” -> “images, taglist, and autotags”
-Page 10, Figure 6: “10M database).” -> “10M database”
+D4: There are some minor typos.\\
+Page 1: “need for multiple system”\textrightarrow “need for multiple systems”\\
+Page 5: “desing specifically”\textrightarrow “designed specifically”\\
+Page 7: “images, taglist, and taglist”\textrightarrow “images, taglist, and autotags”\\
+Page 10, Figure 6: “10M database).”\textrightarrow “10M database”
 }\bigskip
 
 All typos are fixed in the final version.
