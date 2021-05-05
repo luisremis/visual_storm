@@ -7,3 +7,15 @@ for visual data infrastructure.
 In particular, we have identified the urgent need for a set of UNION/INTERSECTION
 interfaces to enable richer queries and improve performance,
 given the limitations discussed on \ref{concurrency_analysis}.
+Even if this evaluation focuses on image search using metadata properties,
+VDMS has the capability to also perform similarity search based on
+feature vectors.
+The team will work on a evaluation of this feature as future work,
+as more work is needed to arrive at a comparable and fair baseline.
+Last, but not least, we recognize the need for a distributed
+implementation of VDMS.
+Most of the subcomponents and abstractions were design with a distributed
+architecture in mind, but also most of the applications we encountered in our
+internal use cases would fit on a single server plus a distributed file system.
+With a validation of the benefits of the abstractions provided by VDMS,
+the natural next step is working on scaling the system out.
