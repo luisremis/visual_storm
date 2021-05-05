@@ -54,7 +54,10 @@ Using VDMS to Index and Search 100M Images}}
 
 \end{center}
 
+%===========================================================
+\newpage
 \section{Reviewer \#1}
+%===========================================================
 
 \noindent %
 \textbf{
@@ -67,9 +70,9 @@ Thanks for your comment.
 We have decided to avoid going in detail on the Feature Vector support
 and interfaces primarily due to space constraints.
 We should note that this functionality is fully implemented,
-and you can find the more details on the github wiki of the project
-\footnote{https://github.com/IntelLabs/vdms/wiki/Descriptors-Tutorial,
-https://github.com/IntelLabs/vdms/wiki/FindDescriptor}.
+and you can find the more details on the project's wiki
+\footnote{https://github.com/IntelLabs/vdms/wiki/Descriptors-Tutorial}
+\footnote{https://github.com/IntelLabs/vdms/wiki/FindDescriptor}.
 Based on feedback from last year submission at this same venue, we decided
 to skip the feature vector functionality evaluation and focus on image search
 based on metadata to better be able to compare against well-known baselines.
@@ -160,8 +163,10 @@ Fixed in final version.
 
 \bigskip
 
+%===========================================================
 \newpage
 \section{Reviewer \#4}
+%===========================================================
 
 \noindent %
 \textbf{
@@ -173,17 +178,17 @@ convince users to replace their customized solution to VDMS.
 }\bigskip
 
 
-Thanks for this comment.
-We avoided expanding on supported operations for images due to space constraints,
-and because these are fully documented on the projects wiki
-\footnote{https://github.com/IntelLabs/vdms/wiki}.
-The wiki also contains the full documentation on APIs for video and similarity
-search, among other things, which work together with the API we used for
-image search for this work, providing a unified API for all the data applications need.
+Thanks for your comment, these are important clarifications to add.
 We have expanded on additional details on which operations we support and our
 decision for choosing the operations in Section 3.
 We also elaborated more on the benefits of
 using VDMS over relational databases in Section 3.1.
+We avoided expanding on supported operations for images due to space constraints,
+and because these are fully documented on the project's wiki
+\footnote{https://github.com/IntelLabs/vdms/wiki}.
+The wiki also contains the full documentation on APIs for video and similarity
+search, among other things, which work together with the API we used for
+image search for this work, providing a unified API for all the data applications need.
 
 \bigskip
 \noindent %
@@ -200,7 +205,7 @@ Thank you for the input.
 To demonstrate the benefits of VDMS more clearly, and to address another
 reviewers' comment,  we have added Figure 9, which compares queries
 with and without the resize operation.
-Without the resize operation, the evaluation demonstrates the
+Without the resize operation, the evaluation shows the
 improvement on metadata handling better, plus the effect of a single round
 of communication between client and the server (as it is the case with VDMS).
 
@@ -234,13 +239,13 @@ which would be beneficial.
 
 Interactive analysis of visual data is out of scope for this paper
 but this can easily be done using the current implementation of VDMS.
-To support interactive analysis, a new API/front-end could be implemented on top of
-VDMS API as a web app without adding any additional abstractions.
-An example of such front-end can be found \url{http://coco.datasets.aperturedata.io}.
-The front-end is very thin, as most of the heavy-load is done by VDMS through
-the interfaces mentioned in this work
+To support interactive analysis, a front-end could be implemented on top of
+VDMS API as a web app without needing any additional abstractions.
+An example of such front-end can be found here: \url{http://coco.datasets.aperturedata.io}.
+This front-end is very thin, as most of the heavy-load is done by VDMS through
+the interfaces described in this work
 (plus a thin REST abstraction we have added recently).
-In section 3 of final version, we briefly mention this ability.
+In section 3 of final version, we have added a brief mention to this mechanism.
 
 \bigskip
 \noindent %
@@ -257,8 +262,10 @@ We have included this capability in the "Future Work" section
 added to the final version.
 We are currently working on a distributed version of the system.
 
+%===========================================================
 \newpage
 \section{Reviewer \#5}
+%===========================================================
 
 \noindent %
 \textbf{
