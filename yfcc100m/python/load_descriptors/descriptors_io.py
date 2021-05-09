@@ -4,17 +4,21 @@ import numpy
 
 class descriptors_reader(object):
 
-    def __init__(self, prefix):
+    def __init__(self, prefix="", just_one=False, just_one_path=""):
 
         self.file = None
         self.prefix = prefix
         self.file_counter = 0
+        self.just_one = just_one
 
         self.dimensions = 4096
 
         self.desc_counter = 0
 
-        self.read_next_file()
+        if just_one:
+            self.file = open(just_one_path, 'rb')
+        else:
+            self.read_next_file()
 
     def get_next_n(self, n):
 
@@ -27,8 +31,10 @@ class descriptors_reader(object):
 
             id_bin = self.file.read(8)
             if len(id_bin) != 8 :
-                self.read_next_file()
-                continue
+                if self.read_next_file():
+                    continue
+                else:
+                    break
 
             id_long = struct.unpack('@l', id_bin)[0]
 
@@ -43,12 +49,17 @@ class descriptors_reader(object):
 
     def read_next_file(self):
 
+        if self.just_one:
+            return False
+
         filename = self.prefix + str(self.file_counter) + ".bin"
 
         print("Reading", filename, "...")
 
         self.file = open(filename, 'rb')
         self.file_counter += 1
+
+        return True
 
 class descriptors_writer(object):
 

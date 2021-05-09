@@ -15,15 +15,15 @@ import sys
 # process_first_n = 500000
 
 log_name = sys.argv[0].split('/')[-1].replace('.py','.log')
-connection_batch_limit = 100  #10
+connection_batch_limit = 200  #10
 
 def get_args():
     parserobj = argparse.ArgumentParser()
     # parserobj.add_argument('-process_first_n', type=int, default=None,
                            # help='Process only the first N lines of image/connection data [default: None-> all data]')
-    parserobj.add_argument('-num_threads', type=int, default=100,
-                           help='Number of threads to use [default: 100]')
-    parserobj.add_argument('-batch_size', type=int, default=100,
+    parserobj.add_argument('-num_threads', type=int, default=16,
+                           help='Number of threads to use [default: 32]')
+    parserobj.add_argument('-batch_size', type=int, default=150,
                            help='Number of entries per thread for autotags and images [default: 100; connections: max {}]'.format(connection_batch_limit))
     parserobj.add_argument('-data_file', type=str,
                            default='yfcc100m_dataset_1M',
@@ -54,7 +54,7 @@ def get_db_list(num):
     dbs = []
     for i in range(0, num):
         db = vdms.vdms()
-        db.connect("sky4.local")
+        db.connect("localhost")
         dbs.append(db)
     return dbs
 
@@ -116,7 +116,6 @@ def process_tag_entities(params, dbs, all_data):
             idx += batch
 
     return error_counter
-
 
 def process_image_entities(params, dbs, all_data):
     batch, num_lines, blocks, results = get_parameters(params, all_data)

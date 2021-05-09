@@ -13,6 +13,7 @@ import logging
 
 FROOT = "input_files"
 LICENSETYPE = "Attribution License"
+YFCC_VIDEOS = "/mnt/largedata/yfcc100m/metadata/yfcc100m_dataset_videos"
 
 '''
 License Options:
@@ -28,7 +29,7 @@ BASEURL = 'https://multimedia-commons.s3-us-west-2.amazonaws.com/data/videos/mp4
 SEARCH1 = "backpack"
 
 def main():
-    print("Starting dataset processing")
+    # print("Starting dataset processing")
     mdpdf = getMetaData()
 
     ''' Get a subset that has appropriate license type '''
@@ -41,13 +42,13 @@ def main():
     ''' Fetch those videos '''
     getVideos(searchpdf)
 
-    print("Finished downloading")
+    # print("Finished downloading")
     sys.exit(0)
 
 def getMetaData():
 
     ''' PDF for yf100m metadata '''
-    mdfile = getPath("yfcc100m_videos_metadata.tsv")
+    mdfile = getPath(YFCC_VIDEOS)
     mdheaderfile = getPath("yfcc100m_videos_metadata_headers.csv")
     mdheader = [x.strip() for x in open(mdheaderfile)]
     mdpdf = pd.read_csv(mdfile, "\t", header = None)
@@ -86,7 +87,7 @@ def getVideo(rowd,baseurl):
     hashf = hashd + ".mp4"
     fullurl = os.path.join(baseurl,*[sub1,sub2,hashf])
     print(fullurl)
-    # return
+    return
     try:
         urllib.request.urlretrieve(fullurl,idf)
     except Exception as e:

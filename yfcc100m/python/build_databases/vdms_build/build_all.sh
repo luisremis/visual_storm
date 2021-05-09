@@ -3,19 +3,29 @@
 rm -rf logs
 mkdir logs
 
-input_root="/mnt/yfcc100m/metadata/processed/splitted/"
-output_root="/mnt/yfcc100m/golden_building/"
+echo "$(date) - Build start..."
+
+input_root="/mnt/largedata/yfcc100m/metadata/processed/splitted/"
+output_root="/mnt/data/yfcc100m/"
 
 python3 build_yfcc_db.py \
           -data_file=${input_root}/yfcc100m_dataset_000 \
           -tag_file=${input_root}/yfcc100m_dataset_autotags_000 \
           -tag_list=${input_root}/../autotag_list.txt \
           -add_tags > logs/screen_000.log 2> logs/error_000.log
+sync
 
-# sync
-# (cd ${output_root}/vdms/ && \
-#  bash check_graph.sh && \
-#  bsdtar cvfz ${output_root}/vdms_archive_000.tar.gz db )
+echo "$(date) - Done building 1M."
+
+echo "$(date) - Compressing..."
+
+(cd ${output_root} && \
+ bsdtar cfz ${output_root}/vdms_archive_000.tar.gz db )
+
+echo "$(date) - Done compressing."
+# bash check_graph.sh && \
+
+exit 0
 
 for i in $(seq -f "%03g" 1 99)
 do

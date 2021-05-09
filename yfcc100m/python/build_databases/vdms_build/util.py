@@ -180,8 +180,8 @@ def add_autotag_connection_batch(index, database, row_data, start, end, results)
         if not pd.isna(row['autotags']):
             ind = [None, None]
             # Find Image
-            parentref = (100 * rix) % 19000
-            parentref +=1  #Max ref 20000
+            parentref = (100 * rix) % 9000
+            parentref +=1  #Max ref 10000
             query = {}
             findImage = {}
             findImage["_ref"] = parentref
@@ -242,10 +242,17 @@ def add_autotag_connection_batch(index, database, row_data, start, end, results)
 """ Using single entry per thread """
 
 def add_autotags_entity(index, database, tag, results):
-    query = {}
-    add_entity = {"class": 'autotags', "properties": {"name": tag}}
-    query["AddEntity"] = add_entity
-    res = database.query([query])
+
+    query = [ {
+        "AddEntity": {
+            "class": "autotags",
+            "properties": {
+                "name": tag
+            }
+        }
+    }]
+
+    res = database.query(query)
     # print('res[0][0]', res[0][0])
     results[index] = res[0][0]['AddEntity']["status"]
 
