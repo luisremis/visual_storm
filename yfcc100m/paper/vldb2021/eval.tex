@@ -763,7 +763,8 @@ at the type of queries that require visual data access and transformations.
 
 We designed VDMS with the idea in mind that pre-processing operations will be
 commonly performed, as visual data is generally pre-processed before analytics
-computation are performed on them.
+computation are performed on them (i.e., a resize plus
+normalization done on images before passing them through a neural network).
 Figure \ref{fig:q_throughput_56_resize} shows how the query throughput varies
 when a pre-processing operations is applied (in this case, a resize operation).
 The first thing to notice is that a resize operation is a significant part of
@@ -791,7 +792,7 @@ on 1tag based queries, and orders of magnitude worst than VDMS.
 Note that in the baseline systems, the resize happens on the client side,
 rather than on the server side.
 This is the common case in most analytics applications, where pre-processing
-operations happen on the client side (or when the analytics computation happens),
+operations happen on the client side (or wherever the analytics computation happens),
 rather than near where the data is located, as it is the case with VDMS.
 We kept both the server and client systems the same to avoid the computation
 capabilities difference complicating our understanding of the results.

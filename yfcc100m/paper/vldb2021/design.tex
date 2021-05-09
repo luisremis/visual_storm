@@ -275,8 +275,10 @@ completes entirely or not at all, and the effects of a completed transaction
 survives any failure.
 In cases where the system may crash or fail, PMGD has the ability
 to recover to a consistent state without loading its content into memory.
-Unlike existing graph databases that are disk-based, our graph engine
-avoids converting data from a disk-friendly format to an usable format for an application.
+This is done through an undo log, chosen because it is optimistic and
+it handles reads after writes naturally.
+Upon failures, PMGD consults the log to restore the database
+to its state just past the last committed transaction.
 PMGD comes as a C++ library that VDMS uses for implementing its query engine.
 Because PMGD already supports most of the graph abstractions we wanted
 to see on VDMS API, it was our preferred option.
