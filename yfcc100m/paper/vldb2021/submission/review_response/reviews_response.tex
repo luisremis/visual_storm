@@ -55,6 +55,34 @@ Using VDMS to Index and Search 100M Images}}
 \end{center}
 
 %===========================================================
+\section{General Description of Changes}
+%===========================================================
+
+The authors would like to thank the program committee and the reviewers
+for the comments and suggestions,
+instrumental to increase the quality of our work and its presentation.
+
+We have addressed comments from every reviewer separately, but the following
+list summarize the main updates:
+
+\begin{itemize}
+  \item We have added and run a new experiment that compares VDMS and baseline
+        for queries that do not run a pre-processing operations, following
+        reviewer's suggestions.
+        We expand the analysis of the results including these findings.
+  \item We have expanded on the type of supported pre-processing
+        operations, and more details on VDMS API design in general.
+  \item We have expanded on the description of the ACID properties offered
+        by VDMS and how that mechanism work.
+  \item We have expanded on the type of queries supported by VDMS,
+        including similarity-search based on feature vectors,
+        which is a feature currently supported by the system.
+  \item We have added a "Future Work" sections where we describe some
+        of the limitations found during this experiments, as well as the
+        near and long term line of work after this paper.
+\end{itemize}
+
+%===========================================================
 \section{Reviewer \#1}
 %===========================================================
 
@@ -66,24 +94,24 @@ do not include an example.
 }\bigskip
 
 Thanks for your comment.
-We have decided to avoid going in detail on the Feature Vector support
-and interfaces primarily due to space constraints.
-We should note that this functionality is fully implemented,
-and you can find the more details on the project's wiki
+Following feedback and suggestions from last year submission at this same venue,
+we decided to skip the feature vector functionality evaluation and
+focus on image search based on metadata to better be able to compare
+against well-known baselines.
+We should note that similarity search based on feature vectors
+is fully implemented, and you can find the more details on the project's wiki
 \footnote{https://github.com/IntelLabs/vdms/wiki/Descriptors-Tutorial}
 \footnote{https://github.com/IntelLabs/vdms/wiki/FindDescriptor}.
-Based on feedback from last year submission at this same venue, we decided
-to skip the feature vector functionality evaluation and focus on image search
-based on metadata to better be able to compare against well-known baselines.
+
 Including an analysis of similarity search in this same work would also
 complicate the implementation of the baseline, making it harder to understand
 and isolate the main sources of performance gains.
-Implementing a baseline that also includes similarity search, even if doable,
-would mean combining more than 4 systems (SQL database, web server, client side
+We have a preliminary implementation of baselines for our internal use cases,
+and it meant combining more than 4 systems (SQL database, web server, client side
 pre-processing with OpenCV, some quick-and-dirty implementation
 to provide client-server architecture to Faiss/Annoy, given that these
 are just C++ libraries).
-This would increase the complexity of the baseline systems, adding
+This increases the complexity of the baseline systems, adding
 more parameters to tune, and complicating the understanding of the results.
 We have decided to focus this work on image search based on metadata tags
 and the addition of needed pre-processing operations, and
@@ -110,13 +138,14 @@ We have run a new experiment and added a new figure to the paper (Figure 9),
 where we compare 3 of the queries with and without the resize operation
 to understand the difference in performance better.
 We have also added an explanation on these differences in performance
-in the final version.
+in the final version, and made these results publicly available
+\footnote{https://github.com/luisremis/visual\_storm/tree/master/yfcc100m/python/eval/results/resize\_comparison}
+(as the rest of the evaluation in this work).
 Note that, even if the resize happens on the client side in the case of both
 baselines we have built, the computing capabilities of the server and the
 client are identical.
 This is on purpose, to avoid the difference in computing power for the
 resize operation to affect the understanding of the results.
-
 
 \bigskip
 \noindent %
@@ -133,7 +162,7 @@ This can be achieved using the very similar queries as the one used in
 the present evaluation, plus the use of the feature vector queries,
 that are natively supported using the same set of APIs (as we mention in D1).
 Because of space constraints, we were not able to accommodate initial evaluation
-we have been working on with Feature Vector search specifically,
+we have been working on for Feature Vector-based search specifically,
 and we plan to perform a more comprehensive evaluation on this functionality
 of this feature because of its relevance when processing visual data, as well
 as our own needs in our use cases.
@@ -176,12 +205,12 @@ patterns associated could have been more meaningful to the research communities 
 convince users to replace their customized solution to VDMS.
 }\bigskip
 
-
 Thanks for your comment, these are important clarifications to add.
 We have expanded on additional details on which operations we support and our
-decision for choosing the operations in Section 3.
+decision for choosing the operations in Section 3, and how supporting
+these operations natively opens optimization possibilities that we exploit.
 We also elaborated more on the benefits of
-using VDMS over relational databases in Section 3.1.
+using VDMS over ad-hoc solutions in Section 3.1.
 We avoided expanding on supported operations for images due to space constraints,
 and because these are fully documented on the project's wiki
 \footnote{https://github.com/IntelLabs/vdms/wiki}.
@@ -201,12 +230,20 @@ improvement on metadata handling.
 }\bigskip
 
 Thank you for the input.
-To demonstrate the benefits of VDMS more clearly, and to address another
-reviewers' comment,  we have added Figure 9, which compares queries
-with and without the resize operation.
+To demonstrate the benefits of VDMS more clearly, we have added Figure 9,
+which compares queries with and without the resize operation.
 Without the resize operation, the evaluation shows the
 improvement on metadata handling better, plus the effect of a single round
 of communication between client and the server (as it is the case with VDMS).
+Because we design VDMS for visual data as the first class elements,
+we focused our evaluation on the retrieval of visual objects rather
+than metadata only.
+When it comes to building solutions that primarily depend on metadata,
+rather than actual visual objects, the authors believe that VDMS is not
+the right solution, given that there are many other commercially available
+solutions (relational databases, graph databases, document-oriented databases, etc)
+that have been optimized over many decades and provide a level of
+functionality and maturity that is sufficient for the majority of the use cases.
 
 \bigskip
 \noindent %
@@ -218,9 +255,9 @@ decision in the application contexts.
 }\bigskip
 
 Thank you for this recommendation, it is an important clarification we have added.
-In a nutshell, we only add pre-processing operations to VDMS API only if such
-operation are not application-dependent.
-Operations like resize, crop, zoom, transcoding, convert to black and white,
+In a nutshell, we add pre-processing operations to VDMS API only if such
+operations are application-independent.
+Operations like resize, crop, zoom, trans-coding, convert to black and white,
 re-sample video, and access to random frames in a video, among others, are
 example of operations that are needed in many different applications,
 and that it is performed in the same way in all uses.
@@ -236,11 +273,13 @@ VDMS could design new mechanisms to support interactive analysis,
 which would be beneficial.
 }\bigskip
 
-Interactive analysis of visual data is out of scope for this paper
-but this can easily be done using the current implementation of VDMS.
+This is a great point, and a primary motivation for building a system like VDMS.
+VDMS, by design, supports functionality that makes it easy to build
+iterative analysis using its API.
 To support interactive analysis, a front-end could be implemented on top of
 VDMS API as a web app without needing any additional abstractions.
-An example of such front-end can be found here: \url{http://coco.datasets.aperturedata.io}.
+An example of such front-end can be found here:
+\url{http://coco.datasets.aperturedata.io}.
 This front-end is very thin, as most of the heavy-load is done by VDMS through
 the interfaces described in this work
 (plus a thin REST abstraction we have added recently).
@@ -297,13 +336,14 @@ and without using PMGD?
 }\bigskip
 
 We did not elaborate on advantages of using persistent memory or include
-any PMGD experiments due to page limitations and the use of SSDs
-instead of persistent memory in the evaluation.
+any PMGD experiments primarily due to space constraints, and to avoid
+complicating the understand of the experimental evaluation.
 In our evaluation, we use SSDs (and not persistent memory) to avoid
-being unfair with the baseline systems, and have a better understanding of
+being unfair with the baseline systems (which do not have explicit support for
+persistent memory abstractions), and have a better understanding of
 the results.
 PMGD performance evaluation will be published separately to highlight
-the advantages of using persistent memory for visual data.
+the advantages of using persistent memory in general.
 
 \bigskip
 \noindent %
@@ -318,12 +358,12 @@ near-identical to that of Figure 8.
 Thank you for this comment, and it is a great suggestion.
 Figure 8 and 9 are quite similar but provide the performance difference with different
 number of concurrent clients we found interesting to be shared.
-We have removed figure 9 and replaced with a figure
+We have removed figure 9 and replaced it with a figure
 demonstrating the difference between queries with and without the resize operation.
 
 The paper is focused on an image search application so we did not include any
 experiments on videos or feature vectors, but we have attached as an appendix
-part of the evaluation we submitted last year.
+part of our preliminary evaluation using similarity search.
 It also includes initial evaluation on the Video API, which works in a very
 similar way as it does for images.
 
