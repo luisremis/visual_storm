@@ -65,7 +65,7 @@ OpenCV 3.3 (to provide pre-processing operations on images).
 We chose Apache Web Server to work as a file server (serving the image files),
 because it provides the lowest possible overhead
 (when compared to other object store system), at the expenses of providing less
-functionality (authentication, data integrity checking, etc).
+functionality (authentication, data integrity checking, etc.).
 The other baseline system replaces the MySQL Server 5.7 with a
 most advanced open-source relational database, PostgreSQL 9.5 \cite{postgresql}.
 We decided to use relational databases in the baseline systems instead of
@@ -597,7 +597,7 @@ just a missing implementation.
 In the case of \textit{q4} and \textit{q6}, it is worth noting
 that for the OR operation, there is no need for 2 retrievals (2 transactions).
 Rather, a single transaction is performed and the result filtered on the client.
-Future VDMS releases will add more of such operators (AND, OR, etc)
+Future VDMS releases will add more of such operators (AND, OR, etc.)
 in order to prevent unnecessary retrievals and extra filtering on the client side.
 
 % WAS: begin{figure*}[ht]; textwidth
@@ -787,7 +787,7 @@ differences between the 2 baseline systems become more noticeable.
 For instance, for an image retrieval based on a single tag, we see how
 \textit{postgresql} outperforms \textit{mysql}, but when adding geo-location
 filtering, we see \textit{mysql} showing a small advantage.
-When the resize operations is performed, both baselines do very similar
+When the resize operation is performed, both baselines do very similar
 on 1tag based queries, and orders of magnitude worst than VDMS.
 Note that in the baseline systems, the resize happens on the client side,
 rather than on the server side.
@@ -820,7 +820,7 @@ that enable more complex queries for our use cases.
 The team will address the missing implementation as part of future work.
 Most of the performance improvements can be attributed to the design
 principles of VDMS, which aims to eliminate the need of combining and
-re-purposing systems that were designed to handle types of date other than visual.
+re-purposing systems that were designed to handle types of data other than visual.
 VDMS, by design, eliminates most of the inefficiencies that result
 from a forced integration of components designed for a
 different range of applications.
