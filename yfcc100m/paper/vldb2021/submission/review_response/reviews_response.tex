@@ -78,7 +78,7 @@ list summarize the main updates:
         including similarity-search based on feature vectors,
         which is a feature currently supported by the system.
   \item We have added a "Future Work" sections where we describe some
-        of the limitations found during this experiments, as well as the
+        of the limitations found during these experiments, as well as the
         near and long term line of work after this paper.
 \end{itemize}
 
@@ -94,17 +94,17 @@ do not include an example.
 }\bigskip
 
 Thanks for your comment.
-Following feedback and suggestions from last year submission at this same venue,
+Following feedback and suggestions from last year's submission at this same venue,
 we decided to skip the feature vector functionality evaluation and
-focus on image search based on metadata to better be able to compare
-against well-known baselines.
+focus on image search based on metadata to compare
+against well-known baselines better.
 We should note that similarity search based on feature vectors
 is fully implemented, and you can find the more details on the project's wiki
 \footnote{https://github.com/IntelLabs/vdms/wiki/Descriptors-Tutorial}
 \footnote{https://github.com/IntelLabs/vdms/wiki/FindDescriptor}.
 
 Including an analysis of similarity search in this same work would also
-complicate the implementation of the baseline, making it harder to understand
+complicate the implementation of the baselines, making it harder to understand
 and isolate the main sources of performance gains.
 We have a preliminary implementation of baselines for our internal use cases,
 and it meant combining more than 4 systems (SQL database, web server, client side
@@ -117,7 +117,7 @@ We have decided to focus this work on image search based on metadata tags
 and the addition of needed pre-processing operations, and
 work on a similarity-search specific evaluation as a next step.
 If reviewers are interested in learning more about our similarity search functionality,
-we have attached as an appendix part of the evaluation we submitted last year.
+we have attached, as an appendix, part of the evaluation we submitted last year.
 It also includes initial evaluation on the Video API, which works in a very
 similar way as it does for images.
 We will continue to improve this evaluation, and submit to arxiv directly
@@ -158,7 +158,7 @@ on Visual Feature Vectors within a geographical region supported?
 
 VDMS does support the suggested query, i.e., perform a similarity search based
 on feature vectors and also filter by geographical location.
-This can be achieved using the very similar queries as the one used in
+This can be achieved using very similar queries as the one used in
 the present evaluation, plus the use of the feature vector queries,
 that are natively supported using the same set of APIs (as we mention in D1).
 Because of space constraints, we were not able to accommodate initial evaluation
@@ -241,7 +241,7 @@ than metadata only.
 When it comes to building solutions that primarily depend on metadata,
 rather than actual visual objects, the authors believe that VDMS is not
 the right solution, given that there are many other commercially available
-solutions (relational databases, graph databases, document-oriented databases, etc)
+solutions (relational databases, graph databases, document-oriented databases, etc.)
 that have been optimized over many decades and provide a level of
 functionality and maturity that is sufficient for the majority of the use cases.
 
