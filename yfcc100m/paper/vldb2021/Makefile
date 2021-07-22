@@ -1,4 +1,5 @@
-FILE = p1971-remis
+FILE = vdms-vldb2021
+OUTFILE = p1971-remis
 COMM = pdflatex
 
 all: ${FILE}.tex
@@ -11,6 +12,7 @@ all: ${FILE}.tex
 	# xdvi ${FILE}.dvi&
 	# open ${FILE}.pdf
 	make clean
+	mv ${FILE}.pdf ${OUTFILE}.pdf
 
 clean:
 	rm -f *.log *.aux *.bbl *.blg *.lot *.toc *.lof *.out *~
