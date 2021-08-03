@@ -405,7 +405,7 @@ together with all the results of our evaluation
 
 We use the metadata associated with the images to filter the images.
 We use the \textit{autotags} (as they contain information about the content
-of the image), and geo-location information (latitude/longitude)
+of the image), and geo-location information (latitude and longitude)
 of the images for search and filtering.
 Note that, even if we use geo-location for our study, any other property
 assigned to the images can be used to refine the search
@@ -501,7 +501,7 @@ We start with a simple query that involves a simple
 metadata filtering over 1 tag and also geo-location,
 plus pre-processing operations.
 Figure~\ref{fig:concurrency_comparison_q2} illustrates a concurrency analysis
-for \textit{q2} (\textit{1tag\_geo\_resize}), described above,
+for \textit{q2} described above (\textit{1tag\_geo\_resize}),
 using VDMS and the baselines.
 Here we evaluate the concurrency of all systems, as the number of concurrent
 clients grows (x-axis) and as the size of the databases grow.
